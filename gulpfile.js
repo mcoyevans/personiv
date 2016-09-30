@@ -13,7 +13,26 @@ require('laravel-elixir-vue');
  |
  */
 
-elixir(mix => {
-    mix.sass('app.scss')
-       .webpack('app.js');
+elixir(function(mix) {
+    mix
+    	/* App Sass Bootstrap */
+    	.sass('app.scss')
+
+    	/* Vendor CSS */
+		.styles('vendor/*.css', 'public/css/vendor.css')
+    	
+    	/* Vendor Scripts */
+    	.scriptsIn('public/libraries', 'public/js/vendor.js')
+    	
+    	/* Application Sass */
+    	.sass('app/app.scss', 'public/css/application.css')
+
+        /* Shared Scripts */
+        .scriptsIn('public/app/shared', 'public/js/shared.js')
+
+        /* Admin Scripts */
+        .scriptsIn('public/app/components/admin', 'public/js/admin.js')
+
+        /* Guest Scripts */
+        .scriptsIn('public/app/components/guest', 'public/js/guest.js')
 });
