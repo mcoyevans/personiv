@@ -14,12 +14,14 @@ class CreateEquipmentTable extends Migration
     public function up()
     {
         Schema::create('equipment', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
             $table->increments('id');
             $table->string('brand');
             $table->string('model');
             $table->string('asset_tag');
             $table->integer('equipment_type_id')->unsigned();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

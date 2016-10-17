@@ -14,10 +14,10 @@ class CreateReservationEquipmentsTable extends Migration
     public function up()
     {
         Schema::create('reservation_equipments', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
             $table->increments('id');
             $table->integer('reservation_id')->unsigned();
             $table->integer('equipment_id')->unsigned();
-            $table->timestamps();
         });
     }
 

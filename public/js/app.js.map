@@ -1,0 +1,1 @@
+{"version":3,"sources":["posts/post.module.js","reservations/reservation.module.js","settings/settings.module.js"],"names":[],"mappings":"AAAA;ACAA;ACAA","file":"app.js","sourcesContent":["var post = angular.module('post', ['shared']);","var reservation = angular.module('reservation', ['shared']);","var settings = angular.module('settings', ['shared']);"]}

@@ -1,0 +1,31 @@
+<div class="md-toolbar-tools" layout="row" flex flex-gt-md="90">
+	<md-button class="md-icon-button" ng-click="toggleSidenav('left')" hide-gt-xs ng-if="!searchBar">
+		<md-icon class="mdi mdi-24px grey mdi-menu" aria-label="Toogle Sidenav"></md-icon>
+	</md-button>
+  	<a href="/" layout="row" layout-align="center center" layout-padding class="site-logo">
+		<img src="/img/2Color-Logo_247px-1024x195.png" alt="Personiv Logo">
+	</a>
+	<span flex></span>
+	<!-- Other Apps -->
+	<md-menu hide-xs>
+        <md-button aria-label="Open filters" class="md-primary" ng-click="$mdOpenMenu($event)">
+            <span>Apps</span> 
+            <md-icon class="mdi mdi-chevron-down grey"></md-icon>
+        </md-button>
+        <md-menu-content width="4">
+        	<md-subheader>Apps</md-subheader>
+            <md-menu-item ng-repeat="link in menu.static | orderBy:'name'">
+              	<md-button aria-label="{{link.name}}" flex href="{{link.link}}" target="_blank">
+              		<div layout="row">
+	                	<span>{{link.name}}</span>
+	                	<span flex></span>
+              		</div>
+              	</md-button>
+            </md-menu-item>
+        </md-menu-content>
+    </md-menu>
+    <!-- Reservations -->
+	<md-button class="md-primary" hide-xs>Reservation</md-button>
+	<!-- Login -->
+	<md-button class="md-primary" hide-xs href="/login">Login</md-button>
+</div>

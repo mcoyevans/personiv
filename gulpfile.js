@@ -30,9 +30,9 @@ elixir(function(mix) {
         /* Shared Scripts */
         .scriptsIn('public/app/shared', 'public/js/shared.js')
 
-        /* Admin Scripts */
-        .scriptsIn('public/app/components/admin', 'public/js/admin.js')
+        /* App Scripts */
+        .scriptsIn('public/app/components', 'public/js/app.js')
 
         /* Guest Scripts */
-        .scriptsIn('public/app/components/guest', 'public/js/guest.js')
+        .scriptsIn('public/app/guest', 'public/js/guest.js')
 });

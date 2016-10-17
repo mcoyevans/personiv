@@ -1,0 +1,1 @@
+var guest = angular.module('guest', ['shared']);

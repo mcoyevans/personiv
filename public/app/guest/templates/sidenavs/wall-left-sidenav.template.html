@@ -1,0 +1,34 @@
+<md-content flex>
+    <md-subheader class="md-no-sticky">Menu</md-subheader>
+    <div layout="column">
+        <!-- Reservations -->
+        <md-button class="static" flex href="{{page.link}}">
+            <div layout="row" flex>
+                <md-icon class="mdi mdi-format-list-numbers grey"></md-icon>
+                <span flex="5"></span>
+                <span flex class="left-text secondary-text">Reservation</span>
+                <span flex></span>
+            </div>
+        </md-button>
+        <!-- Login -->
+        <md-button class="static" flex href="{{page.link}}">
+            <div layout="row" flex>
+                <md-icon class="mdi mdi-login grey"></md-icon>
+                <span flex="5"></span>
+                <span flex class="left-text secondary-text">Login</span>
+                <span flex></span>
+            </div>
+        </md-button>
+    </div>
+    <md-subheader class="md-no-sticky">Apps</md-subheader>
+    <ul class="no-padding">
+        <li layout="row" flex ng-repeat="page in menu.static | orderBy:'name'">
+            <md-button class="static" flex href="{{page.link}}">
+                <div layout="row" flex>
+                    <span flex class="left-text secondary-text">{{page.name}}</span>
+                    <span flex></span>
+                </div>
+            </md-button>
+        </li>
+    </ul>
+</md-content>
