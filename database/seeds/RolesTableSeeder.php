@@ -14,6 +14,7 @@ class RolesTableSeeder extends Seeder
         DB::table('roles')->insert([
         	['name' => 'posts'],
         	['name' => 'reservations'],
+            ['name' => 'manage-groups'],
         	['name' => 'manage-users'],
         	['name' => 'manage-locations'],
         	['name' => 'manage-equipments'],

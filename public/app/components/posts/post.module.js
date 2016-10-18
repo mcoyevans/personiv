@@ -1,1 +1,0 @@
-var post = angular.module('post', ['shared']);

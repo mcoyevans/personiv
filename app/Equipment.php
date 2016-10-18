@@ -15,4 +15,9 @@ class Equipment extends Model
     {
     	return $this->belongsToMany('App\Reservation', 'reservation_equipments');
     }
+
+    public function equipment_type()
+    {
+    	return $this->belongsTo('App\EquipmentType');
+    }
 }

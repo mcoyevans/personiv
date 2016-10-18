@@ -1,1 +1,0 @@
-var reservation = angular.module('reservation', ['shared']);

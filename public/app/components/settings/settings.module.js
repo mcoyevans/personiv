@@ -1,1 +1,0 @@
-var settings = angular.module('settings', ['shared']);
