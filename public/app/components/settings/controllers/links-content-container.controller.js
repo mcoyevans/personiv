@@ -1,5 +1,5 @@
 app
-	.controller('groupsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
+	.controller('linksContentContainerController', ['$scope', 'Helper', function($scope, Helper){
 		$scope.$emit('closeSidenav');
 		/*
 		 * Object for toolbar
@@ -23,12 +23,12 @@ app
 		$scope.fab = {};
 		$scope.fab.icon = 'mdi-plus';
 
-		$scope.fab.label = 'Groups';
+		$scope.fab.label = 'Links';
 
 		$scope.fab.action = function(){
 			var dialog = {
-				'template':'/app/components/settings/templates/dialogs/group-dialog.template.html',
-				'controller': 'groupDialogController',
+				'template':'/app/components/settings/templates/dialogs/link-dialog.template.html',
+				'controller': 'linkDialogController',
 			}
 
 			dialog.action = 'create';
@@ -37,7 +37,7 @@ app
 
 			Helper.customDialog(dialog)
 				.then(function(){
-					Helper.notify('Group created.');
+					Helper.notify('Link created.');
 					$scope.refresh();
 				}, function(){
 					return;
@@ -60,8 +60,8 @@ app
 
 		$scope.updateModel = function(data){
 			var dialog = {
-				'template':'/app/components/settings/templates/dialogs/group-dialog.template.html',
-				'controller': 'groupDialogController',
+				'template':'/app/components/settings/templates/dialogs/link-dialog.template.html',
+				'controller': 'linkDialogController',
 			}
 
 			data.action = 'edit';
@@ -71,7 +71,7 @@ app
 			Helper.customDialog(dialog)
 				.then(function(){
 					$scope.refresh();
-					Helper.notify('Group updated.');
+					Helper.notify('Link updated.');
 				}, function(){
 					return;
 				});
@@ -86,10 +86,10 @@ app
 
 			Helper.confirm(dialog)
 				.then(function(){
-					Helper.delete('/group/' + data.id)
+					Helper.delete('/link/' + data.id)
 						.success(function(){
 							$scope.refresh();
-							Helper.notify('Group deleted.');
+							Helper.notify('Link deleted.');
 						})
 						.error(function(){
 							Helper.error();
@@ -123,7 +123,7 @@ app
 			// 2 is default so the next page to be loaded will be page 2 
 			$scope.model.page = 2;
 
-			Helper.post('/group/enlist', query)
+			Helper.post('/link/enlist', query)
 				.success(function(data){
 					$scope.model.details = data;
 					$scope.model.items = data.data;
@@ -152,7 +152,7 @@ app
 						$scope.model.busy = true;
 						$scope.isLoading = true;
 						// Calls the next page of pagination.
-						Helper.post('/group/enlist' + '?page=' + $scope.model.page, query)
+						Helper.post('/link/enlist' + '?page=' + $scope.model.page, query)
 							.success(function(data){
 								// increment the page to set up next page for next AJAX Call
 								$scope.model.page++;
@@ -176,6 +176,7 @@ app
   			$scope.model.show = false;
 
   			$scope.init($scope.request);
+  			$scope.$emit('fetchLinks');
 		};
 
 		$scope.request = {};

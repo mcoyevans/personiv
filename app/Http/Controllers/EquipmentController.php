@@ -22,13 +22,11 @@ class EquipmentController extends Controller
      */
     public function checkDuplicate(Request $request)
     {
-        if($request->has('asset_tag'))
-        {
-            $duplicate = $request->has('id') ? Equipment::where('asset_tag', $request->asset_tag)->where('equipment_type_id', $request->equipment_type_id)->whereNotIn('id', [$request->id])->first() : Equipment::where('asset_tag', $request->asset_tag)->where('equipment_type_id', $request->equipment_type_id)->first();
+        $duplicate = $request->has('id') ? Equipment::where('asset_tag', $request->asset_tag)->where('equipment_type_id', $request->equipment_type_id)->whereNotIn('id', [$request->id])->first() : Equipment::where('asset_tag', $request->asset_tag)->where('equipment_type_id', $request->equipment_type_id)->first();
 
-            return response()->json($duplicate ? true : false);
-        }
+        return response()->json($duplicate ? true : false);
     }
+
     /**
      * Display a listing of the resource with parameters.
      *
@@ -49,6 +47,16 @@ class EquipmentController extends Controller
                 if(!$request->input('with')[$i]['withTrashed'])
                 {
                     $equipments->with($request->input('with')[$i]['relation']);
+                }
+            }
+        }
+
+        if($request->has('withCount'))
+        {
+            for ($i=0; $i < count($request->withCount); $i++) { 
+                if(!$request->input('withCount')[$i]['withTrashed'])
+                {
+                    $equipments->withCount($request->input('withCount')[$i]['relation']);
                 }
             }
         }
@@ -77,6 +85,7 @@ class EquipmentController extends Controller
 
         return $equipments->get();
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -84,7 +93,7 @@ class EquipmentController extends Controller
      */
     public function index()
     {
-        //
+        return Equipment::all();
     }
 
     /**
@@ -94,7 +103,10 @@ class EquipmentController extends Controller
      */
     public function create()
     {
-        //
+        if(!Gate::forUser(Auth::user())->allows('manage-equipments'))
+        {
+            abort(403, 'Unauthorized action.');
+        }
     }
 
     /**

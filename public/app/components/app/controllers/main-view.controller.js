@@ -206,25 +206,33 @@ app
 				}
 			})
 
-		Helper.get('/link')
-			.success(function(data){
-				var links = [];
+		$scope.fetchLinks = function(){		
+			Helper.get('/link')
+				.success(function(data){
+					var links = [];
 
-				angular.forEach(data, function(link){
-					var item = {};
+					angular.forEach(data, function(link){
+						var item = {};
 
-					item.label = link.name;	
-					item.action = function(){
-						window.open(link.link);
-					}
+						item.label = link.name;	
+						item.action = function(){
+							window.open(link.link);
+						}
 
-					links.push(item);
-				});
-				
-				$scope.menu.pages[0] = links;
-			})
+						links.push(item);
+					});
+					
+					$scope.menu.pages[0] = links;
+				})
+		}
+
+		$scope.fetchLinks();
 
 		$scope.$on('closeSidenav', function(){
 			$mdSidenav('left').close();
+		});
+
+		$scope.$on('fetchLinks', function(){
+			$scope.fetchLinks();
 		});
 	}]);

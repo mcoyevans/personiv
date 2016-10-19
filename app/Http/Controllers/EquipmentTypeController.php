@@ -22,12 +22,9 @@ class EquipmentTypeController extends Controller
      */
     public function checkDuplicate(Request $request)
     {
-        if($request->has('name'))
-        {
-            $duplicate = $request->has('id') ? EquipmentType::where('name', $request->name)->whereNotIn('id', [$request->id])->first() : EquipmentType::where('name', $request->name)->first();
+        $duplicate = $request->has('id') ? EquipmentType::where('name', $request->name)->whereNotIn('id', [$request->id])->first() : EquipmentType::where('name', $request->name)->first();
 
-            return response()->json($duplicate ? true : false);
-        }
+        return response()->json($duplicate ? true : false);
     }
     /**
      * Display a listing of the resource with parameters.
@@ -67,7 +64,7 @@ class EquipmentTypeController extends Controller
 
         if($request->has('search'))
         {
-            $equipment_types->where('brand', 'like', '%'.$request->search.'%')->orWhere('model', 'like', '%'.$request->search.'%')->orWhere('asset_tag', 'like', '%'.$request->search.'%');
+            $equipment_types->where('name', 'like', '%'.$request->search.'%');
         }
 
         if($request->has('paginate'))

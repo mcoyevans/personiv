@@ -58,3 +58,15 @@ Route::group(['prefix' => 'equipment-type'], function(){
 	Route::post('enlist', 'EquipmentTypeController@enlist');
 	Route::post('check-duplicate', 'EquipmentTypeController@checkDuplicate');
 });
+
+/* Group */
+Route::group(['prefix' => 'group'], function(){
+	Route::post('enlist', 'GroupController@enlist');
+	Route::post('check-duplicate', 'GroupController@checkDuplicate');
+});
+
+/* Link */
+Route::group(['prefix' => 'link'], function(){
+	Route::post('enlist', 'LinkController@enlist');
+	Route::post('check-duplicate', 'LinkController@checkDuplicate');
+});
