@@ -86,6 +86,7 @@ app
 						item.equipments_count = equipment_type.equipments_count;
 						item.label = equipment_type.name;
 						item.request = {
+							'withTrashed': true,
 							'where': [
 								{
 									'label':'equipment_type_id',

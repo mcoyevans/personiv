@@ -1,5 +1,5 @@
 app
-	.controller('mainViewController', ['$scope', '$state', '$mdDialog', '$mdSidenav', '$mdToast', 'Helper', function($scope, $state, $mdDialog, $mdSidenav, $mdToast, Helper){
+	.controller('mainViewController', ['$scope', '$filter', '$state', '$mdDialog', '$mdSidenav', '$mdToast', 'Helper', 'FileUploader', function($scope, $filter, $state, $mdDialog, $mdSidenav, $mdToast, Helper, FileUploader){
 		$scope.toggleSidenav = function(menuID){
 			$mdSidenav(menuID).toggle();
 		}
@@ -53,13 +53,51 @@ app
 		    });
 		}
 
+		var uploader = {};
+
+		uploader.filter = {
+            name: 'photoFilter',
+            fn: function(item /*{File|FileLikeObject}*/, options) {
+                var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
+                return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
+            }
+        };
+
+        uploader.sizeFilter = {
+		    'name': 'enforceMaxFileSize',
+		    'fn': function (item) {
+		        return item.size <= 2000000;
+		    }
+        }
+
+        uploader.error = function(item /*{File|FileLikeObject}*/, filter, options) {
+            $scope.fileError = true;
+            $scope.photoUploader.queue = [];
+        };
+
+        uploader.headers = { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')};
+
+		$scope.clickUpload = function(){
+		    angular.element('#upload').trigger('click');
+		};
+
 		Helper.post('/user/check')
 			.success(function(data){
 				var settings = false;
 				var settings_menu = [];
 
 				angular.forEach(data.roles, function(role){
-					if(role.name == 'manage-groups')
+					if(role.name == 'approvals')
+					{
+						var item = {
+							'state': 'main.approvals',
+							'icon': 'mdi-clipboard-check',
+							'label': 'Approvals',
+						}
+
+						$scope.menu.static[2] = item;
+					}
+					else if(role.name == 'manage-groups')
 					{
 						settings = true;
 
@@ -138,8 +176,34 @@ app
 				}
 
 				$scope.user = data;
+				$scope.currentTime = Date.now();
 
 				Helper.setAuthUser(data);
+
+				/* Photo Uploader */
+				$scope.photoUploader = new FileUploader({
+					url: '/user/upload-avatar/' + $scope.user.id,
+					headers: uploader.headers,
+					queueLimit : 1
+				})
+
+				// FILTERS
+		        $scope.photoUploader.filters.push(uploader.filter);
+		        $scope.photoUploader.filters.push(uploader.sizeFilter);
+		        
+				$scope.photoUploader.onWhenAddingFileFailed = uploader.error;
+				$scope.photoUploader.onAfterAddingFile  = function(){
+					$scope.fileError = false;
+					if($scope.photoUploader.queue.length)
+					{	
+						$scope.photoUploader.uploadAll()
+					}
+				};
+
+				$scope.photoUploader.onCompleteItem  = function(data, response){
+					$scope.currentTime = Date.now();
+					$scope.photoUploader.queue = [];
+				}
 			})
 
 		Helper.get('/link')

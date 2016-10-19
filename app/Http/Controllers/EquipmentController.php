@@ -173,7 +173,7 @@ class EquipmentController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $duplicate = Equipment::whereNotIn('id', $id)->where('asset_tag', $request->asset_tag)->where('equipment_type_id', $request->equipment_type_id)->first();
+        $duplicate = Equipment::whereNotIn('id', [$id])->where('asset_tag', $request->asset_tag)->where('equipment_type_id', $request->equipment_type_id)->first();
 
         if($duplicate)
         {
@@ -208,7 +208,7 @@ class EquipmentController extends Controller
      */
     public function destroy($id)
     {
-        if(!Gate::forUser($request->user())->allows('manage-equipments'))
+        if(!Gate::forUser(Auth::user())->allows('manage-equipments'))
         {
             abort(403, 'Unauthorized action.');
         }

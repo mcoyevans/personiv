@@ -21,3 +21,13 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
         'remember_token' => str_random(10),
     ];
 });
+
+
+$factory->define(App\Equipment::class, function (Faker\Generator $faker) {
+    return [
+        'brand' => 'Acer',
+        'model' => 'Veriton M4630G',
+        'asset_tag' => str_random(10),
+        'equipment_type_id' => 1,
+    ];
+});

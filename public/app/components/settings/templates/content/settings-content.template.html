@@ -1,18 +1,46 @@
 <div infinite-scroll='model.paginateLoad()' infinite-scroll-distance="1" infinite-scroll-disabled="model.busy" infinite-scroll-parent ng-if="model.show">
-	<md-card class="container">
+	<md-card class="container" ng-if="model.items.length">
 		<md-card-content>
 			<md-list>
-				<md-list-item class="md-3-line" ng-repeat="model in model.items | filter: toolbar.searchText | orderBy:sortType:sortReverse" ng-if="showInactive || !model.deleted_at" ng-click="listItemAction(model)">
-					<h2 class="md-avatar" ng-class="model.deleted_at ? 'accent-bg': 'primary-bg'" layout="row" layout-align="center center">
+				<md-list-item class="md-3-line" ng-repeat="model in model.items | filter: toolbar.searchText | orderBy:sortType:sortReverse" ng-if="showInactive || !model.deleted_at">
+					<h2 class="md-avatar" ng-class="model.deleted_at ? 'red-bg': 'primary-bg'" layout="row" layout-align="center center">
 						<span class="md-headline white-text">{{model.brand.charAt(0).toUpperCase()}}</span>
 					</h2>
 					<div class="md-list-item-text">
-						<h3>{{model.brand}} {{model.model}}</h3>
-						<h4>{{model.asset_tag}}</h4>
+						<h3>{{model.brand}}</h3>
+						<h4>{{model.model}}</h4>
 						<p>
-							
+							{{model.asset_tag}} <span ng-if="model.deleted_at">| Deleted at: {{model.deleted_at | date: 'EEEE, MMM. dd, yyyy, hh:mma'}}</span>
 						</p>
 					</div>
+					<md-menu ng-show="!model.deleted_at">
+						<md-button aria-label="Menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+				            <md-icon class="mdi mdi-dots-vertical grey"></md-icon>
+				            <md-tooltip>Menu</md-tooltip>
+				        </md-button>
+
+				        <md-menu-content width="4">
+							<md-subheader class="md-no-sticky">{{model.asset_tag}}</md-subheader>
+							 <!-- Update -->
+				            <md-button aria-label="Update" ng-click="updateModel(model)" flex>
+				                <div layout="row">
+				                    <md-icon class="mdi mdi-pencil grey"></md-icon>
+				                    <span flex="5"></span>
+				                    <span>Update</span>
+				                    <span flex></span>
+				                </div>
+				            </md-button>
+				            <!-- Delete -->
+				            <md-button aria-label="Delete" ng-click="deleteModel(model)" flex>
+				                <div layout="row">
+				                    <md-icon class="mdi mdi-delete grey"></md-icon>
+				                    <span flex="5"></span>
+				                    <span>Delete</span>
+				                    <span flex></span>
+				                </div>
+				            </md-button>
+				        </md-menu-content>
+					</md-menu>
 				</md-list-item>
 			</md-list>
 		</md-card-content>

@@ -146,6 +146,9 @@ md-content.dirty-white {
 .accent-bg {
   background: #FFC107; }
 
+.red-bg {
+  background: #F44336; }
+
 .blur-white {
   background: rgba(255, 255, 255, 0.1); }
 

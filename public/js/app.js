@@ -48,9 +48,37 @@ app
 					}
 				}
 			})
+			.state('main.groups', {
+				url: 'settings/groups',
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'groupsContentContainerController',
+					},
+					'toolbar@main.groups': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'groupsToolbarController',
+					},
+					'left-sidenav@main.groups': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.groups':{
+						templateUrl: '/app/components/settings/templates/content/settings-content.template.html',
+					}
+				}
+			})
 	}]);
 app
-	.controller('mainViewController', ['$scope', '$state', '$mdDialog', '$mdSidenav', '$mdToast', 'Helper', function($scope, $state, $mdDialog, $mdSidenav, $mdToast, Helper){
+	.controller('postsContentContainerController', ['$scope', function($scope){
+		$scope.$emit('closeSidenav');
+		/*
+		 * Object for toolbar
+		 *
+		*/
+		$scope.toolbar = {};
+	}]);
+app
+	.controller('mainViewController', ['$scope', '$filter', '$state', '$mdDialog', '$mdSidenav', '$mdToast', 'Helper', 'FileUploader', function($scope, $filter, $state, $mdDialog, $mdSidenav, $mdToast, Helper, FileUploader){
 		$scope.toggleSidenav = function(menuID){
 			$mdSidenav(menuID).toggle();
 		}
@@ -104,13 +132,51 @@ app
 		    });
 		}
 
+		var uploader = {};
+
+		uploader.filter = {
+            name: 'photoFilter',
+            fn: function(item /*{File|FileLikeObject}*/, options) {
+                var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
+                return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
+            }
+        };
+
+        uploader.sizeFilter = {
+		    'name': 'enforceMaxFileSize',
+		    'fn': function (item) {
+		        return item.size <= 2000000;
+		    }
+        }
+
+        uploader.error = function(item /*{File|FileLikeObject}*/, filter, options) {
+            $scope.fileError = true;
+            $scope.photoUploader.queue = [];
+        };
+
+        uploader.headers = { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')};
+
+		$scope.clickUpload = function(){
+		    angular.element('#upload').trigger('click');
+		};
+
 		Helper.post('/user/check')
 			.success(function(data){
 				var settings = false;
 				var settings_menu = [];
 
 				angular.forEach(data.roles, function(role){
-					if(role.name == 'manage-groups')
+					if(role.name == 'approvals')
+					{
+						var item = {
+							'state': 'main.approvals',
+							'icon': 'mdi-clipboard-check',
+							'label': 'Approvals',
+						}
+
+						$scope.menu.static[2] = item;
+					}
+					else if(role.name == 'manage-groups')
 					{
 						settings = true;
 
@@ -189,8 +255,34 @@ app
 				}
 
 				$scope.user = data;
+				$scope.currentTime = Date.now();
 
 				Helper.setAuthUser(data);
+
+				/* Photo Uploader */
+				$scope.photoUploader = new FileUploader({
+					url: '/user/upload-avatar/' + $scope.user.id,
+					headers: uploader.headers,
+					queueLimit : 1
+				})
+
+				// FILTERS
+		        $scope.photoUploader.filters.push(uploader.filter);
+		        $scope.photoUploader.filters.push(uploader.sizeFilter);
+		        
+				$scope.photoUploader.onWhenAddingFileFailed = uploader.error;
+				$scope.photoUploader.onAfterAddingFile  = function(){
+					$scope.fileError = false;
+					if($scope.photoUploader.queue.length)
+					{	
+						$scope.photoUploader.uploadAll()
+					}
+				};
+
+				$scope.photoUploader.onCompleteItem  = function(data, response){
+					$scope.currentTime = Date.now();
+					$scope.photoUploader.queue = [];
+				}
 			})
 
 		Helper.get('/link')
@@ -214,14 +306,6 @@ app
 		$scope.$on('closeSidenav', function(){
 			$mdSidenav('left').close();
 		});
-	}]);
-app
-	.controller('postsContentContainerController', ['$scope', function($scope){
-		/*
-		 * Object for toolbar
-		 *
-		*/
-		$scope.toolbar = {};
 	}]);
 app
 	.controller('equipmentsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
@@ -281,13 +365,56 @@ app
 			$scope.refresh();
 		});
 
+		$scope.updateModel = function(data){
+			var dialog = {
+				'template':'/app/components/settings/templates/dialogs/equipment-dialog.template.html',
+				'controller': 'equipmentDialogController',
+			}
+
+			data.action = 'edit';
+
+			Helper.set(data);
+
+			Helper.customDialog(dialog)
+				.then(function(){
+					$scope.refresh();
+					Helper.notify('Equipment updated.');
+				}, function(){
+					return;
+				});
+		}
+
+		$scope.deleteModel = function(data){
+			var dialog = {};
+			dialog.title = 'Delete';
+			dialog.message = 'Delete ' + data.asset_tag + '?'
+			dialog.ok = 'Delete';
+			dialog.cancel = 'Cancel';
+
+			Helper.confirm(dialog)
+				.then(function(){
+					Helper.delete('/equipment/' + data.id)
+						.success(function(){
+							$scope.refresh();
+							Helper.notify('Equipment deleted.');
+						})
+						.error(function(){
+							Helper.error();
+						});
+				}, function(){
+					return;
+				})
+		}
+
 		/* Formats every data in the paginated call */
 		var pushItem = function(data){
-			data.created_at = new Date(data.created_at);
+			data.deleted_at =  data.deleted_at ? new Date(data.deleted_at) : null;
 
 			var item = {};
 
-			item.display = data.name;
+			item.display = data.asset_tag;
+			item.brand = data.brand;
+			item.model = data.model;
 
 			$scope.toolbar.items.push(item);
 		}
@@ -342,6 +469,175 @@ app
 						$scope.isLoading = true;
 						// Calls the next page of pagination.
 						Helper.post('/equipment/enlist' + '?page=' + $scope.model.page, query.request)
+							.success(function(data){
+								// increment the page to set up next page for next AJAX Call
+								$scope.model.page++;
+
+								// iterate over each data then splice it to the data array
+								angular.forEach(data.data, function(item, key){
+									pushItem(item);
+									$scope.model.items.push(item);
+								});
+
+								// Enables again the pagination call for next call.
+								$scope.model.busy = false;
+								$scope.isLoading = false;
+							});
+					}
+				});
+		}
+
+		$scope.refresh = function(){
+			$scope.isLoading = true;
+  			$scope.model.show = false;
+
+  			$scope.init($scope.subheader.current);
+		};
+	}]);
+app
+	.controller('groupsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
+		$scope.$emit('closeSidenav');
+
+		/*
+		 * Object for toolbar
+		 *
+		*/
+		$scope.toolbar = {};
+
+		$scope.toolbar.toggleActive = function(){
+			$scope.showInactive = !$scope.showInactive;
+		}
+		$scope.toolbar.sortBy = function(filter){
+			filter.sortReverse = !filter.sortReverse;			
+			$scope.sortType = filter.type;
+			$scope.sortReverse = filter.sortReverse;
+		}
+
+		/*
+		 * Object for fab
+		 *
+		*/
+		$scope.fab = {};
+		$scope.fab.icon = 'mdi-plus';
+
+		/* Action originates from toolbar */
+		$scope.$on('search', function(){
+			// $scope.subheader.current.request.search = $scope.toolbar.searchText;
+			$scope.refresh();
+			$scope.showInactive = true;
+		});
+
+		/* Listens for any request for refresh */
+		$scope.$on('refresh', function(){
+			$scope.subheader.current.request.search = null;
+			$scope.$broadcast('close');
+			$scope.refresh();
+		});
+
+		$scope.updateModel = function(data){
+			var dialog = {
+				'template':'/app/components/settings/templates/dialogs/group-dialog.template.html',
+				'controller': 'groupDialogController',
+			}
+
+			data.action = 'edit';
+
+			Helper.set(data);
+
+			Helper.customDialog(dialog)
+				.then(function(){
+					$scope.refresh();
+					Helper.notify('Group updated.');
+				}, function(){
+					return;
+				});
+		}
+
+		$scope.deleteModel = function(data){
+			var dialog = {};
+			dialog.title = 'Delete';
+			dialog.message = 'Delete ' + data.asset_tag + '?'
+			dialog.ok = 'Delete';
+			dialog.cancel = 'Cancel';
+
+			Helper.confirm(dialog)
+				.then(function(){
+					Helper.delete('/group/' + data.id)
+						.success(function(){
+							$scope.refresh();
+							Helper.notify('group deleted.');
+						})
+						.error(function(){
+							Helper.error();
+						});
+				}, function(){
+					return;
+				})
+		}
+
+		/* Formats every data in the paginated call */
+		var pushItem = function(data){
+			data.deleted_at =  data.deleted_at ? new Date(data.deleted_at) : null;
+
+			var item = {};
+
+			item.display = data.asset_tag;
+			item.brand = data.brand;
+			item.model = data.model;
+
+			$scope.toolbar.items.push(item);
+		}
+
+		$scope.init = function(query, refresh){
+			$scope.model = {};
+			$scope.model.items = [];
+			$scope.toolbar.items = [];
+
+			// 2 is default so the next page to be loaded will be page 2 
+			$scope.model.page = 2;
+
+			Helper.post('/group/enlist', query.request)
+				.success(function(data){
+					$scope.model.details = data;
+					$scope.model.items = data.data;
+					$scope.model.show = true;
+
+					$scope.fab.label = query.label;
+					$scope.fab.action = function(){
+						Helper.set(query.fab);
+
+						Helper.customDialog(query.fab)
+							.then(function(){
+								Helper.notify(query.fab.message);
+								$scope.refresh();
+							}, function(){
+								return;
+							});
+					}
+					$scope.fab.show = true;
+
+					if(data.data.length){
+						// iterate over each record and set the format
+						angular.forEach(data.data, function(item){
+							pushItem(item);
+						});
+					}
+
+					$scope.model.paginateLoad = function(){
+						// kills the function if ajax is busy or pagination reaches last page
+						if($scope.model.busy || ($scope.model.page > $scope.model.details.last_page)){
+							$scope.isLoading = false;
+							return;
+						}
+						/**
+						 * Executes pagination call
+						 *
+						*/
+						// sets to true to disable pagination call if still busy.
+						$scope.model.busy = true;
+						$scope.isLoading = true;
+						// Calls the next page of pagination.
+						Helper.post('/group/enlist' + '?page=' + $scope.model.page, query.request)
 							.success(function(data){
 								// increment the page to set up next page for next AJAX Call
 								$scope.model.page++;
@@ -665,6 +961,7 @@ app
 						item.equipments_count = equipment_type.equipments_count;
 						item.label = equipment_type.name;
 						item.request = {
+							'withTrashed': true,
 							'where': [
 								{
 									'label':'equipment_type_id',
@@ -767,5 +1064,9 @@ app
 				'sortReverse': false,
 			},
 		];
+
+		$scope.toolbar.refresh = function(){
+			$scope.$emit('refresh');
+		}
 	}]);
 //# sourceMappingURL=app.js.map

@@ -47,4 +47,23 @@ app
 					}
 				}
 			})
+			.state('main.groups', {
+				url: 'settings/groups',
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'groupsContentContainerController',
+					},
+					'toolbar@main.groups': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'groupsToolbarController',
+					},
+					'left-sidenav@main.groups': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.groups':{
+						templateUrl: '/app/components/settings/templates/content/settings-content.template.html',
+					}
+				}
+			})
 	}]);

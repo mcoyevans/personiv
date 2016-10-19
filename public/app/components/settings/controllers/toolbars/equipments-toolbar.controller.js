@@ -71,4 +71,8 @@ app
 				'sortReverse': false,
 			},
 		];
+
+		$scope.toolbar.refresh = function(){
+			$scope.$emit('refresh');
+		}
 	}]);

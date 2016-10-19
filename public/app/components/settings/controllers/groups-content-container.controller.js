@@ -1,5 +1,5 @@
 app
-	.controller('equipmentsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
+	.controller('groupsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
 		$scope.$emit('closeSidenav');
 
 		/*
@@ -18,33 +18,15 @@ app
 		}
 
 		/*
-		 * Object for subheader
-		 *
-		*/
-		$scope.subheader = {};
-		$scope.subheader.show = true;
-
-		/*
 		 * Object for fab
 		 *
 		*/
 		$scope.fab = {};
 		$scope.fab.icon = 'mdi-plus';
 
-		/* Action originates from subheader */
-		$scope.$on('setInit', function(){
-			var current = Helper.fetch();
-
-			$scope.subheader.current = current;
-			$scope.isLoading = true;
-			$scope.init(current);
-			$scope.$broadcast('close');
-			$scope.showInactive = false;
-		});
-
 		/* Action originates from toolbar */
 		$scope.$on('search', function(){
-			$scope.subheader.current.request.search = $scope.toolbar.searchText;
+			// $scope.subheader.current.request.search = $scope.toolbar.searchText;
 			$scope.refresh();
 			$scope.showInactive = true;
 		});
@@ -58,8 +40,8 @@ app
 
 		$scope.updateModel = function(data){
 			var dialog = {
-				'template':'/app/components/settings/templates/dialogs/equipment-dialog.template.html',
-				'controller': 'equipmentDialogController',
+				'template':'/app/components/settings/templates/dialogs/group-dialog.template.html',
+				'controller': 'groupDialogController',
 			}
 
 			data.action = 'edit';
@@ -69,7 +51,7 @@ app
 			Helper.customDialog(dialog)
 				.then(function(){
 					$scope.refresh();
-					Helper.notify('Equipment updated.');
+					Helper.notify('Group updated.');
 				}, function(){
 					return;
 				});
@@ -84,10 +66,10 @@ app
 
 			Helper.confirm(dialog)
 				.then(function(){
-					Helper.delete('/equipment/' + data.id)
+					Helper.delete('/group/' + data.id)
 						.success(function(){
 							$scope.refresh();
-							Helper.notify('Equipment deleted.');
+							Helper.notify('group deleted.');
 						})
 						.error(function(){
 							Helper.error();
@@ -118,7 +100,7 @@ app
 			// 2 is default so the next page to be loaded will be page 2 
 			$scope.model.page = 2;
 
-			Helper.post('/equipment/enlist', query.request)
+			Helper.post('/group/enlist', query.request)
 				.success(function(data){
 					$scope.model.details = data;
 					$scope.model.items = data.data;
@@ -159,7 +141,7 @@ app
 						$scope.model.busy = true;
 						$scope.isLoading = true;
 						// Calls the next page of pagination.
-						Helper.post('/equipment/enlist' + '?page=' + $scope.model.page, query.request)
+						Helper.post('/group/enlist' + '?page=' + $scope.model.page, query.request)
 							.success(function(data){
 								// increment the page to set up next page for next AJAX Call
 								$scope.model.page++;

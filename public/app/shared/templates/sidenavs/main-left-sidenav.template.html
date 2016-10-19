@@ -1,20 +1,32 @@
 <md-toolbar class="white-toolbar">
     <div class="md-toolbar-tools" layout="row" layout-align="center center">
-        <a href="/" layout="row" layout-align="center center" layout-padding class="site-logo">
+        <a ui-sref="main" layout="row" layout-align="center center" layout-padding class="site-logo">
             <img src="/img/2Color-Logo_247px-1024x195.png" alt="Personiv Logo">
         </a>
     </div>
 </md-toolbar>
 <md-content flex>
     <div layout="column" layout-align="center center" layout-padding>
-        <img src="/img/batman.png" alt="avatar" class="avatar">
-        <h2 class="md-headline">{{ user.name }}</h2>
-        <h3 class="md-subhead">{{ user.email }}</h3>
+        <div layout="column" layout="center center">
+            <img ng-if="user.avatar_path" ng-src="/user/avatar/{{user.id}}?={{currentTime}}" alt="avatar" class="avatar">
+            <img ng-if="!user.avatar_path" src="/img/2Color-Favicon_512x512-1.png" class="avatar" alt="">
+            <input id="upload" type="file" nv-file-select uploader="photoUploader" style="display: none;" ng-if="user">
+            <md-button ng-mouseover="show = true" ng-mouseleave = "show=false" ng-click="clickUpload()">
+                <div layout="row" flex>                
+                    <md-icon class="mdi mdi-camera grey"></md-icon>
+                    <span flex="5"></span>
+                    <span flex class="fade-transition" ng-if="show">Update Photo</span>
+                </div>
+            </md-button>
+            <p ng-if="fileError" class="red-text center-text">File must be an image and must not exceed 2MB.</p>
+        </div>
+        <span class="md-headline">{{ user.name }}</span>
+        <span class="md-subhead">{{ user.email }}</span>
     </div>
     <md-divider></md-divider>
     <md-subheader class="md-no-sticky">Menu</md-subheader>
     <ul class="no-padding">
-        <li layout="row" flex ng-repeat="page in menu.static | orderBy:'label'">
+        <li layout="row" flex ng-repeat="page in menu.static">
             <md-button class="static" flex ui-sref="{{page.state}}">
                 <div layout="row" flex>
                     <md-icon class="mdi {{page.icon}} grey"></md-icon>
