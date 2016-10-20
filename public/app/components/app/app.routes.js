@@ -60,6 +60,17 @@ app
 			})
 			.state('main.groups', {
 				url: 'settings/groups',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/group/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
 				views: {
 					'content-container': {
 						templateUrl: '/app/shared/views/content-container.view.html',
@@ -79,6 +90,17 @@ app
 			})
 			.state('main.links', {
 				url: 'settings/links',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/link/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
 				views: {
 					'content-container': {
 						templateUrl: '/app/shared/views/content-container.view.html',
@@ -92,6 +114,66 @@ app
 						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
 					},
 					'content@main.links':{
+						templateUrl: '/app/components/settings/templates/content/settings-content.template.html',
+					}
+				}
+			})
+			.state('main.locations', {
+				url: 'settings/locations',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/location/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'locationsContentContainerController',
+					},
+					'toolbar@main.locations': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'locationsToolbarController',
+					},
+					'left-sidenav@main.locations': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.locations':{
+						templateUrl: '/app/components/settings/templates/content/settings-content.template.html',
+					}
+				}
+			})
+			.state('main.users', {
+				url: 'settings/users',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/user/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'usersContentContainerController',
+					},
+					'toolbar@main.users': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'usersToolbarController',
+					},
+					'left-sidenav@main.users': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.users':{
 						templateUrl: '/app/components/settings/templates/content/settings-content.template.html',
 					}
 				}

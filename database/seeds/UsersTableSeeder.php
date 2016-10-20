@@ -16,7 +16,8 @@ class UsersTableSeeder extends Seeder
         	'email' => 'marco.paco@personiv.com',
         	'password' => bcrypt('admin222526'),
         	'group_id' => 1,
-        	'super_admin' => true, 
+            'super_admin' => true, 
+        	'position' => 'IT Programmer', 
             'created_at' => Carbon\Carbon::now(), 
             'updated_at' => Carbon\Carbon::now()
         ]);

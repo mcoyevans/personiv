@@ -19,7 +19,6 @@ app
 		$scope.showSearchBar = function(){
 			// $scope.post.busy = true;
 			$scope.searchBar = true;
-			$scope.showInactive = true;
 		};
 
 		/**
@@ -44,4 +43,10 @@ app
 			$scope.$emit('search');
 			$scope.searched = true;
 		};
+
+		$scope.toolbar.options = true;
+		
+		$scope.toolbar.refresh = function(){
+			$scope.$emit('refresh');
+		}
 	}]);

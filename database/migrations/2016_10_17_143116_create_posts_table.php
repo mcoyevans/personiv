@@ -19,8 +19,10 @@ class CreatePostsTable extends Migration
             $table->text('message');
             $table->string('image_path')->nullable();
             $table->boolean('pinned');
+            $table->boolean('allow_comments');
             $table->dateTime('published_at');
             $table->integer('group_id')->nullable();
+            $table->integer('user_id')->unsigned();
             $table->timestamps();
             $table->softDeletes();
         });

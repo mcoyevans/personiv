@@ -22,6 +22,7 @@ class CreateUsersTable extends Migration
             $table->text('avatar_path')->nullable();
             $table->integer('group_id')->unsigned()->nullable();
             $table->boolean('super_admin');
+            $table->string('position');
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

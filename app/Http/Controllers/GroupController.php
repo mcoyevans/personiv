@@ -103,7 +103,10 @@ class GroupController extends Controller
      */
     public function create()
     {
-        //
+        if(!Gate::forUser(Auth::user())->allows('manage-groups'))
+        {
+            abort(403, 'Unauthorized action.');
+        }
     }
 
     /**

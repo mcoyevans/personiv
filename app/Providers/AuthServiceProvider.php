@@ -120,6 +120,6 @@ class AuthServiceProvider extends ServiceProvider
 
         Gate::define('upload-avatar', function($user, $id){
             return $user->id == $id;
-        });    
+        });
     }
 }

@@ -47,12 +47,14 @@ app
 
 		/* Action originates from toolbar */
 		$scope.$on('search', function(){
+			$scope.showInactive = true;
 			$scope.request.search = $scope.toolbar.searchText;
 			$scope.refresh();
 		});
 
 		/* Listens for any request for refresh */
 		$scope.$on('refresh', function(){
+			$scope.showInactive = false;
 			$scope.request.search = null;
 			$scope.$broadcast('close');
 			$scope.refresh();
@@ -102,11 +104,6 @@ app
 		/* Formats every data in the paginated call */
 		var pushItem = function(data){
 			data.deleted_at =  data.deleted_at ? new Date(data.deleted_at) : null;
-
-			if(data.users_count)
-			{
-				data.hideDelete = true;
-			}
 
 			var item = {};
 

@@ -1,73 +1,78 @@
-<md-subheader flex class="md-primary">Today</md-subheader>
-<div layout="column" class="container">
-	<md-card>
-		<md-card-header>
-          	<md-card-avatar>
-            	<img src="/img/batman.png" alt="avatar" class="md-user-avatar">
-          	</md-card-avatar>
-          	<md-card-header-text>
-            	<span class="md-title">Title</span>
-            	<span class="md-subhead">subhead</span>
-          	</md-card-header-text>
-        </md-card-header>
-        <img ng-src="/img/washedout.png" class="md-card-image" alt="Washed Out">
-        <md-card-title>
-          	<md-card-title-text>
-            	<span class="md-headline">Action buttons</span>
-          	</md-card-title-text>
-        </md-card-title>
-        <md-card-content>
-          	<p>
-	            The titles of Washed Out's breakthrough song and the first single from Paracosm share the
-	            two most important words in Ernest Greene's musical language: feel it. It's a simple request, as well...
-          	</p>
-          	<p>
-	            The titles of Washed Out's breakthrough song and the first single from Paracosm share the
-	            two most important words in Ernest Greene's musical language: feel it. It's a simple request, as well...
-          	</p>
-          	<p>
-	            The titles of Washed Out's breakthrough song and the first single from Paracosm share the
-	            two most important words in Ernest Greene's musical language: feel it. It's a simple request, as well...
-          	</p>
-        </md-card-content>
-        <md-card-actions layout="row" layout-align="end center">
-          	<md-button>Action 1</md-button>
-          	<md-button>Action 2</md-button>
-        </md-card-actions>
-    </md-card>
-    <md-card>
-		<md-card-header>
-          	<md-card-avatar>
-            	<!-- <md-icon class="md-avatar-icon" md-svg-icon="img/icons/menu.svg"></md-icon> -->
-          	</md-card-avatar>
-          	<md-card-header-text>
-            	<span class="md-title">Title</span>
-            	<span class="md-subhead">subhead</span>
-          	</md-card-header-text>
-        </md-card-header>
-        <img ng-src="/img/washedout.png" class="md-card-image" alt="Washed Out">
-        <md-card-title>
-          	<md-card-title-text>
-            	<span class="md-headline">Action buttons</span>
-          	</md-card-title-text>
-        </md-card-title>
-        <md-card-content>
-          	<p>
-	            The titles of Washed Out's breakthrough song and the first single from Paracosm share the
-	            two most important words in Ernest Greene's musical language: feel it. It's a simple request, as well...
-          	</p>
-          	<p>
-	            The titles of Washed Out's breakthrough song and the first single from Paracosm share the
-	            two most important words in Ernest Greene's musical language: feel it. It's a simple request, as well...
-          	</p>
-          	<p>
-	            The titles of Washed Out's breakthrough song and the first single from Paracosm share the
-	            two most important words in Ernest Greene's musical language: feel it. It's a simple request, as well...
-          	</p>
-        </md-card-content>
-        <md-card-actions layout="row" layout-align="end center">
-          	<md-button>Action 1</md-button>
-          	<md-button>Action 2</md-button>
-        </md-card-actions>
-    </md-card>
+<div infinite-scroll='post.paginateLoad()' infinite-scroll-distance="1" infinite-scroll-disabled="post.busy" infinite-scroll-parent ng-if="post.show">
+	<div layout="column" class="container">
+		<md-card ng-repeat="post in post.items | filter: toolbar.searchText | orderBy:sortType:sortReverse">
+			<md-card-header>
+	          	<md-card-avatar>
+	            	<img ng-src="/user/avatar/{{post.user.id}}" alt="avatar" class="md-user-avatar" ng-if="post.user.avatar_path">
+	            	<img src="/img/2Color-Favicon_512x512-1.png" class="md-user-avatar" alt="" ng-if="!post.user.avatar_path">
+	          	</md-card-avatar>
+	          	<md-card-header-text>
+	            	<span class="md-title">{{post.user.name}} - {{post.user.position}}</span>
+	            	<span class="md-subhead"><span am-time-ago="post.published_at"></span></span>
+	          	</md-card-header-text>
+	        </md-card-header>
+	        <img ng-src="/post/photo/{{post.id}}" class="md-card-image" alt="{{post.title}} Photo">
+	        <md-card-title>
+	          	<md-card-title-text>
+	            	<span class="md-headline">{{post.title}}</span>
+	          	</md-card-title-text>
+	        </md-card-title>
+	        <md-card-content>
+	          	<p>
+	          		{{post.message}}
+	          	</p>
+	          	<md-chips ng-model="post.chips" name="hashTags" readonly="true"></md-chips>
+	        </md-card-content>
+	        <md-card-actions layout="row" layout-align="start center" ng-if="post.allow_comments">
+	        	<md-card-icon-actions>
+		          	<md-button ng-click="commentSection(post)">
+		          		<md-icon class="mdi mdi-comment grey"></md-icon>
+		          	</md-button>
+		        </md-card-icon-actions>
+          		<md-button ng-if="post.comments_count" ng-click="fetchComments(post)">{{post.comments_count}} Comment <span ng-if="post.comments_count > 1">s</span></md-button>
+	        </md-card-actions>
+	        <md-card-content ng-if="!post.allow_comments">
+		        <em class="secondary-post">Comments are disabled for this post.</em>
+	        </md-card-content>
+	        <form novalidate name="Comment{{$index}}" ng-if="post.allow_comments" hide-xs>
+	        	<div layout="row" layout-align="start center" layout-padding flex>        		
+		        	<md-list>
+		        		<md-list-item>
+		        			<img ng-src="/user/avatar/{{user.id}}" class="md-avatar" ng-if="user.avatar_path"/>
+		        			<img src="/img/2Color-Favicon_512x512-1.png" class="md-avatar" alt="" ng-if="!user.avatar_path">
+		        		</md-list-item>
+		        	</md-list>
+		        	<md-input-container md-no-float class="md-block" flex>
+					    <input id="comment-{{post.id}}" ng-model="post.new_comment" type="text" placeholder="Write a comment...">
+				    </md-input-container>
+					<md-button class="md-icon-button" type="submit" ng-click="submit(post)">
+						<md-icon id="submit-{{post.id}}" class="mdi mdi-send grey"></md-icon>
+					</md-button>
+	        	</div>
+	        </form>
+		    <md-card-content ng-if="post.comments">
+		    	<md-divider></md-divider>
+		    	<md-list>
+		    		<md-subheader class="md-no-sticky">Comments</md-subheader>
+		    		<md-list-item ng-repeat="comment in post.comments" class="md-3-line md-long-text">
+		    			<img src="/img/2Color-Favicon_512x512-1.png" class="md-avatar" alt="" ng-if="!comment.user.avatar_path">
+		    			<img ng-src="/user/avatar/{{comment.user_id}}" class="md-avatar" alt="" ng-if="comment.user.avatar_path">
+						<div class="md-list-item-text">
+							<h3>{{comment.user.name}}</h3>
+							<p>{{comment.message}}</p>
+							<span am-time-ago="comment.created_at"></span>
+						</div>
+		    		</md-list-item>
+		    	</md-list>
+		    	<md-button class="md-primary" ng-if="post.comments_count > post.comments.length">more comments</md-button>
+		    </md-card-content>
+	    </md-card>
+	</div>
+</div>
+
+<div layout="row" layout-align="center center" layout-padding layout-margin ng-if="isLoading">
+	<md-progress-circular class="md-primary" md-diameter="60"></md-progress-circular>
+</div>
+<div layout-padding layout-margin ng-if="!post.items.length && post.show && !post.no_matches">
+	Nothing to display.
 </div>

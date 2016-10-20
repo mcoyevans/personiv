@@ -83,7 +83,10 @@ class LinkController extends Controller
      */
     public function create()
     {
-        //
+        if(!Gate::forUser(Auth::user())->allows('manage-links'))
+        {
+            abort(403, 'Unauthorized action.');
+        }
     }
 
     /**

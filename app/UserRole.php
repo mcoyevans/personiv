@@ -8,11 +8,11 @@ class UserRole extends Model
 {
     public function user()
     {
-    	return $this->belongTo('App\User');
+    	return $this->belongsTo('App\User');
     }
 
     public function role()
     {
-    	return $this->belongTo('App\Role');
+    	return $this->belongsTo('App\Role');
     }
 }

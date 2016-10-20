@@ -47,6 +47,7 @@ app
 
 		/* Action originates from toolbar */
 		$scope.$on('search', function(){
+			$scope.showInactive = true;
 			$scope.request.search = $scope.toolbar.searchText;
 			$scope.refresh();
 		});

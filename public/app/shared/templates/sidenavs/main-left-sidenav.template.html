@@ -9,7 +9,7 @@
     <div layout="column" layout-align="center center" layout-padding>
         <div layout="column" layout-align="center center">
             <img ng-if="user.avatar_path" ng-src="/user/avatar/{{user.id}}?={{currentTime}}" alt="avatar" class="avatar">
-            <img ng-if="!user.avatar_path" src="/img/2Color-Favicon_512x512-1.png" class="avatar" alt="">
+            <img ng-if="user && !user.avatar_path" src="/img/2Color-Favicon_512x512-1.png" class="avatar" alt="">
             <input id="upload" type="file" nv-file-select uploader="photoUploader" style="display: none;" ng-if="user">
             <md-button ng-mouseover="show = true" ng-mouseleave = "show=false" ng-click="clickUpload()">
                 <div layout="row" flex>                

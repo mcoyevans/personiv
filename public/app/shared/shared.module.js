@@ -6,4 +6,5 @@ var shared = angular.module('shared', [
 	'angularMoment',
 	'angularFileUpload',
 	'ui.calendar',
+	'ui.bootstrap'
 ]);

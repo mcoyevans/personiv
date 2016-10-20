@@ -6,8 +6,80 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 
+use App\Post;
+
+use Auth;
+use Carbon\Carbon;
+use DB;
+use Gate;
+
 class PostController extends Controller
 {
+    /**
+     * Display a listing of the resource with parameters.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function photo($id)
+    {
+        $post = Post::where('id', $id)->first();
+
+        return response()->file(storage_path() .'/app/'. $post->image_path);
+    }
+    /**
+     * Display a listing of the resource with parameters.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function enlist(Request $request)
+    {
+        $posts = Post::query();
+
+        if($request->has('with'))
+        {
+            for ($i=0; $i < count($request->with); $i++) { 
+                if(!$request->input('with')[$i]['withTrashed'])
+                {
+                    $posts->with($request->input('with')[$i]['relation']);
+                }
+            }
+        }
+
+        if($request->has('withCount'))
+        {
+            for ($i=0; $i < count($request->withCount); $i++) { 
+                if(!$request->input('withCount')[$i]['withTrashed'])
+                {
+                    $posts->withCount($request->input('withCount')[$i]['relation']);
+                }
+            }
+        }
+
+        if(!$request->user()->super_admin)
+        {
+            $posts->where('group_id', $request->user()->group_id)->orWhereNull('group_id');
+        }
+
+        if($request->has('where'))
+        {
+            for ($i=0; $i < count($request->where); $i++) { 
+                $posts->where($request->input('where')[$i]['label'], $request->input('where')[$i]['condition'], $request->input('where')[$i]['value']);
+            }
+        }
+
+        if($request->has('first'))
+        {
+            return $posts->first();
+        }
+
+        if($request->has('paginate'))
+        {
+            return $posts->paginate($request->paginate);
+        }
+
+        return $posts->get();
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -15,7 +87,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
+        return Post::all();
     }
 
     /**

@@ -33,10 +33,10 @@ md-nav-bar {
   color: #757575 !important; }
 
 .mdi.accent {
-  color: #FFC107; }
+  color: #FFC107 !important; }
 
 .mdi.primary {
-  color: #3F51B5; }
+  color: #3F51B5 !important; }
 
 .mdi.baseline {
   vertical-align: baseline; }

@@ -61,6 +61,17 @@ app
 			})
 			.state('main.groups', {
 				url: 'settings/groups',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/group/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
 				views: {
 					'content-container': {
 						templateUrl: '/app/shared/views/content-container.view.html',
@@ -80,6 +91,17 @@ app
 			})
 			.state('main.links', {
 				url: 'settings/links',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/link/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
 				views: {
 					'content-container': {
 						templateUrl: '/app/shared/views/content-container.view.html',
@@ -93,6 +115,66 @@ app
 						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
 					},
 					'content@main.links':{
+						templateUrl: '/app/components/settings/templates/content/settings-content.template.html',
+					}
+				}
+			})
+			.state('main.locations', {
+				url: 'settings/locations',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/location/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'locationsContentContainerController',
+					},
+					'toolbar@main.locations': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'locationsToolbarController',
+					},
+					'left-sidenav@main.locations': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.locations':{
+						templateUrl: '/app/components/settings/templates/content/settings-content.template.html',
+					}
+				}
+			})
+			.state('main.users', {
+				url: 'settings/users',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/user/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'usersContentContainerController',
+					},
+					'toolbar@main.users': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'usersToolbarController',
+					},
+					'left-sidenav@main.users': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.users':{
 						templateUrl: '/app/components/settings/templates/content/settings-content.template.html',
 					}
 				}
@@ -337,13 +419,238 @@ app
 		});
 	}]);
 app
-	.controller('postsContentContainerController', ['$scope', function($scope){
+	.controller('postsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
 		$scope.$emit('closeSidenav');
+
+		$scope.commentSection = function(post){
+		    angular.element('#comment-' + post.id).trigger('focus');
+		    angular.element('#submit-' + post.id).addClass('primary');
+		};
+
+		$scope.fetchComments = function(post){
+			if(!post.comments)
+			{
+				var query= {};
+
+				query.where = [
+					{
+						'label':'post_id',
+						'condition': '=',
+						'value': post.id
+					}
+				];
+
+				query.with = [
+					{
+						'relation':'user',
+						'withTrashed':true,
+					}
+				]
+				query.paginate = 10;
+
+				Helper.post('/comment/enlist', query)
+					.success(function(data){
+						post.comments = data.data;
+					})
+			}
+		}
+
+		$scope.submit = function(post)
+		{
+			console.log(post);
+		}
 		/*
 		 * Object for toolbar
 		 *
 		*/
 		$scope.toolbar = {};
+
+		/*
+		 * Object for fab
+		 *
+		*/
+		$scope.fab = {};
+		$scope.fab.icon = 'mdi-message-text';
+
+		$scope.fab.label = 'Post';
+
+		$scope.fab.action = function(){
+			var dialog = {
+				'template':'/app/components/settings/templates/dialogs/post-dialog.template.html',
+				'controller': 'postDialogController',
+			}
+
+			dialog.action = 'create';
+
+			Helper.set(dialog);
+
+			Helper.customDialog(dialog)
+				.then(function(){
+					Helper.notify('Post created.');
+					$scope.refresh();
+				}, function(){
+					return;
+				});
+		}
+
+		/* Action originates from toolbar */
+		$scope.$on('search', function(){
+			$scope.request.search = $scope.toolbar.searchText;
+			$scope.refresh();
+		});
+
+		/* Listens for any request for refresh */
+		$scope.$on('refresh', function(){
+			$scope.request.search = null;
+			$scope.$broadcast('close');
+			$scope.refresh();
+		});
+
+		$scope.updatePost = function(data){
+			var dialog = {
+				'template':'/app/components/settings/templates/dialogs/post-dialog.template.html',
+				'controller': 'postDialogController',
+			}
+
+			data.action = 'edit';
+
+			Helper.set(data);
+
+			Helper.customDialog(dialog)
+				.then(function(){
+					$scope.refresh();
+					Helper.notify('Post updated.');
+				}, function(){
+					return;
+				});
+		}
+
+		$scope.deletePost = function(data){
+			var dialog = {};
+			dialog.title = 'Delete';
+			dialog.message = 'Delete this post?'
+			dialog.ok = 'Delete';
+			dialog.cancel = 'Cancel';
+
+			Helper.confirm(dialog)
+				.then(function(){
+					Helper.delete('/post/' + data.id)
+						.success(function(){
+							$scope.refresh();
+							Helper.notify('Post deleted.');
+						})
+						.error(function(){
+							Helper.error();
+						});
+				}, function(){
+					return;
+				})
+		}
+
+		/* Formats every data in the paginated call */
+		var pushItem = function(data){
+			data.chips = [];
+
+			angular.forEach(data.hashtags, function(hashtag){
+				data.chips.push(hashtag.tag);
+			});
+			
+			var item = {};
+
+			item.display = data.name;
+
+			$scope.toolbar.items.push(item);
+		}
+
+		$scope.init = function(query){
+			$scope.post = {};
+			$scope.post.items = [];
+			$scope.toolbar.items = [];
+
+			// 2 is default so the next page to be loaded will be page 2 
+			$scope.post.page = 2;
+
+			Helper.post('/post/enlist', query)
+				.success(function(data){
+					$scope.post.details = data;
+					$scope.post.items = data.data;
+					$scope.post.show = true;
+
+					$scope.fab.show = true;
+
+					if(data.data.length){
+						// iterate over each record and set the format
+						angular.forEach(data.data, function(item){
+							pushItem(item);
+						});
+					}
+
+					$scope.post.paginateLoad = function(){
+						// kills the function if ajax is busy or pagination reaches last page
+						if($scope.post.busy || ($scope.post.page > $scope.post.details.last_page)){
+							$scope.isLoading = false;
+							return;
+						}
+						/**
+						 * Executes pagination call
+						 *
+						*/
+						// sets to true to disable pagination call if still busy.
+						$scope.post.busy = true;
+						$scope.isLoading = true;
+						// Calls the next page of pagination.
+						Helper.post('/post/enlist' + '?page=' + $scope.post.page, query)
+							.success(function(data){
+								// increment the page to set up next page for next AJAX Call
+								$scope.post.page++;
+
+								// iterate over each data then splice it to the data array
+								angular.forEach(data.data, function(item, key){
+									pushItem(item);
+									$scope.post.items.push(item);
+								});
+
+								// Enables again the pagination call for next call.
+								$scope.post.busy = false;
+								$scope.isLoading = false;
+							});
+					}
+				});
+		}
+
+		$scope.refresh = function(){
+			$scope.isLoading = true;
+  			$scope.post.show = false;
+
+  			$scope.init($scope.request);
+		};
+
+		$scope.request = {};
+
+		$scope.request.withTrashed = false;
+		$scope.request.paginate = 10;
+
+		$scope.request.with = [
+			{
+				'relation':'user',
+				'withTrashed': false,
+			},
+			{
+				'relation':'hashtags',
+				'withTrashed': false,	
+			},
+		];
+		$scope.request.withCount = [
+			{
+				'relation':'comments',
+				'withTrashed': false,
+			}
+		]	
+
+		$scope.isLoading = true;
+		$scope.$broadcast('close');
+
+		$scope.init($scope.request);
 	}]);
 app
 	.controller('equipmentsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
@@ -581,6 +888,7 @@ app
 
 		/* Action originates from toolbar */
 		$scope.$on('search', function(){
+			$scope.showInactive = true;
 			$scope.request.search = $scope.toolbar.searchText;
 			$scope.refresh();
 		});
@@ -778,12 +1086,14 @@ app
 
 		/* Action originates from toolbar */
 		$scope.$on('search', function(){
+			$scope.showInactive = true;
 			$scope.request.search = $scope.toolbar.searchText;
 			$scope.refresh();
 		});
 
 		/* Listens for any request for refresh */
 		$scope.$on('refresh', function(){
+			$scope.showInactive = false;
 			$scope.request.search = null;
 			$scope.$broadcast('close');
 			$scope.refresh();
@@ -833,11 +1143,6 @@ app
 		/* Formats every data in the paginated call */
 		var pushItem = function(data){
 			data.deleted_at =  data.deleted_at ? new Date(data.deleted_at) : null;
-
-			if(data.users_count)
-			{
-				data.hideDelete = true;
-			}
 
 			var item = {};
 
@@ -928,6 +1233,398 @@ app
 		$scope.init($scope.request);
 	}]);
 app
+	.controller('locationsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
+		$scope.$emit('closeSidenav');
+		/*
+		 * Object for toolbar
+		 *
+		*/
+		$scope.toolbar = {};
+
+		$scope.toolbar.toggleActive = function(){
+			$scope.showInactive = !$scope.showInactive;
+		}
+		$scope.toolbar.sortBy = function(filter){
+			filter.sortReverse = !filter.sortReverse;			
+			$scope.sortType = filter.type;
+			$scope.sortReverse = filter.sortReverse;
+		}
+
+		/*
+		 * Object for fab
+		 *
+		*/
+		$scope.fab = {};
+		$scope.fab.icon = 'mdi-plus';
+
+		$scope.fab.label = 'Locations';
+
+		$scope.fab.action = function(){
+			var dialog = {
+				'template':'/app/components/settings/templates/dialogs/location-dialog.template.html',
+				'controller': 'locationDialogController',
+			}
+
+			dialog.action = 'create';
+
+			Helper.set(dialog);
+
+			Helper.customDialog(dialog)
+				.then(function(){
+					Helper.notify('Location created.');
+					$scope.refresh();
+				}, function(){
+					return;
+				});
+		}
+
+
+		/* Action originates from toolbar */
+		$scope.$on('search', function(){
+			$scope.showInactive = true;
+			$scope.request.search = $scope.toolbar.searchText;
+			$scope.refresh();
+		});
+
+		/* Listens for any request for refresh */
+		$scope.$on('refresh', function(){
+			$scope.showInactive = false;
+			$scope.request.search = null;
+			$scope.$broadcast('close');
+			$scope.refresh();
+		});
+
+		$scope.updateModel = function(data){
+			var dialog = {
+				'template':'/app/components/settings/templates/dialogs/location-dialog.template.html',
+				'controller': 'locationDialogController',
+			}
+
+			data.action = 'edit';
+
+			Helper.set(data);
+
+			Helper.customDialog(dialog)
+				.then(function(){
+					$scope.refresh();
+					Helper.notify('Location updated.');
+				}, function(){
+					return;
+				});
+		}
+
+		$scope.deleteModel = function(data){
+			var dialog = {};
+			dialog.title = 'Delete';
+			dialog.message = 'Delete ' + data.name + '?'
+			dialog.ok = 'Delete';
+			dialog.cancel = 'Cancel';
+
+			Helper.confirm(dialog)
+				.then(function(){
+					Helper.delete('/location/' + data.id)
+						.success(function(){
+							$scope.refresh();
+							Helper.notify('Location deleted.');
+						})
+						.error(function(){
+							Helper.error();
+						});
+				}, function(){
+					return;
+				})
+		}
+
+		/* Formats every data in the paginated call */
+		var pushItem = function(data){
+			data.deleted_at =  data.deleted_at ? new Date(data.deleted_at) : null;
+
+			var item = {};
+
+			item.display = data.name;
+
+			$scope.toolbar.items.push(item);
+		}
+
+		$scope.init = function(query){
+			$scope.model = {};
+			$scope.model.items = [];
+			$scope.toolbar.items = [];
+
+			// 2 is default so the next page to be loaded will be page 2 
+			$scope.model.page = 2;
+
+			Helper.post('/location/enlist', query)
+				.success(function(data){
+					$scope.model.details = data;
+					$scope.model.items = data.data;
+					$scope.model.show = true;
+
+					$scope.fab.show = true;
+
+					if(data.data.length){
+						// iterate over each record and set the format
+						angular.forEach(data.data, function(item){
+							pushItem(item);
+						});
+					}
+
+					$scope.model.paginateLoad = function(){
+						// kills the function if ajax is busy or pagination reaches last page
+						if($scope.model.busy || ($scope.model.page > $scope.model.details.last_page)){
+							$scope.isLoading = false;
+							return;
+						}
+						/**
+						 * Executes pagination call
+						 *
+						*/
+						// sets to true to disable pagination call if still busy.
+						$scope.model.busy = true;
+						$scope.isLoading = true;
+						// Calls the next page of pagination.
+						Helper.post('/location/enlist' + '?page=' + $scope.model.page, query)
+							.success(function(data){
+								// increment the page to set up next page for next AJAX Call
+								$scope.model.page++;
+
+								// iterate over each data then splice it to the data array
+								angular.forEach(data.data, function(item, key){
+									pushItem(item);
+									$scope.model.items.push(item);
+								});
+
+								// Enables again the pagination call for next call.
+								$scope.model.busy = false;
+								$scope.isLoading = false;
+							});
+					}
+				});
+		}
+
+		$scope.refresh = function(){
+			$scope.isLoading = true;
+  			$scope.model.show = false;
+
+  			$scope.init($scope.request);
+		};
+
+		$scope.request = {};
+
+		$scope.request.withTrashed = true;
+		$scope.request.paginate = 20;	
+
+		$scope.isLoading = true;
+		$scope.$broadcast('close');
+
+		$scope.init($scope.request);
+	}]);
+app
+	.controller('usersContentContainerController', ['$scope', 'Helper', function($scope, Helper){
+		$scope.$emit('closeSidenav');
+		/*
+		 * Object for toolbar
+		 *
+		*/
+		$scope.toolbar = {};
+
+		$scope.toolbar.toggleActive = function(){
+			$scope.showInactive = !$scope.showInactive;
+		}
+		$scope.toolbar.sortBy = function(filter){
+			filter.sortReverse = !filter.sortReverse;			
+			$scope.sortType = filter.type;
+			$scope.sortReverse = filter.sortReverse;
+		}
+
+		/*
+		 * Object for fab
+		 *
+		*/
+		$scope.fab = {};
+		$scope.fab.icon = 'mdi-plus';
+
+		$scope.fab.label = 'Users';
+
+		$scope.fab.action = function(){
+			var dialog = {
+				'template':'/app/components/settings/templates/dialogs/user-dialog.template.html',
+				'controller': 'userDialogController',
+			}
+
+			dialog.action = 'create';
+
+			Helper.set(dialog);
+
+			Helper.customDialog(dialog)
+				.then(function(){
+					Helper.notify('User created.');
+					$scope.refresh();
+				}, function(){
+					return;
+				});
+		}
+
+
+		/* Action originates from toolbar */
+		$scope.$on('search', function(){
+			$scope.showInactive = true;
+			$scope.request.search = $scope.toolbar.searchText;
+			$scope.refresh();
+		});
+
+		/* Listens for any request for refresh */
+		$scope.$on('refresh', function(){
+			$scope.showInactive = false;
+			$scope.request.search = null;
+			$scope.$broadcast('close');
+			$scope.refresh();
+		});
+
+		$scope.updateModel = function(data){
+			var dialog = {
+				'template':'/app/components/settings/templates/dialogs/user-dialog.template.html',
+				'controller': 'userDialogController',
+			}
+
+			data.action = 'edit';
+
+			Helper.set(data);
+
+			Helper.customDialog(dialog)
+				.then(function(){
+					$scope.refresh();
+					Helper.notify('User updated.');
+				}, function(){
+					return;
+				});
+		}
+
+		$scope.deleteModel = function(data){
+			var dialog = {};
+			dialog.title = 'Delete';
+			dialog.message = 'Delete ' + data.name + '?'
+			dialog.ok = 'Delete';
+			dialog.cancel = 'Cancel';
+
+			Helper.confirm(dialog)
+				.then(function(){
+					Helper.delete('/user/' + data.id)
+						.success(function(){
+							$scope.refresh();
+							Helper.notify('User deleted.');
+						})
+						.error(function(){
+							Helper.error();
+						});
+				}, function(){
+					return;
+				})
+		}
+
+		/* Formats every data in the paginated call */
+		var pushItem = function(data){
+			data.deleted_at =  data.deleted_at ? new Date(data.deleted_at) : null;
+
+			var item = {};
+
+			item.display = data.name;
+
+			$scope.toolbar.items.push(item);
+		}
+
+		$scope.init = function(query){
+			$scope.model = {};
+			$scope.model.items = [];
+			$scope.toolbar.items = [];
+
+			// 2 is default so the next page to be loaded will be page 2 
+			$scope.model.page = 2;
+
+			Helper.post('/user/enlist', query)
+				.success(function(data){
+					$scope.model.details = data;
+					$scope.model.items = data.data;
+					$scope.model.show = true;
+
+					$scope.fab.show = true;
+
+					if(data.data.length){
+						// iterate over each record and set the format
+						angular.forEach(data.data, function(item){
+							pushItem(item);
+						});
+					}
+
+					$scope.model.paginateLoad = function(){
+						// kills the function if ajax is busy or pagination reaches last page
+						if($scope.model.busy || ($scope.model.page > $scope.model.details.last_page)){
+							$scope.isLoading = false;
+							return;
+						}
+						/**
+						 * Executes pagination call
+						 *
+						*/
+						// sets to true to disable pagination call if still busy.
+						$scope.model.busy = true;
+						$scope.isLoading = true;
+						// Calls the next page of pagination.
+						Helper.post('/user/enlist' + '?page=' + $scope.model.page, query)
+							.success(function(data){
+								// increment the page to set up next page for next AJAX Call
+								$scope.model.page++;
+
+								// iterate over each data then splice it to the data array
+								angular.forEach(data.data, function(item, key){
+									pushItem(item);
+									$scope.model.items.push(item);
+								});
+
+								// Enables again the pagination call for next call.
+								$scope.model.busy = false;
+								$scope.isLoading = false;
+							});
+					}
+				});
+		}
+
+		$scope.refresh = function(){
+			$scope.isLoading = true;
+  			$scope.model.show = false;
+
+  			$scope.init($scope.request);
+		};
+
+		$scope.request = {};
+
+		$scope.request.withTrashed = true;
+		$scope.request.paginate = 20;	
+		$scope.request.with = [
+			{
+				'relation':'group',
+				'withTrashed':false,
+			},
+			{
+				'relation':'roles',
+				'withTrashed':false,
+			},
+		]
+		$scope.request.where = [
+			{
+				'label':'super_admin',
+				'condition':'!=',
+				'value':true,
+			},
+		]
+
+
+		$scope.isLoading = true;
+		$scope.$broadcast('close');
+
+		$scope.init($scope.request);
+	}]);
+app
 	.controller('postsToolbarController', ['$scope', '$filter', function($scope, $filter){
 		$scope.toolbar.childState = 'Posts';
 
@@ -948,7 +1645,6 @@ app
 		$scope.showSearchBar = function(){
 			// $scope.post.busy = true;
 			$scope.searchBar = true;
-			$scope.showInactive = true;
 		};
 
 		/**
@@ -973,6 +1669,12 @@ app
 			$scope.$emit('search');
 			$scope.searched = true;
 		};
+
+		$scope.toolbar.options = true;
+		
+		$scope.toolbar.refresh = function(){
+			$scope.$emit('refresh');
+		}
 	}]);
 app
 	.controller('equipmentDialogController', ['$scope', 'Helper', function($scope, Helper){
@@ -1300,6 +2002,224 @@ app
 		}
 	}]);
 app
+	.controller('locationDialogController', ['$scope', 'Helper', function($scope, Helper){
+		$scope.config = Helper.fetch();
+
+		if($scope.config.action == 'create')
+		{
+			$scope.model = {};
+		}
+		else if($scope.config.action == 'edit')
+		{
+			Helper.get('/location' + '/' + $scope.config.id)
+				.success(function(data){
+					$scope.model = data;
+				})
+		}
+
+		$scope.duplicate = false;
+
+		$scope.busy = false;
+
+		$scope.cancel = function(){
+			Helper.cancel();
+		}		
+
+		$scope.checkDuplicate = function(){
+			Helper.post('/location' + '/check-duplicate', $scope.model)
+				.success(function(data){
+					$scope.duplicate = data;
+				})
+		}
+
+		$scope.submit = function(){
+			if($scope.modelForm.$invalid){
+				angular.forEach($scope.modelForm.$error, function(field){
+					angular.forEach(field, function(errorField){
+						errorField.$setTouched();
+					});
+				});
+
+				return;
+			}
+
+			if(!$scope.duplicate)
+			{
+				$scope.busy = true;
+
+				if($scope.config.action == 'create')
+				{
+					Helper.post('/location', $scope.model)
+						.success(function(duplicate){
+							if(duplicate){
+								$scope.busy = false;
+								return;
+							}
+
+							Helper.stop();
+						})
+						.error(function(){
+							$scope.busy = false;
+							$scope.error = true;
+						});
+				}
+				else if($scope.config.action == 'edit')
+				{
+					Helper.put('/location' + '/' + $scope.config.id, $scope.model)
+						.success(function(duplicate){
+							if(duplicate){
+								$scope.busy = false;
+								return;
+							}
+
+							Helper.stop();
+						})
+						.error(function(){
+							$scope.busy = false;
+							$scope.error = true;
+						});
+				}
+			}
+		}
+	}]);
+app
+	.controller('userDialogController', ['$scope', 'Helper', function($scope, Helper){
+		$scope.config = Helper.fetch();
+
+		Helper.get('/group')
+			.success(function(data){
+				$scope.groups = data;
+			});
+
+		Helper.post('/role/enlist')
+			.success(function(data){
+				$scope.roles = data;
+			})
+
+		if($scope.config.action == 'create')
+		{
+			$scope.model = {};
+			$scope.model.roles = [];
+			$scope.model.group_id = $scope.config.group_id;
+		}
+		else if($scope.config.action == 'edit')
+		{
+			Helper.post('/role/enlist')
+				.success(function(data){
+					$scope.roles = data;
+					$scope.count = $scope.roles.length;
+		
+					Helper.get('/user' + '/' + $scope.config.id)
+						.success(function(data){
+							$scope.model = data;
+							$scope.model.roles = [];
+
+							angular.forEach($scope.roles, function(item, key){
+								$scope.model.roles.push(null);
+
+								var query = {};
+								query.with = [
+									{
+										'relation':'role',
+										'withTrashed': false,
+									},
+								];
+								query.where = [
+									{
+										'label': 'user_id',
+										'condition': '=',
+										'value': $scope.model.id,
+									},
+									{
+										'label': 'role_id',
+										'condition': '=',
+										'value': item.id,
+									},
+								];
+								query.first = true;
+
+								Helper.post('/user-role/enlist', query)
+									.success(function(data){
+										$scope.count--;
+										if(data)
+										{
+											$scope.model.roles.splice(key, 1, data.role);
+										}
+									});
+							});
+						})
+						.error(function(){
+							Helper.error();
+						});
+				})
+		}
+
+		$scope.duplicate = false;
+
+		$scope.busy = false;
+
+		$scope.cancel = function(){
+			Helper.cancel();
+		}		
+
+		$scope.checkDuplicate = function(){
+			Helper.post('/user' + '/check-email', $scope.model)
+				.success(function(data){
+					$scope.duplicate = data;
+				})
+		}
+
+		$scope.submit = function(){
+			if($scope.modelForm.$invalid){
+				angular.forEach($scope.modelForm.$error, function(field){
+					angular.forEach(field, function(errorField){
+						errorField.$setTouched();
+					});
+				});
+
+				return;
+			}
+
+			if(!$scope.duplicate)
+			{
+				$scope.busy = true;
+
+				if($scope.config.action == 'create')
+				{
+					Helper.post('/user', $scope.model)
+						.success(function(duplicate){
+							if(duplicate){
+								$scope.busy = false;
+								return;
+							}
+
+							Helper.stop();
+						})
+						.error(function(){
+							$scope.busy = false;
+							$scope.error = true;
+						});
+				}
+				else if($scope.config.action == 'edit')
+				{
+					Helper.put('/user' + '/' + $scope.config.id, $scope.model)
+						.success(function(duplicate){
+							if(duplicate){
+								$scope.busy = false;
+								return;
+							}
+
+							Helper.stop();
+						})
+						.error(function(){
+							$scope.busy = false;
+							$scope.error = true;
+						});
+				}
+			}
+		}
+	}]);
+app
 	.controller('equipmentsSubheaderController', ['$scope', 'Helper', function($scope, Helper){
 		var setInit = function(data){
 			Helper.set(data);
@@ -1439,7 +2359,6 @@ app
 		$scope.showSearchBar = function(){
 			$scope.model.busy = true;
 			$scope.searchBar = true;
-			$scope.showInactive = true;
 		};
 
 		/**
@@ -1517,7 +2436,6 @@ app
 		$scope.showSearchBar = function(){
 			$scope.model.busy = true;
 			$scope.searchBar = true;
-			$scope.showInactive = true;
 		};
 
 		/**
@@ -1585,7 +2503,6 @@ app
 		$scope.showSearchBar = function(){
 			$scope.model.busy = true;
 			$scope.searchBar = true;
-			$scope.showInactive = true;
 		};
 
 		/**
@@ -1623,6 +2540,145 @@ app
 			{
 				'label': 'Link',
 				'type': 'link',
+				'sortReverse': false,
+			},
+			{
+				'label': 'Recently added',
+				'type': 'created_at',
+				'sortReverse': false,
+			},
+		];
+
+		$scope.toolbar.refresh = function(){
+			$scope.$emit('refresh');
+		}
+	}]);
+app
+	.controller('locationsToolbarController', ['$scope', '$filter', function($scope, $filter){
+		$scope.toolbar.parentState = 'Settings';
+		$scope.toolbar.childState = 'Locations';
+
+		$scope.$on('close', function(){
+			$scope.hideSearchBar();
+		});
+
+		$scope.toolbar.getItems = function(query){
+			var results = query ? $filter('filter')($scope.toolbar.items, query) : $scope.toolbar.items;
+			return results;
+		}
+
+		$scope.toolbar.searchAll = true;
+		/**
+		 * Reveals the search bar.
+		 *
+		*/
+		$scope.showSearchBar = function(){
+			$scope.model.busy = true;
+			$scope.searchBar = true;
+		};
+
+		/**
+		 * Hides the search bar.
+		 *
+		*/
+		$scope.hideSearchBar = function(){
+			$scope.searchBar = false;
+			$scope.toolbar.searchText = '';
+			$scope.toolbar.searchItem = '';
+			/* Cancels the paginate when the user sent a query */
+			if($scope.searched){
+				$scope.model.page = 1;
+				$scope.model.no_matches = false;
+				$scope.model.items = [];
+				$scope.searched = false;
+				$scope.$emit('refresh');
+			}
+		};
+
+		$scope.searchUserInput = function(){
+			$scope.$emit('search');
+			$scope.searched = true;
+		};
+
+		$scope.toolbar.options = true;
+		$scope.toolbar.showInactive = true;
+
+		$scope.toolbar.sort = [
+			{
+				'label': 'Name',
+				'type': 'name',
+				'sortReverse': false,
+			},
+			{
+				'label': 'Recently added',
+				'type': 'created_at',
+				'sortReverse': false,
+			},
+		];
+
+		$scope.toolbar.refresh = function(){
+			$scope.$emit('refresh');
+		}
+	}]);
+app
+	.controller('usersToolbarController', ['$scope', '$filter', function($scope, $filter){
+		$scope.toolbar.parentState = 'Settings';
+		$scope.toolbar.childState = 'Users';
+
+		$scope.$on('close', function(){
+			$scope.hideSearchBar();
+		});
+
+		$scope.toolbar.getItems = function(query){
+			var results = query ? $filter('filter')($scope.toolbar.items, query) : $scope.toolbar.items;
+			return results;
+		}
+
+		$scope.toolbar.searchAll = true;
+		/**
+		 * Reveals the search bar.
+		 *
+		*/
+		$scope.showSearchBar = function(){
+			$scope.model.busy = true;
+			$scope.searchBar = true;
+		};
+
+		/**
+		 * Hides the search bar.
+		 *
+		*/
+		$scope.hideSearchBar = function(){
+			$scope.searchBar = false;
+			$scope.toolbar.searchText = '';
+			$scope.toolbar.searchItem = '';
+			/* Cancels the paginate when the user sent a query */
+			if($scope.searched){
+				$scope.model.page = 1;
+				$scope.model.no_matches = false;
+				$scope.model.items = [];
+				$scope.searched = false;
+				$scope.$emit('refresh');
+			}
+		};
+
+		$scope.searchUserInput = function(){
+			$scope.$emit('search');
+			$scope.searched = true;
+		};
+
+		$scope.toolbar.options = true;
+		$scope.toolbar.showInactive = true;
+
+		$scope.toolbar.sort = [
+			{
+				'label': 'Name',
+				'type': 'name',
+				'sortReverse': false,
+			},
+			{
+				'label': 'Email',
+				'type': 'email',
 				'sortReverse': false,
 			},
 			{

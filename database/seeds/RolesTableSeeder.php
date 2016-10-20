@@ -12,14 +12,14 @@ class RolesTableSeeder extends Seeder
     public function run()
     {
         DB::table('roles')->insert([
-        	['name' => 'posts'],
-            ['name' => 'reservations'],
-        	['name' => 'approvals'],
-            ['name' => 'manage-groups'],
-        	['name' => 'manage-users'],
-        	['name' => 'manage-locations'],
-        	['name' => 'manage-equipments'],
-        	['name' => 'manage-links'],
+        	['name' => 'posts', 'description' => 'Create a post.', 'super_admin_action' => false],
+            ['name' => 'reservations', 'description' => 'Make a room reservation.', 'super_admin_action' => false],
+        	['name' => 'approvals', 'description' => 'Manage approvals for reservations.', 'super_admin_action' => true],
+            ['name' => 'manage-groups', 'description' => 'Manage user groups.', 'super_admin_action' => true],
+        	['name' => 'manage-users', 'description' => 'Manage own group users.', 'super_admin_action' => true],
+        	['name' => 'manage-locations', 'description' => 'Manage locations for reservations.', 'super_admin_action' => true],
+        	['name' => 'manage-equipments', 'description' => 'Manage equipments for reservation.', 'super_admin_action' => true],
+        	['name' => 'manage-links', 'description' => 'Manage local app links.', 'super_admin_action' => true],
         ]);
     }
 }

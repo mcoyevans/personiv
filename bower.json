@@ -23,6 +23,7 @@
     "angular-ui-calendar": "^1.0.2",
     "pusher-websocket-iso": "pusher#^3.2.1",
     "angular-moment": "^1.0.0",
-    "angular-file-upload": "^2.3.4"
+    "angular-file-upload": "^2.3.4",
+    "angular-bootstrap": "^2.2.0"
   }
 }

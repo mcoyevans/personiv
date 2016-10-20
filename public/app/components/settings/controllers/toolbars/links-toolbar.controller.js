@@ -20,7 +20,6 @@ app
 		$scope.showSearchBar = function(){
 			$scope.model.busy = true;
 			$scope.searchBar = true;
-			$scope.showInactive = true;
 		};
 
 		/**

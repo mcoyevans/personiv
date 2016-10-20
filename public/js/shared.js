@@ -6,6 +6,7 @@ var shared = angular.module('shared', [
 	'angularMoment',
 	'angularFileUpload',
 	'ui.calendar',
+	'ui.bootstrap'
 ]);
 shared
 	.config(['$urlRouterProvider', '$stateProvider', '$mdThemingProvider', function($urlRouterProvider, $stateProvider, $mdThemingProvider){

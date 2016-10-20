@@ -70,3 +70,30 @@ Route::group(['prefix' => 'link'], function(){
 	Route::post('enlist', 'LinkController@enlist');
 	Route::post('check-duplicate', 'LinkController@checkDuplicate');
 });
+
+/* Location */
+Route::group(['prefix' => 'location'], function(){
+	Route::post('enlist', 'LocationController@enlist');
+	Route::post('check-duplicate', 'LocationController@checkDuplicate');
+});
+
+/* Role */
+Route::group(['prefix' => 'role'], function(){
+	Route::post('enlist', 'RoleController@enlist');
+});
+
+/* User Role */
+Route::group(['prefix' => 'user-role'], function(){
+	Route::post('enlist', 'UserRoleController@enlist');
+});
+
+/* Post */
+Route::group(['prefix' => 'post'], function(){
+	Route::post('enlist', 'PostController@enlist');
+	Route::get('photo/{postID}', 'PostController@photo');
+});
+
+/* Comment */
+Route::group(['prefix' => 'comment'], function(){
+	Route::post('enlist', 'CommentController@enlist');
+});

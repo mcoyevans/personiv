@@ -8,6 +8,7 @@ use App\Http\Requests;
 
 use App\User;
 use Auth;
+use DB;
 use Hash;
 use Gate;
 use Storage;
@@ -70,6 +71,11 @@ class UserController extends Controller
                     $users->with($request->input('with')[$i]['relation']);
                 }
             }
+        }
+
+        if(!$request->user()->super_admin)
+        {
+            $users->where('group_id', $request->user()->group_id);
         }
 
         if($request->has('where'))
@@ -179,7 +185,10 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        if(!Gate::forUser(Auth::user())->allows('manage-users'))
+        {
+            abort(403, 'Unauthorized action.');
+        }
     }
 
     /**
@@ -190,7 +199,48 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if(!Gate::forUser(Auth::user())->allows('manage-users'))
+        {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $duplicate = User::withTrashed()->where('email', $request->email)->first();
+
+        if($duplicate)
+        {
+            return response()->json(true);
+        }
+
+        $this->validate($request, [
+            'name' => 'required',
+            'email' => 'required|unique:users',
+            'password' => 'required',
+            'position' => 'required',
+        ]);
+
+        DB::transaction(function() use($request){
+            $user = new User;
+
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->password = bcrypt($request->password);
+            $user->group_id = $request->group_id;
+            $user->super_admin = false;
+            $user->position = $request->position;
+
+            $user->save();
+
+            $roles = array();
+
+            for ($i=0; $i < count($request->roles); $i++) { 
+                if(isset($request->input('roles')[$i]['id']))
+                {
+                    array_push($roles, $request->input('roles')[$i]['id']);
+                }
+            }
+            
+            $user->roles()->attach($roles);
+        });
     }
 
     /**
@@ -201,7 +251,7 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        //
+        return User::withTrashed()->where('id', $id)->first();
     }
 
     /**
@@ -224,7 +274,44 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        if(!Gate::forUser(Auth::user())->allows('manage-users'))
+        {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $duplicate = User::whereNotIn('id', [$id])->withTrashed()->where('email', $request->email)->first();
+
+        if($duplicate)
+        {
+            return response()->json(true);
+        }
+
+        $this->validate($request, [
+            'name' => 'required',
+            'position' => 'required',
+        ]);
+
+        DB::transaction(function() use($request, $id){
+            $user = User::where('id', $id)->first();
+
+            $user->name = $request->name;
+            $user->group_id = $request->group_id;
+            $user->position = $request->position;
+
+
+            $user->save();
+
+            $roles = array();
+
+            for ($i=0; $i < count($request->roles); $i++) { 
+                if(isset($request->input('roles')[$i]['id']))
+                {
+                    array_push($roles, $request->input('roles')[$i]['id']);
+                }
+            }
+            
+            $user->roles()->sync($roles);
+        });
     }
 
     /**
@@ -235,6 +322,11 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
+        if(!Gate::forUser(Auth::user())->allows('manage-users') && !Auth::user()->super_admin)
+        {
+            abort(403, 'Unauthorized action.');
+        }
+
+        User::where('id', $id)->delete();
     }
 }
