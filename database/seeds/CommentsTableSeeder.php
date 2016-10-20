@@ -14,7 +14,9 @@ class CommentsTableSeeder extends Seeder
         DB::table('comments')->insert([
         	'message' => '*Insert some cool meme here*',
             'post_id' => 1,
-        	'user_id' => 1
+        	'user_id' => 1,
+            'created_at' => Carbon\Carbon::now(),
+            'updated_at' => Carbon\Carbon::now(),
         ]);
     }
 }
