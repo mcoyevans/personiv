@@ -81,23 +81,20 @@
 		        </md-button>
 
 		        <md-menu-content width="4">
-		        	<md-subheader>Actions</md-subheader>
-		        		<md-button aria-label="Refresh" ng-click="toolbar.refresh()" flex>
+		        	<md-menu-item>
+				        <md-button ng-click="toolbar.refresh()">
+				        	Refresh
+				    	</md-button>
+			        </md-menu-item>
+					<md-menu-item>
+						<md-button aria-label="show inactive" ng-click="toolbar.toggleActive()" flex ng-if="toolbar.showInactive">
 		                    <div layout="row">
-		                        <md-icon class="mdi mdi-refresh grey"></md-icon>
-		                        <span flex="5"></span>
-		                        <span>Refresh</span>
+		                        <span>Show inactive</span>
 		                        <span flex></span>
+		                        <md-icon ng-show="showInactive" class="mdi mdi-check grey"></md-icon>
 		                    </div>
 		                </md-button>
-		        	<md-subheader ng-if="toolbar.showInactive">Filter</md-subheader>
-					<md-button aria-label="show inactive" ng-click="toolbar.toggleActive()" flex ng-if="toolbar.showInactive">
-	                    <div layout="row">
-	                        <span>Show inactive</span>
-	                        <span flex></span>
-	                        <md-icon ng-show="showInactive" class="mdi mdi-check grey"></md-icon>
-	                    </div>
-	                </md-button>
+					</md-menu-item>
 	                <md-subheader ng-if="toolbar.sort.length">Sort By</md-subheader>
 	                <md-menu-item ng-repeat="item in toolbar.sort">
 		              	<md-button aria-label="{{item.label}}" flex ng-click="toolbar.sortBy(item)">
@@ -111,7 +108,6 @@
 		            </md-menu-item>
 		        </md-menu-content>
 			</md-menu>
-			<span flex="5"></span>
 		</div>
 	</div>
 </div>

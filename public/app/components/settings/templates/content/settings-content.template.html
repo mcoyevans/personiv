@@ -29,23 +29,17 @@
 			        <md-menu-content width="4">
 						<md-subheader class="md-no-sticky">{{model.asset_tag}} {{model.name}}</md-subheader>
 						 <!-- Update -->
-			            <md-button aria-label="Update" ng-click="updateModel(model)" flex>
-			                <div layout="row">
-			                    <md-icon class="mdi mdi-pencil grey"></md-icon>
-			                    <span flex="5"></span>
-			                    <span>Update</span>
-			                    <span flex></span>
-			                </div>
-			            </md-button>
-			            <!-- Delete -->
-			            <md-button aria-label="Delete" ng-click="deleteModel(model)" flex ng-if="!model.hideDelete">
-			                <div layout="row">
-			                    <md-icon class="mdi mdi-delete grey"></md-icon>
-			                    <span flex="5"></span>
-			                    <span>Delete</span>
-			                    <span flex></span>
-			                </div>
-			            </md-button>
+			            <md-menu-item>
+				            <md-button aria-label="Update" ng-click="updateModel(model)" flex>
+				                Update
+				            </md-button>
+			        	</md-menu-item>
+			        	<md-menu-item>
+				            <!-- Delete -->
+				            <md-button aria-label="Delete" ng-click="deleteModel(model)" flex ng-if="!model.hideDelete">
+				                Delete
+				            </md-button>
+			        	</md-menu-item>
 			        </md-menu-content>
 				</md-menu>
 			</md-list-item>
