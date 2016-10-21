@@ -1,0 +1,78 @@
+<md-dialog aria-label="Post Form"  flex flex-gt-sm="50" ng-cloak>
+    <form name="postForm">
+        <md-toolbar >
+            <div class="md-toolbar-tools">
+                <h2 class="white-text">Post</h2>
+                <span flex></span>
+                <md-button class="md-icon-button" ng-click="cancel()">
+                    <md-icon class="mdi mdi-close mdi-24px" aria-label="Close dialog"></md-icon>
+                </md-button>
+            </div>
+        </md-toolbar>
+        <md-dialog-content flex layout-padding layout-wrap>
+            <md-subheader class="red-text" ng-if="error">Oops! Something went wrong! An error occured. Please try again.</md-subheader>
+            <div layout="row" layout-wrap flex>
+                <input id="post-upload" type="file" nv-file-select uploader="postPhotoUploader" style="display: none;" ng-if="!postPhotoUploader.queue.length">
+                <md-button class="md-icon-button" ng-click="clickUpload()" ng-if="!postPhotoUploader.queue.length">
+                    <md-icon class="mdi mdi-camera grey"></md-icon>
+                </md-button>
+                <p ng-if="fileError" class="red-text">File must be an image and not larger than 10MB.</p>
+            </div>
+            <div layout="column">
+                <img ng-src="/temp-upload/{{temp_upload.id}}" ng-if="preview" class="thumb">
+            </div>
+            <md-button ng-click="remove()" ng-if="preview">Remove</md-button>
+            <div layout="row" layout-wrap flex>
+                <!-- Title -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Title</label>
+                    <input type="text" name="Title" required ng-model="post.title" ng-disabled="busy" md-maxlength="150">
+                    <div ng-messages="postForm.Title.$error" ng-if="postForm.Title.$touched">
+                        <div ng-message="required">Title is required.</div>
+                        <div ng-message="md-maxlength">Keep it short and catchy.. you can write on the body instead.</div>
+                    </div>
+                </md-input-container>
+            </div>
+            <div layout="row" layout-wrap flex>
+                <!-- Body -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Body</label>
+                    <textarea name="Body" required ng-model="post.body" ng-disabled="busy"></textarea>
+                    <div ng-messages="postForm.Body.$error" ng-if="postForm.Body.$touched">
+                        <div ng-message="required">You might want to add some details to your post.</div>
+                    </div>
+                </md-input-container>
+            </div>
+            <div layout="column" flex>
+                <h2 class="md-title">Hashtags</h2>
+                <md-chips ng-model="post.chips" name="hashTag" md-removable="true" placeholder="Enter a hashtag." delete-button-label="Remove Hashtag" delete-hint="Press delete to remove hashtag" secondary-placeholder="+Hashtag" md-enable-chip-edit="true">
+                <md-chip-template>
+                    <strong>#{{$chip}}</strong>
+                </md-chip-template>
+            </md-chips>
+            </div>
+            <div layout="row" layout-wrap flex>
+               <md-switch ng-model="post.pinned" flex-xs="100" flex-gt-sm>
+                   Pinned Post
+               </md-switch>
+               <md-switch ng-model="post.allow_comments" flex-xs="100" flex-gt-sm>
+                   Allow comments
+               </md-switch>
+               <md-input-container flex>
+                    <label>Recepient</label>
+                    <md-select name="Group" ng-model="post.group_id" flex-xs="100" flex-gt-sm>
+                        <md-option ng-repeat="group in groups" value="{{group.id}}">
+                            {{group.name}}
+                        </md-option>
+                    </md-select>
+               </md-input-container>
+            </div>
+        </md-dialog-content>
+    </form>
+    <div layout="row" layout-align="end center">   
+        <md-button ng-if="!busy" class="md-primary" aria-label="Submit" ng-click="submit()">
+            Post
+        </md-button>
+        <md-progress-circular ng-if="busy" md-mode="indeterminate" class="md-primary" md-diameter="60"></md-progress-circular>
+    </div>
+</md-dialog>

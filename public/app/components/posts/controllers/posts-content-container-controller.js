@@ -56,7 +56,7 @@ app
 
 		$scope.fab.action = function(){
 			var dialog = {
-				'template':'/app/components/settings/templates/dialogs/post-dialog.template.html',
+				'template':'/app/components/posts/templates/dialogs/post-dialog.template.html',
 				'controller': 'postDialogController',
 			}
 
@@ -88,7 +88,7 @@ app
 
 		$scope.updatePost = function(data){
 			var dialog = {
-				'template':'/app/components/settings/templates/dialogs/post-dialog.template.html',
+				'template':'/app/components/posts/templates/dialogs/post-dialog.template.html',
 				'controller': 'postDialogController',
 			}
 
@@ -129,6 +129,7 @@ app
 
 		/* Formats every data in the paginated call */
 		var pushItem = function(data){
+			data.created_at = new Date(data.created_at);
 			data.chips = [];
 
 			angular.forEach(data.hashtags, function(hashtag){
@@ -226,6 +227,17 @@ app
 				'withTrashed': false,
 			}
 		]	
+
+		$scope.request.orderBy = [
+			{
+				'column':'pinned',
+				'order':'asc',
+			},
+			{
+				'column':'created_at',
+				'order':'desc',
+			},	
+		]
 
 		$scope.isLoading = true;
 		$scope.$broadcast('close');

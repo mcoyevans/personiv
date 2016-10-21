@@ -16,11 +16,10 @@ class CreatePostsTable extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->increments('id');
             $table->string('title');
-            $table->text('message');
+            $table->text('body');
             $table->string('image_path')->nullable();
             $table->boolean('pinned');
             $table->boolean('allow_comments');
-            $table->dateTime('published_at');
             $table->integer('group_id')->nullable();
             $table->integer('user_id')->unsigned();
             $table->timestamps();

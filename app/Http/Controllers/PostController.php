@@ -12,6 +12,7 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Gate;
+use Storage;
 
 class PostController extends Controller
 {
@@ -64,6 +65,13 @@ class PostController extends Controller
         {
             for ($i=0; $i < count($request->where); $i++) { 
                 $posts->where($request->input('where')[$i]['label'], $request->input('where')[$i]['condition'], $request->input('where')[$i]['value']);
+            }
+        }
+
+        if($request->has('orderBy'))
+        {
+            for ($i=0; $i < count($request->orderBy); $i++) { 
+                $posts->orderBy($request->input('orderBy')[$i]['column'], $request->input('orderBy')[$i]['order']);
             }
         }
 

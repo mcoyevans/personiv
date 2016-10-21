@@ -13,12 +13,11 @@ class PostsTableSeeder extends Seeder
     {
         DB::table('posts')->insert([
         	'title' => 'Action buttons',
-        	'message' => 'The titles of Washed Out\'s breakthrough song and the first single from Paracosm share the two most important words in Ernest Greene\'s musical language: feel it. It\'s a simple request, as well...',
+        	'body' => 'The titles of Washed Out\'s breakthrough song and the first single from Paracosm share the two most important words in Ernest Greene\'s musical language: feel it. It\'s a simple request, as well...',
         	'image_path' => 'sample/washedout',
         	'pinned' => true,
         	'allow_comments' => true,
         	'user_id' => 1,
-        	'published_at' => Carbon\Carbon::now(),
         	'created_at' => Carbon\Carbon::now(),
         	'updated_at' => Carbon\Carbon::now(),
         ]);

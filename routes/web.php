@@ -29,6 +29,7 @@ Route::resource('hashtag', 'HashtagController');
 Route::resource('link', 'LinkController');
 Route::resource('location', 'LocationController');
 Route::resource('post', 'PostController');
+Route::resource('temp-upload', 'TempUploadController');
 Route::resource('reservation', 'ReservationController');
 Route::resource('reservation-equipment', 'ReservationEquipmentController');
 Route::resource('role', 'RoleController');
@@ -91,9 +92,15 @@ Route::group(['prefix' => 'user-role'], function(){
 Route::group(['prefix' => 'post'], function(){
 	Route::post('enlist', 'PostController@enlist');
 	Route::get('photo/{postID}', 'PostController@photo');
+	Route::get('temp/{path}', 'PostController@temp');
 });
 
 /* Comment */
 Route::group(['prefix' => 'comment'], function(){
 	Route::post('enlist', 'CommentController@enlist');
+});
+
+Route::group(['prefix' => 'temp-upload'], function(){
+	Route::post('upload-photo', 'TempUploadController@uploadPhoto');
+	Route::post('cancel-upload', 'TempUploadController@cancelUpload');
 });

@@ -15,20 +15,26 @@ use Storage;
 
 class UserController extends Controller
 {
+    /**
+     * View user avatar and upload new avatar.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function avatar($id)
     {
         $user = User::withTrashed()->where('id', $id)->first();
 
         return response()->file(storage_path() .'/app/'. $user->avatar_path);
     }
+
     /**
-     * Delete previous user avatar and upload new avatar.
+     * Upload post photo.
      *
      * @return \Illuminate\Http\Response
      */
-    public function uploadAvatar(Request $request, $id)
+    public function uploadPhoto(Request $request)
     {
-        if(!Gate::forUser($request->user())->allows('upload-avatar', $id))
+        if(!Gate::forUser($request->user())->allows('posts'))
         {
             abort(403, 'Unauthorized action');
         }
