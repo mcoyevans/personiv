@@ -14,6 +14,7 @@ class CreateHashtagsTable extends Migration
     public function up()
     {
         Schema::create('hash_tags', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
             $table->increments('id');
             $table->string('tag');
             $table->integer('post_id')->unsigned();

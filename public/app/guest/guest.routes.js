@@ -10,7 +10,7 @@ guest
 					},
 					'content-container@wall': {
 						templateUrl: '/app/shared/views/content-container.view.html',
-						// controller: 'wallContentContainerController',
+						controller: 'wallContentContainerController',
 					},
 					'toolbar@wall': {
 						templateUrl: '/app/guest/templates/toolbar.template.html',

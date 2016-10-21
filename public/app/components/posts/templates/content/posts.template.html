@@ -1,5 +1,5 @@
 <div infinite-scroll='post.paginateLoad()' infinite-scroll-distance="1" infinite-scroll-disabled="post.busy" infinite-scroll-parent ng-if="post.show" layout="row" layout-align="center start">
-	<div layout="column" layout-align="center center" layout-margin flex flex-gt-sm="70">
+	<div layout="column" layout-align="center center" layout-margin flex flex-gt-sm="50">
 		<md-card ng-repeat="post in post.items | filter: toolbar.searchText | orderBy:sortType:sortReverse" layout-fill>
 			<md-card-header>
 	          	<md-card-avatar>
@@ -17,7 +17,7 @@
 					<md-icon class="mdi mdi-star accent" ng-if="post.pinned"></md-icon>
 	          	</md-card-header-text>
 	        </md-card-header>
-	        <img ng-src="/post/photo/{{post.id}}" class="md-card-image" alt="{{post.title}} Photo">
+	        <img ng-src="/post/photo/{{post.id}}" class="md-card-image" alt="{{post.title}} Photo" ng-if="post.image_path">
 	        <md-card-title>
 	          	<md-card-title-text>
 	            	<span class="md-headline">{{post.title}}</span>
@@ -29,7 +29,7 @@
 	          	</p>
 	          	<md-chips ng-model="post.chips" name="hashTags" readonly="true"></md-chips>
 	        </md-card-content>
-	        <md-card-actions layout="row" layout-align="start center" ng-if="post.allow_comments">
+	        <md-card-actions layout="row" layout-align="start center" ng-if="post.allow_comments && user">
 	        	<md-card-icon-actions>
 		          	<md-button ng-click="commentSection(post)">
 		          		<md-icon class="mdi mdi-comment grey"></md-icon>
@@ -40,7 +40,7 @@
 	        <md-card-content ng-if="!post.allow_comments">
 		        <em class="secondary-post">Comments are disabled for this post.</em>
 	        </md-card-content>
-	        <form novalidate name="Comment{{$index}}" ng-if="post.allow_comments" hide-xs>
+	        <form novalidate name="Comment{{$index}}" ng-if="post.allow_comments && user" hide-xs>
 	        	<div layout="row" layout-align="start center" layout-padding flex>        		
 		        	<md-list>
 		        		<md-list-item>

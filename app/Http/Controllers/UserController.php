@@ -32,9 +32,9 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function uploadPhoto(Request $request)
+    public function uploadAvatar(Request $request, $id)
     {
-        if(!Gate::forUser($request->user())->allows('posts'))
+        if(!Gate::forUser($request->user())->allows('upload-avatar', $id))
         {
             abort(403, 'Unauthorized action');
         }

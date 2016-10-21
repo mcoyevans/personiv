@@ -14,6 +14,7 @@ class CreateTempUploadsTable extends Migration
     public function up()
     {
         Schema::create('temp_uploads', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
             $table->increments('id');
             $table->string('path');
             $table->timestamps();

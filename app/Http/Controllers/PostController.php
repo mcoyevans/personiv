@@ -57,16 +57,27 @@ class PostController extends Controller
             }
         }
 
-        if(!$request->user()->super_admin)
+        if(Auth::check())
         {
-            $posts->where('group_id', $request->user()->group_id)->orWhereNull('group_id');
+            if(!$request->user()->super_admin)
+            {
+                $posts->where('group_id', $request->user()->group_id)->orWhereNull('group_id');
+            }
         }
+
 
         if($request->has('where'))
         {
             for ($i=0; $i < count($request->where); $i++) { 
                 $posts->where($request->input('where')[$i]['label'], $request->input('where')[$i]['condition'], $request->input('where')[$i]['value']);
             }
+        }
+
+        if($request->has('whereNull'))
+        {
+            for ($i=0; $i < count($request->whereNull); $i++) { 
+                $posts->whereNull($request->input('whereNull')[$i]);
+            }   
         }
 
         if($request->has('orderBy'))
@@ -153,13 +164,16 @@ class PostController extends Controller
                 $post->hashtags()->saveMany($hashtags);
             }
 
-            $post->image_path = 'posts/'. Carbon::now()->toDateString(). '-'. $post->id . '-'. str_random(16) . '.jpg';
+            if($request->has('image_path'))
+            {
+                $post->image_path = 'posts/'. Carbon::now()->toDateString(). '-'. $post->id . '-'. str_random(16) . '.jpg';
 
-            Storage::copy($request->image_path, $post->image_path);
+                Storage::copy($request->image_path, $post->image_path);
 
-            Storage::delete($request->image_path);
+                Storage::delete($request->image_path);
 
-            $post->save();
+                $post->save();
+            }
         });
     }
 
