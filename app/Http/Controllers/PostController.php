@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 
 use App\Post;
+use App\Hashtag;
 
 use Auth;
 use Carbon\Carbon;
@@ -116,7 +117,50 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if(!Gate::forUser($request->user())->allows('posts'))
+        {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $this->validate($request, [
+            'title' => 'required',
+            'body' => 'required',
+        ]);
+
+
+        DB::transaction(function() use($request){
+            $post = new Post;
+
+            $post->title = $request->title;
+            $post->body = $request->body;
+            $post->pinned = $request->pinned ? true : false;
+            $post->allow_comments = $request->allow_comments ? true : false;
+            $post->group_id = $request->group_id;
+            $post->user_id = $request->user()->id;
+
+            $post->save();
+
+            if($request->has('chips'))
+            {
+                $hashtags = array();
+
+                foreach ($request->chips as $item) {
+                    $hashtag = new Hashtag(['tag' => $item]);
+
+                    array_push($hashtags, $hashtag);
+                }
+
+                $post->hashtags()->saveMany($hashtags);
+            }
+
+            $post->image_path = 'posts/'. Carbon::now()->toDateString(). '-'. $post->id . '-'. str_random(16) . '.jpg';
+
+            Storage::copy($request->image_path, $post->image_path);
+
+            Storage::delete($request->image_path);
+
+            $post->save();
+        });
     }
 
     /**

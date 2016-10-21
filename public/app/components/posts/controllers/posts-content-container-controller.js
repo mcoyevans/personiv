@@ -231,7 +231,7 @@ app
 		$scope.request.orderBy = [
 			{
 				'column':'pinned',
-				'order':'asc',
+				'order':'desc',
 			},
 			{
 				'column':'created_at',

@@ -8,6 +8,8 @@ class Hashtag extends Model
 {
 	protected $touches = ['post'];
 
+	protected $fillable = ['tag'];
+
     public function post()
     {
     	return $this->belongsTo('App\Post');

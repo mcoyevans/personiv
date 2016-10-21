@@ -43,7 +43,7 @@ class TempUploadController extends Controller
             abort(403, 'Unauthorized action');
         }
 
-        $path = Storage::putFile('posts', $request->file('file'));
+        $path = Storage::putFile('temp', $request->file('file'));
 
         $temp_upload = new TempUpload;
 

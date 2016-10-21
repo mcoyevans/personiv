@@ -1,14 +1,20 @@
-<div infinite-scroll='post.paginateLoad()' infinite-scroll-distance="1" infinite-scroll-disabled="post.busy" infinite-scroll-parent ng-if="post.show">
-	<div layout="column" class="container">
-		<md-card ng-repeat="post in post.items | filter: toolbar.searchText | orderBy:sortType:sortReverse">
+<div infinite-scroll='post.paginateLoad()' infinite-scroll-distance="1" infinite-scroll-disabled="post.busy" infinite-scroll-parent ng-if="post.show" layout="row" layout-align="center start">
+	<div layout="column" layout-align="center center" layout-margin flex flex-gt-sm="70">
+		<md-card ng-repeat="post in post.items | filter: toolbar.searchText | orderBy:sortType:sortReverse" layout-fill>
 			<md-card-header>
 	          	<md-card-avatar>
 	            	<img ng-src="/user/avatar/{{post.user.id}}" alt="avatar" class="md-user-avatar" ng-if="post.user.avatar_path">
 	            	<img src="/img/2Color-Favicon_512x512-1.png" class="md-user-avatar" alt="" ng-if="!post.user.avatar_path">
 	          	</md-card-avatar>
-	          	<md-card-header-text>
-	            	<span class="md-title">{{post.user.name}} - {{post.user.position}}</span>
-	            	<span class="md-subhead"><span am-time-ago="post.published_at"></span></span>
+	          	<md-card-header-text layout="row">
+	            	<div layout="column" flex>            		
+		            	<span class="md-title">{{post.user.name}} - {{post.user.position}}</span>
+		            	<span class="md-subhead">
+		            		<span am-time-ago="post.created_at"></span>
+		            		<span hide-xs hide-sm> | {{post.created_at | date: 'EEEE, MMM. dd, yyyy,'}} at {{post.created_at | date: 'hh:mma'}}</span>
+		            	</span>
+	            	</div>
+					<md-icon class="mdi mdi-star accent" ng-if="post.pinned"></md-icon>
 	          	</md-card-header-text>
 	        </md-card-header>
 	        <img ng-src="/post/photo/{{post.id}}" class="md-card-image" alt="{{post.title}} Photo">
@@ -19,7 +25,7 @@
 	        </md-card-title>
 	        <md-card-content>
 	          	<p>
-	          		{{post.message}}
+	          		{{post.body}}
 	          	</p>
 	          	<md-chips ng-model="post.chips" name="hashTags" readonly="true"></md-chips>
 	        </md-card-content>
@@ -43,7 +49,7 @@
 		        		</md-list-item>
 		        	</md-list>
 		        	<md-input-container md-no-float class="md-block" flex>
-					    <input id="comment-{{post.id}}" ng-model="post.new_comment" type="text" placeholder="Write a comment...">
+					    <textarea id="comment-{{post.id}}" ng-model="post.new_comment" type="text" placeholder="Write a comment..."></textarea>
 				    </md-input-container>
 					<md-button class="md-icon-button" type="submit" ng-click="submit(post)">
 						<md-icon id="submit-{{post.id}}" class="mdi mdi-send grey"></md-icon>
@@ -52,20 +58,20 @@
 	        </form>
 		    <md-card-content ng-if="post.comments">
 		    	<md-divider></md-divider>
+		    	<md-button class="md-primary" ng-if="post.comments_count > post.comments.length">Previous comments</md-button>
 		    	<md-list>
-		    		<md-subheader class="md-no-sticky">Comments</md-subheader>
 		    		<md-list-item ng-repeat="comment in post.comments" class="md-3-line md-long-text">
 		    			<img src="/img/2Color-Favicon_512x512-1.png" class="md-avatar" alt="" ng-if="!comment.user.avatar_path">
 		    			<img ng-src="/user/avatar/{{comment.user_id}}" class="md-avatar" alt="" ng-if="comment.user.avatar_path">
 						<div class="md-list-item-text">
 							<h3>{{comment.user.name}}</h3>
 							<p>{{comment.message}}</p>
-							<span am-time-ago="comment.created_at"></span>
+							<span am-time-ago="comment.created_at" class="secondary-text"></span>
 						</div>
 		    		</md-list-item>
 		    	</md-list>
-		    	<md-button class="md-primary" ng-if="post.comments_count > post.comments.length">more comments</md-button>
 		    </md-card-content>
+		    <md-divider></md-divider>
 	    </md-card>
 	</div>
 </div>
