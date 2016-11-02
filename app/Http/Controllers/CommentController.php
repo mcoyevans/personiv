@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 
+use App\Post;
 use App\Comment;
 
 use Auth;
@@ -46,7 +47,7 @@ class CommentController extends Controller
             }
         }
 
-        $comments->orderBy('created_at');
+        $comments->orderBy('created_at', 'desc');
 
         if($request->has('first'))
         {
@@ -89,7 +90,29 @@ class CommentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $post = Post::find($request->id);
+
+        if($post->group_id && !$request->user()->super_admin)
+        {
+            $this->authorize('comment', $post);
+        }
+
+        $this->validate($request, [
+            'id' => 'required|numeric',
+            'new_comment' => 'required',
+        ]);
+
+        $comment = new Comment;
+
+        $comment->message = $request->new_comment;
+        $comment->post_id = $request->id;
+        $comment->user_id = $request->user()->id;
+
+        $comment->save();
+
+        $comment->load('user');
+
+        return $comment;
     }
 
     /**

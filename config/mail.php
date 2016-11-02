@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'driver' => env('MAIL_DRIVER', 'sparkpost'),
+    'driver' => env('MAIL_DRIVER', 'smtp'),
 
     /*
     |--------------------------------------------------------------------------
@@ -29,7 +29,7 @@ return [
     |
     */
 
-    'host' => env('MAIL_HOST', 'smtp.sparkpostmail.com'),
+    'host' => env('MAIL_HOST', 'mailtrap.io'),
 
     /*
     |--------------------------------------------------------------------------
@@ -42,7 +42,7 @@ return [
     |
     */
 
-    'port' => env('MAIL_PORT', 587),
+    'port' => env('MAIL_PORT', 2525),
 
     /*
     |--------------------------------------------------------------------------
@@ -56,8 +56,8 @@ return [
     */
 
     'from' => [
-        'address' => 'hello@example.com',
-        'name' => 'Example',
+        'address' => 'app@personiv.com',
+        'name' => 'Personiv',
     ],
 
     /*
@@ -71,7 +71,7 @@ return [
     |
     */
 
-    'encryption' => env('MAIL_ENCRYPTION', 'STARTTLS'),
+    'encryption' => env('MAIL_ENCRYPTION'),
 
     /*
     |--------------------------------------------------------------------------
@@ -84,7 +84,7 @@ return [
     |
     */
 
-    'username' => env('MAIL_USERNAME', 'SMTP_Injection'),
+    'username' => env('MAIL_USERNAME', '8c4a36d587047e'),
 
     /*
     |--------------------------------------------------------------------------
@@ -97,7 +97,7 @@ return [
     |
     */
 
-    'password' => env('MAIL_PASSWORD', '2556ce989d6e0f60e5d14cbbd6a0fa893097e1b9'),
+    'password' => env('MAIL_PASSWORD', 'e56ddf1d5dcb24'),
 
     /*
     |--------------------------------------------------------------------------

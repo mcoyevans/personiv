@@ -93,6 +93,7 @@ guest
 			$scope.post = {};
 			$scope.post.items = [];
 			$scope.toolbar.items = [];
+			$scope.currentTime = Date.now();
 
 			// 2 is default so the next page to be loaded will be page 2 
 			$scope.post.page = 2;

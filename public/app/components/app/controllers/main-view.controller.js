@@ -81,6 +81,20 @@ app
 		    angular.element('#upload').trigger('click');
 		};
 
+		$scope.markAllAsRead = function(){
+			Helper.post('/user/mark-all-as-read')
+				.success(function(){
+					$scope.user.unread_notifications = [];
+				})
+		}
+
+		var fetchUnreadNotifications = function(){
+			Helper.post('/user/check')
+	    		.success(function(data){
+	    			$scope.user = data;
+	    		});
+		}
+
 		Helper.post('/user/check')
 			.success(function(data){
 				var settings = false;
@@ -176,6 +190,7 @@ app
 				}
 
 				$scope.user = data;
+
 				$scope.currentTime = Date.now();
 
 				Helper.setAuthUser(data);
@@ -204,7 +219,28 @@ app
 					$scope.currentTime = Date.now();
 					$scope.photoUploader.queue = [];
 				}
+
+				var pusher = new Pusher('73a46f761ea4637481b5', {
+			      	encrypted: true,
+			      	auth: {
+					    headers: {
+					      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+					    }
+				  	}
+			    });
+
+				var channel = {};
+
+				channel.user = pusher.subscribe('private-App.User.' + $scope.user.id);
+
+				channel.user.bindings = [
+				 	channel.user.bind('Illuminate\\Notifications\\Events\\BroadcastNotificationCreated', function(data) {
+				    	console.log(data);
+				    	fetchUnreadNotifications();
+				    }),
+				];
 			})
+
 
 		$scope.fetchLinks = function(){		
 			Helper.get('/link')

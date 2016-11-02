@@ -8,11 +8,15 @@ use App\Http\Requests;
 
 use App\Post;
 use App\Hashtag;
+use App\User;
+
+use App\Notifications\PostCreated;
 
 use Auth;
 use Carbon\Carbon;
 use DB;
 use Gate;
+use Notification;
 use Storage;
 
 class PostController extends Controller
@@ -152,6 +156,8 @@ class PostController extends Controller
 
             $post->save();
 
+            $post->load('user');
+
             if($request->has('chips'))
             {
                 $hashtags = array();
@@ -175,6 +181,10 @@ class PostController extends Controller
 
                 $post->save();
             }
+
+            $users = $post->group_id ? User::where('group_id', $request->group_id)->get() : User::all();
+
+            Notification::send($users, new PostCreated($post));
         });
     }
 

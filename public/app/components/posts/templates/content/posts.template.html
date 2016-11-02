@@ -47,11 +47,7 @@
 	          	<p>
 	          		{{post.body}}
 	          	</p>
-	          	<md-chips ng-model="post.chips" name="hashTags" readonly="true">
-	          		<md-chip-template>
-	          			#{{$chip}}
-	          		</md-chip-template>
-	          	</md-chips>
+	          	<md-chips ng-model="post.chips" name="hashTags" readonly="true"></md-chips>
 	        </md-card-content>
 	        <md-card-actions layout="row" layout-align="start center" ng-if="post.allow_comments && user">
 	        	<md-card-icon-actions>
@@ -59,12 +55,53 @@
 		          		<md-icon class="mdi mdi-comment grey"></md-icon>
 		          	</md-button>
 		        </md-card-icon-actions>
-          		<md-button ng-if="post.comments_count" ng-click="fetchComments(post)">{{post.comments_count}} Comment <span ng-if="post.comments_count > 1">s</span></md-button>
+          		<md-button ng-if="post.comments_count" ng-click="fetchComments(post)">{{post.comments_count}} Comment<span ng-if="post.comments_count > 1">s</span></md-button>
 	        </md-card-actions>
 	        <md-card-content ng-if="!post.allow_comments">
 		        <em class="secondary-post">Comments are disabled for this post.</em>
 	        </md-card-content>
+	        <md-card-content ng-if="post.comments">
+		    	<md-divider></md-divider>
+		    	<md-button class="md-primary" ng-if="post.comments_count > post.comments.length" ng-click="previousComments(post)">Previous comments</md-button>
+		    	<md-list>
+		    		<md-list-item ng-repeat="comment in post.comments" class="md-3-line md-long-text" ng-mouseover="comment.options = true" ng-mouseout="comment.options = false">
+		    			<img src="/img/2Color-Favicon_512x512-1.png" class="md-avatar" alt="" ng-if="!comment.user.avatar_path">
+		    			<img ng-src="/user/avatar/{{comment.user_id}}" class="md-avatar" alt="" ng-if="comment.user.avatar_path">
+						<div class="md-list-item-text">
+							<h3>{{comment.user.name}}</h3>
+							<p>{{comment.message}}</p>
+							<span am-time-ago="comment.created_at" class="secondary-text"></span> | <span class="secondary-text">{{comment.created_at | date: 'MMMM dd, yyyy'}} at {{comment.created_at | date: 'hh:mma'}}</span>
+						</div>
+						<md-menu ng-show="comment.options" ng-if="user.id == comment.user_id">
+							<md-button aria-label="Menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+					            <md-icon class="mdi mdi-dots-vertical grey"></md-icon>
+					            <md-tooltip>Menu</md-tooltip>
+					        </md-button>
+
+					        <md-menu-content width="3">
+								<!-- Edit -->
+					            <md-menu-item>
+						            <md-button aria-label="Edit" ng-click="editComment(comment)" flex>
+						                Edit
+						            </md-button>
+					        	</md-menu-item>
+					        	<md-menu-item>
+						            <!-- Delete -->
+						            <md-button aria-label="Delete" ng-click="deleteComment(comment)" flex>
+						                Delete
+						            </md-button>
+					        	</md-menu-item>
+					        </md-menu-content>
+						</md-menu>
+						<md-button ng-show="comment.options" class="md-icon-button" ng-if="user.id == post.user_id && user.id != comment.user_id">
+							<md-icon class="mdi mdi-close grey"></md-icon>
+							<md-tooltip>Remove this</md-tooltip>
+						</md-button>
+		    		</md-list-item>
+		    	</md-list>
+		    </md-card-content>
 	        <form novalidate name="Comment{{$index}}" ng-if="post.allow_comments && user" hide-xs>
+				<md-subheader class="red-text md-no-sticky" ng-if="post.error">Oops! Something went wrong! An error occured. Please try again.</md-subheader>
 	        	<div layout="row" layout-align="start center" layout-padding flex>        		
 		        	<md-list>
 		        		<md-list-item>
@@ -76,25 +113,10 @@
 					    <textarea id="comment-{{post.id}}" ng-model="post.new_comment" type="text" placeholder="Write a comment..."></textarea>
 				    </md-input-container>
 					<md-button class="md-icon-button" type="submit" ng-click="submit(post)" ng-if="post.new_comment">
-						<md-icon id="submit-{{post.id}}" class="mdi mdi-send primary"></md-icon>
+						<md-icon class="mdi mdi-send primary"></md-icon>
 					</md-button>
 	        	</div>
 	        </form>
-		    <md-card-content ng-if="post.comments">
-		    	<md-divider></md-divider>
-		    	<md-button class="md-primary" ng-if="post.comments_count > post.comments.length">Previous comments</md-button>
-		    	<md-list>
-		    		<md-list-item ng-repeat="comment in post.comments" class="md-3-line md-long-text">
-		    			<img src="/img/2Color-Favicon_512x512-1.png" class="md-avatar" alt="" ng-if="!comment.user.avatar_path">
-		    			<img ng-src="/user/avatar/{{comment.user_id}}" class="md-avatar" alt="" ng-if="comment.user.avatar_path">
-						<div class="md-list-item-text">
-							<h3>{{comment.user.name}}</h3>
-							<p>{{comment.message}}</p>
-							<span am-time-ago="comment.created_at" class="secondary-text"></span>
-						</div>
-		    		</md-list-item>
-		    	</md-list>
-		    </md-card-content>
 		    <md-divider></md-divider>
 	    </md-card>
 	</div>

@@ -34,6 +34,18 @@ class PostPolicy
     }
 
     /**
+     * Determine whether the user can comment on the post.
+     *
+     * @param  App\User  $user
+     * @param  App\Post  $post
+     * @return mixed
+     */
+    public function comment(User $user, Post $post)
+    {
+        return $user->group_id == $post->group_id;
+    }
+
+    /**
      * Determine whether the user can update the post.
      *
      * @param  App\User  $user

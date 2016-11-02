@@ -36,6 +36,8 @@ Route::resource('role', 'RoleController');
 Route::resource('user', 'UserController');
 Route::resource('user-role', 'UserRoleController');
 
+Route::post('/pusher/auth', 'PusherController@auth');
+
 /* User Routes */
 Route::group(['prefix' => 'user'], function(){
 	Route::post('check', 'UserController@check');
@@ -44,6 +46,7 @@ Route::group(['prefix' => 'user'], function(){
 	Route::post('check-password', 'UserController@checkPassword');
 	Route::post('enlist', 'UserController@enlist');
 	Route::post('logout', 'UserController@logout');
+	Route::post('mark-all-as-read', 'UserController@markAllAsRead');
 	Route::post('upload-avatar/{userID}', 'UserController@uploadAvatar');
 	Route::get('avatar/{userID}', 'UserController@avatar');
 });

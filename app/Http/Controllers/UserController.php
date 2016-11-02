@@ -8,6 +8,7 @@ use App\Http\Requests;
 
 use App\User;
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Hash;
 use Gate;
@@ -15,6 +16,18 @@ use Storage;
 
 class UserController extends Controller
 {
+    /**
+     * Mark all notifications as read.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function markAllAsRead(Request $request)
+    {
+        $user = User::find($request->user()->id);
+
+        $user->unreadNotifications()->update(['read_at' => Carbon::now()]);
+    }
+
     /**
      * View user avatar and upload new avatar.
      *

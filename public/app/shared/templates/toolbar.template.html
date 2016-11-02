@@ -59,11 +59,11 @@
 					<div ng-repeat="notification in user.unread_notifications">
 						<md-list-item class="md-3-line secondary-button-padding" ng-mouseenter="hover = true" ng-mouseleave="hover = false" ng-click="notification.action(notification.id)">
 					        <h2 class="md-headline primary-bg md-avatar" layout="row" layout-align="center center">
-					            <span class="white-text">{{ notification.first_letter }}</span>
+					            <span class="white-text">{{ notification.data.sender.name.charAt(0).toUpperCase() }}</span>
 					        </h2>
 					        <div class="md-list-item-text">
-					            <h3>{{ notification.sender }}</h3>
-					            <h4>{{ notification.message }}</h4>
+					            <h3>{{ notification.data.sender.name }}</h3>
+					            <h4>{{ notification.data.message }}</h4>
 					            <p><span am-time-ago=" notification.created_at"></span></p>
 					        </div>
 					        <md-button class="md-secondary md-icon-button hide"  aria-label="Mark as read" ng-click="markAsRead(notification.id)" ng-class="{show:hover}">

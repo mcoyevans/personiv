@@ -263,6 +263,20 @@ app
 		    angular.element('#upload').trigger('click');
 		};
 
+		$scope.markAllAsRead = function(){
+			Helper.post('/user/mark-all-as-read')
+				.success(function(){
+					$scope.user.unread_notifications = [];
+				})
+		}
+
+		var fetchUnreadNotifications = function(){
+			Helper.post('/user/check')
+	    		.success(function(data){
+	    			$scope.user = data;
+	    		});
+		}
+
 		Helper.post('/user/check')
 			.success(function(data){
 				var settings = false;
@@ -358,6 +372,7 @@ app
 				}
 
 				$scope.user = data;
+
 				$scope.currentTime = Date.now();
 
 				Helper.setAuthUser(data);
@@ -386,7 +401,28 @@ app
 					$scope.currentTime = Date.now();
 					$scope.photoUploader.queue = [];
 				}
+
+				var pusher = new Pusher('73a46f761ea4637481b5', {
+			      	encrypted: true,
+			      	auth: {
+					    headers: {
+					      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+					    }
+				  	}
+			    });
+
+				var channel = {};
+
+				channel.user = pusher.subscribe('private-App.User.' + $scope.user.id);
+
+				channel.user.bindings = [
+				 	channel.user.bind('Illuminate\\Notifications\\Events\\BroadcastNotificationCreated', function(data) {
+				    	console.log(data);
+				    	fetchUnreadNotifications();
+				    }),
+				];
 			})
+
 
 		$scope.fetchLinks = function(){		
 			Helper.get('/link')
@@ -422,10 +458,6 @@ app
 	.controller('postsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
 		$scope.$emit('closeSidenav');
 
-		$scope.commentSection = function(post){
-		    angular.element('#comment-' + post.id).trigger('focus');
-		};
-
 		$scope.fetchComments = function(post){
 			if(!post.comments)
 			{
@@ -449,14 +481,77 @@ app
 
 				Helper.post('/comment/enlist', query)
 					.success(function(data){
-						post.comments = data.data;
+						post.comment_details = data;
+
+						post.comments = [];
+
+						angular.forEach(data.data, function(item){
+							item.created_at = new Date(item.created_at);
+							post.comments.unshift(item);
+						});
 					})
 			}
 		}
 
+		$scope.previousComments = function(post)
+		{
+			var next_page = post.comment_details.current_page + 1;
+			
+			if(next_page <= post.comment_details.last_page)
+			{
+				var query= {};
+
+				query.where = [
+					{
+						'label':'post_id',
+						'condition': '=',
+						'value': post.id
+					}
+				];
+
+				query.with = [
+					{
+						'relation':'user',
+						'withTrashed':true,
+					}
+				]
+				query.paginate = 10;
+
+				Helper.post('/comment/enlist?page=' + next_page, query)
+					.success(function(data){
+						post.comment_details = data;
+
+						angular.forEach(data.data, function(item){
+							item.created_at = new Date(item.created_at);
+							post.comments.unshift(item);
+						});
+					})
+			}
+
+		}
+
+		$scope.commentSection = function(post){
+		    angular.element('#comment-' + post.id).trigger('focus');
+		    $scope.fetchComments(post);
+		};
+
 		$scope.submit = function(post)
 		{
-			console.log(post);
+			if(post.new_comment)
+			{
+				$scope.fetchComments(post);
+
+				Helper.post('/comment', post)
+					.success(function(data){
+						data.created_at = new Date(data.created_at);
+						post.comments_count += 1;
+						post.comments.push(data);
+						post.new_comment = null;
+					})
+					.error(function(){
+						post.error = true;
+					})
+			}
 		}
 		/*
 		 * Object for toolbar
