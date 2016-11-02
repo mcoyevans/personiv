@@ -136,6 +136,7 @@ class PostController extends Controller
         $this->validate($request, [
             'title' => 'required',
             'body' => 'required',
+            'group_id' => 'required',
         ]);
 
 
@@ -146,7 +147,7 @@ class PostController extends Controller
             $post->body = $request->body;
             $post->pinned = $request->pinned ? true : false;
             $post->allow_comments = $request->allow_comments ? true : false;
-            $post->group_id = $request->group_id;
+            $post->group_id = $request->group_id == 'all' ? null : $request->group_id;
             $post->user_id = $request->user()->id;
 
             $post->save();
@@ -208,7 +209,61 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $this->authorize('update', Post::find($id));
+
+        $this->validate($request, [
+            'title' => 'required',
+            'body' => 'required',
+            'group_id' => 'required',
+        ]);
+
+
+        DB::transaction(function() use($request, $id){
+            $post = Post::find($id);
+
+            $post->title = $request->title;
+            $post->body = $request->body;
+            $post->pinned = $request->pinned ? true : false;
+            $post->allow_comments = $request->allow_comments ? true : false;
+            $post->group_id = $request->group_id == 'all' ? null : $request->group_id;
+
+            $post->save();
+
+            $hashtags = Hashtag::where('post_id', $id)->delete();
+
+            if($request->has('chips'))
+            {
+                $hashtags = array();
+
+                foreach ($request->chips as $item) {
+                    $hashtag = new Hashtag(['tag' => $item]);
+
+                    array_push($hashtags, $hashtag);
+                }
+
+                $post->hashtags()->saveMany($hashtags);
+            }
+
+            if(!$request->has('image_path'))
+            {
+                Storage::delete($post->image_path);
+
+                $post->image_path = null;
+
+                $post->save();
+            }
+
+            if($request->has('image_path') && $request->image_path != $post->image_path)
+            {
+                $post->image_path = 'posts/'. Carbon::now()->toDateString(). '-'. $post->id . '-'. str_random(16) . '.jpg';
+
+                Storage::copy($request->image_path, $post->image_path);
+
+                Storage::delete($request->image_path);
+
+                $post->save();
+            }
+        });
     }
 
     /**
@@ -219,6 +274,10 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $post = Post::find($id);
+
+        $this->authorize('delete', $post);
+
+        $post->delete();
     }
 }

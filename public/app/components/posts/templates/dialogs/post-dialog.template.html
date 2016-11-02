@@ -13,15 +13,16 @@
             <md-subheader class="red-text" ng-if="error">Oops! Something went wrong! An error occured. Please try again.</md-subheader>
             <div layout="row" layout-wrap flex>
                 <input id="post-upload" type="file" nv-file-select uploader="postPhotoUploader" style="display: none;" ng-if="!postPhotoUploader.queue.length">
-                <md-button class="md-icon-button" ng-click="clickUpload()" ng-if="!postPhotoUploader.queue.length">
+                <md-button class="md-icon-button" ng-click="clickUpload()" ng-if="!post.image_path">
                     <md-icon class="mdi mdi-camera grey"></md-icon>
                 </md-button>
                 <p ng-if="fileError" class="red-text">File must be an image and not larger than 10MB.</p>
             </div>
             <div layout="column">
-                <img ng-src="/temp-upload/{{temp_upload.id}}" ng-if="preview" class="thumb">
+                <img ng-src="/temp-upload/{{temp_upload.id}}?={{currentTime}}" ng-if="preview" class="thumb">
+                <img ng-src="/post/photo/{{post.id}}?={{currentTime}}" ng-if="post.image_path && !preview" class="thumb">
             </div>
-            <md-button ng-click="remove()" ng-if="preview">Remove</md-button>
+            <md-button ng-click="replace()" ng-if="post.image_path">Replace Photo</md-button>
             <div layout="row" layout-wrap flex>
                 <!-- Title -->
                 <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
@@ -58,13 +59,17 @@
                <md-switch class="md-primary" ng-model="post.allow_comments" flex-xs="100" flex-gt-sm>
                    Allow comments
                </md-switch>
-               <md-input-container flex>
+               <md-input-container flex ng-if="groups.length">
                     <label>Recepient</label>
-                    <md-select name="Group" ng-model="post.group_id" flex-xs="100" flex-gt-sm>
+                    <md-select name="Group" ng-model="post.group_id" flex-xs="100" flex-gt-sm required>
+                        <md-option value="all">All</md-option>
                         <md-option ng-repeat="group in groups" value="{{group.id}}">
                             {{group.name}}
                         </md-option>
                     </md-select>
+                    <div ng-messages="postForm.Group.$error" ng-if="postForm.Group.$touched">
+                        <div ng-message="required">Recepient is required.</div>
+                    </div>
                </md-input-container>
             </div>
         </md-dialog-content>

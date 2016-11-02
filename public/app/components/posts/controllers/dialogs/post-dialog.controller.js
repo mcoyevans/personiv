@@ -8,6 +8,7 @@ app
 			});
 
 		$scope.post = {};
+		$scope.post.group_id = 'all';
 		$scope.post.chips = [];
 
 		var uploader = {};
@@ -47,6 +48,8 @@ app
 
 		if($scope.config.action == 'edit')
 		{
+			$scope.currentTime = Date.now();
+			
 			var query = {};
 
 			query.with = [
@@ -64,6 +67,8 @@ app
 				}
 			];
 
+			query.first = true;
+
 			Helper.post('/post/enlist', query)
 				.success(function(data){
 					data.chips = [];
@@ -73,6 +78,7 @@ app
 					});
 
 					$scope.post = data;
+					$scope.post.group_id = data.group_id ? data.group_id : 'all';
 				})
 				.error(function(){
 					Helper.error();
@@ -102,6 +108,7 @@ app
 			if(response)
 			{
 				$scope.preview = true;
+				$scope.currentTime = Date.now();
 			}
 		}
 
@@ -110,11 +117,12 @@ app
 			Helper.error();
 		}
 
-		$scope.remove = function(){
-			$scope.post.image_path = null;
-			$scope.temp_upload = {};
-			$scope.preview = false;
+		$scope.replace = function(){
+			// $scope.post.image_path = null;
+			// $scope.temp_upload = {};
+			// $scope.preview = false;
 			$scope.postPhotoUploader.queue = [];
+			$scope.clickUpload();
 		}
 
 		$scope.cancel = function(){

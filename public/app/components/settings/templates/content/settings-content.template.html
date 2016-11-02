@@ -1,5 +1,5 @@
 <div infinite-scroll='model.paginateLoad()' infinite-scroll-distance="1" infinite-scroll-disabled="model.busy" infinite-scroll-parent ng-if="model.show">
-	<div ng-if="model.items.length" flex flex-gt-md="95">
+	<div ng-if="model.items.length" flex flex-gt-md="90">
 		<md-list>
 			<md-list-item class="md-3-line" ng-repeat="model in model.items | filter: toolbar.searchText | orderBy:sortType:sortReverse" ng-if="showInactive || !model.deleted_at">
 				<h2 class="md-avatar" ng-class="model.deleted_at ? 'red-bg': 'primary-bg'" layout="row" layout-align="center center">

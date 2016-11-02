@@ -15,9 +15,29 @@
 		            	</span>
 	            	</div>
 					<md-icon class="mdi mdi-star accent" ng-if="post.pinned"></md-icon>
+					<md-menu md-position-mode="target-right target" ng-if="user.id == post.user.id">
+						<md-button aria-label="Menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+				            <md-icon class="mdi mdi-dots-vertical grey"></md-icon>
+				            <md-tooltip>Menu</md-tooltip>
+				        </md-button>
+				        <md-menu-content width="3">
+							<!-- Edit -->
+				            <md-menu-item>
+					            <md-button aria-label="Edit" ng-click="updatePost(post)" flex>
+					                Edit
+					            </md-button>
+				        	</md-menu-item>
+				        	<md-menu-item>
+					            <!-- Delete -->
+					            <md-button aria-label="Delete" ng-click="deletePost(post)" flex>
+					                Delete
+					            </md-button>
+				        	</md-menu-item>
+				        </md-menu-content>
+					</md-menu>
 	          	</md-card-header-text>
 	        </md-card-header>
-	        <img ng-src="/post/photo/{{post.id}}" class="md-card-image" alt="{{post.title}} Photo" ng-if="post.image_path">
+	        <img ng-src="/post/photo/{{post.id}}?={{currentTime}}" class="md-card-image" alt="{{post.title}} Photo" ng-if="post.image_path">
 	        <md-card-title>
 	          	<md-card-title-text>
 	            	<span class="md-headline">{{post.title}}</span>
@@ -27,7 +47,11 @@
 	          	<p>
 	          		{{post.body}}
 	          	</p>
-	          	<md-chips ng-model="post.chips" name="hashTags" readonly="true"></md-chips>
+	          	<md-chips ng-model="post.chips" name="hashTags" readonly="true">
+	          		<md-chip-template>
+	          			#{{$chip}}
+	          		</md-chip-template>
+	          	</md-chips>
 	        </md-card-content>
 	        <md-card-actions layout="row" layout-align="start center" ng-if="post.allow_comments && user">
 	        	<md-card-icon-actions>
@@ -51,8 +75,8 @@
 		        	<md-input-container md-no-float class="md-block" flex>
 					    <textarea id="comment-{{post.id}}" ng-model="post.new_comment" type="text" placeholder="Write a comment..."></textarea>
 				    </md-input-container>
-					<md-button class="md-icon-button" type="submit" ng-click="submit(post)">
-						<md-icon id="submit-{{post.id}}" class="mdi mdi-send grey"></md-icon>
+					<md-button class="md-icon-button" type="submit" ng-click="submit(post)" ng-if="post.new_comment">
+						<md-icon id="submit-{{post.id}}" class="mdi mdi-send primary"></md-icon>
 					</md-button>
 	        	</div>
 	        </form>

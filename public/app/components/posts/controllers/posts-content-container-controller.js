@@ -4,7 +4,6 @@ app
 
 		$scope.commentSection = function(post){
 		    angular.element('#comment-' + post.id).trigger('focus');
-		    angular.element('#submit-' + post.id).addClass('primary');
 		};
 
 		$scope.fetchComments = function(post){
@@ -202,6 +201,7 @@ app
 		$scope.refresh = function(){
 			$scope.isLoading = true;
   			$scope.post.show = false;
+  			$scope.currentTime = Date.now();
 
   			$scope.init($scope.request);
 		};

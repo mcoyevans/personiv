@@ -86,8 +86,8 @@
 				        	Refresh
 				    	</md-button>
 			        </md-menu-item>
-					<md-menu-item>
-						<md-button aria-label="show inactive" ng-click="toolbar.toggleActive()" flex ng-if="toolbar.showInactive">
+					<md-menu-item ng-if="toolbar.showInactive">
+						<md-button aria-label="show inactive" ng-click="toolbar.toggleActive()" flex>
 		                    <div layout="row">
 		                        <span>Show inactive</span>
 		                        <span flex></span>
