@@ -25,9 +25,55 @@ guest
 
 				Helper.post('/comment/enlist', query)
 					.success(function(data){
-						post.comments = data.data;
+						post.comment_details = data;
+
+						post.comments = [];
+
+						angular.forEach(data.data, function(item){
+							item.created_at = new Date(item.created_at);
+							item.updated_at = new Date(item.updated_at);
+							post.comments.unshift(item);
+						});
 					})
 			}
+		}
+
+		$scope.previousComments = function(post)
+		{
+			var next_page = post.comment_details.current_page + 1;
+			
+			if(next_page <= post.comment_details.last_page)
+			{
+				var query= {};
+
+				query.where = [
+					{
+						'label':'post_id',
+						'condition': '=',
+						'value': post.id
+					}
+				];
+
+				query.with = [
+					{
+						'relation':'user',
+						'withTrashed':true,
+					}
+				]
+				query.paginate = 10;
+
+				Helper.post('/comment/enlist?page=' + next_page, query)
+					.success(function(data){
+						post.comment_details = data;
+
+						angular.forEach(data.data, function(item){
+							item.created_at = new Date(item.created_at);
+							item.updated_at = new Date(item.updated_at);
+							post.comments.unshift(item);
+						});
+					})
+			}
+
 		}
 
 		/*
@@ -63,6 +109,11 @@ guest
 			item.display = data.name;
 
 			$scope.toolbar.items.push(item);
+		}
+
+		$scope.searchHashTag = function(chip){
+			$scope.toolbar.searchText = chip;
+			$scope.$broadcast('open');
 		}
 
 		$scope.init = function(query){

@@ -296,7 +296,7 @@ app
 			$scope.toolbar.items.push(item);
 		}
 
-		$scope.test = function(chip){
+		$scope.searchHashTag = function(chip){
 			$scope.toolbar.searchText = chip;
 			$scope.$broadcast('open');
 		}
@@ -403,7 +403,7 @@ app
 				'order':'desc',
 			},
 			{
-				'column':'created_at',
+				'column':'updated_at',
 				'order':'desc',
 			},	
 		]

@@ -14,6 +14,7 @@ guest
 					},
 					'toolbar@wall': {
 						templateUrl: '/app/guest/templates/toolbar.template.html',
+						controller: 'wallToolbarController',
 					},
 					'content@wall':{
 						templateUrl: '/app/components/posts/templates/content/posts.template.html',

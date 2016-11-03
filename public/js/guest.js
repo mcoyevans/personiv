@@ -15,6 +15,7 @@ guest
 					},
 					'toolbar@wall': {
 						templateUrl: '/app/guest/templates/toolbar.template.html',
+						controller: 'wallToolbarController',
 					},
 					'content@wall':{
 						templateUrl: '/app/components/posts/templates/content/posts.template.html',
@@ -49,9 +50,55 @@ guest
 
 				Helper.post('/comment/enlist', query)
 					.success(function(data){
-						post.comments = data.data;
+						post.comment_details = data;
+
+						post.comments = [];
+
+						angular.forEach(data.data, function(item){
+							item.created_at = new Date(item.created_at);
+							item.updated_at = new Date(item.updated_at);
+							post.comments.unshift(item);
+						});
 					})
 			}
+		}
+
+		$scope.previousComments = function(post)
+		{
+			var next_page = post.comment_details.current_page + 1;
+			
+			if(next_page <= post.comment_details.last_page)
+			{
+				var query= {};
+
+				query.where = [
+					{
+						'label':'post_id',
+						'condition': '=',
+						'value': post.id
+					}
+				];
+
+				query.with = [
+					{
+						'relation':'user',
+						'withTrashed':true,
+					}
+				]
+				query.paginate = 10;
+
+				Helper.post('/comment/enlist?page=' + next_page, query)
+					.success(function(data){
+						post.comment_details = data;
+
+						angular.forEach(data.data, function(item){
+							item.created_at = new Date(item.created_at);
+							item.updated_at = new Date(item.updated_at);
+							post.comments.unshift(item);
+						});
+					})
+			}
+
 		}
 
 		/*
@@ -87,6 +134,11 @@ guest
 			item.display = data.name;
 
 			$scope.toolbar.items.push(item);
+		}
+
+		$scope.searchHashTag = function(chip){
+			$scope.toolbar.searchText = chip;
+			$scope.$broadcast('open');
 		}
 
 		$scope.init = function(query){
@@ -191,6 +243,63 @@ guest
 		$scope.$broadcast('close');
 
 		$scope.init($scope.request);
+	}]);
+guest
+	.controller('wallToolbarController', ['$scope', '$filter', function($scope, $filter){
+		$scope.toolbar.childState = 'Posts';
+
+		$scope.$on('close', function(){
+			$scope.hideSearchBar();
+		});
+
+		$scope.$on('open', function(){
+			$scope.showSearchBar();
+			$scope.searchUserInput();
+		});
+
+		$scope.toolbar.getItems = function(query){
+			var results = query ? $filter('filter')($scope.toolbar.items, query) : $scope.toolbar.items;
+			return results;
+		}
+
+		$scope.toolbar.searchAll = true;
+		/**
+		 * Reveals the search bar.
+		 *
+		*/
+		$scope.showSearchBar = function(){
+			// $scope.post.busy = true;
+			$scope.searchBar = true;
+		};
+
+		/**
+		 * Hides the search bar.
+		 *
+		*/
+		$scope.hideSearchBar = function(){
+			$scope.searchBar = false;
+			$scope.toolbar.searchText = '';
+			$scope.toolbar.searchItem = '';
+			/* Cancels the paginate when the user sent a query */
+			if($scope.searched){
+				// $scope.post.page = 1;
+				// $scope.post.no_matches = false;
+				// $scope.post.items = [];
+				$scope.searched = false;
+				$scope.$emit('refresh');
+			}
+		};
+
+		$scope.searchUserInput = function(){
+			$scope.$emit('search');
+			$scope.searched = true;
+		};
+
+		$scope.toolbar.options = true;
+		
+		$scope.toolbar.refresh = function(){
+			$scope.$emit('refresh');
+		}
 	}]);
 guest
 	.controller('wallViewController', ['$scope', '$mdMedia', '$mdDialog', '$mdSidenav', '$mdToast', 'Helper', function($scope, $mdMedia, $mdDialog, $mdSidenav, $mdToast, Helper){

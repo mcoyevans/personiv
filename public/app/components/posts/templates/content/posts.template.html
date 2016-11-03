@@ -48,14 +48,14 @@
 	          		{{post.body}}
 	          	</p>
 	          	<md-chips ng-model="post.chips" name="hashTags" readonly="true">
-	          		<md-chip-template ng-click="test($chip)">
+	          		<md-chip-template ng-click="searchHashTag($chip)">
 	          			{{$chip}}
 	          		</md-chip-template>
 	          	</md-chips>
 	        </md-card-content>
-	        <md-card-actions layout="row" layout-align="start center" ng-if="post.allow_comments && user">
+	        <md-card-actions layout="row" layout-align="start center" ng-if="post.allow_comments">
 	        	<md-card-icon-actions>
-		          	<md-button class="md-icon-button" ng-click="commentSection(post)">
+		          	<md-button class="md-icon-button" ng-click="commentSection(post)" ng-if="user">
 		          		<md-icon class="mdi mdi-comment grey"></md-icon>
 		          	</md-button>
 		        </md-card-icon-actions>
