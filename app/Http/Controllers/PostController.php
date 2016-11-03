@@ -48,6 +48,11 @@ class PostController extends Controller
                 {
                     $posts->with($request->input('with')[$i]['relation']);
                 }
+                else{
+                    $posts->with([$request->input('with')[$i]['relation'] => function($query){ 
+                        $query->withTrashed();
+                    }]);
+                }
             }
         }
 
@@ -89,6 +94,13 @@ class PostController extends Controller
             for ($i=0; $i < count($request->orderBy); $i++) { 
                 $posts->orderBy($request->input('orderBy')[$i]['column'], $request->input('orderBy')[$i]['order']);
             }
+        }
+
+        if($request->has('search'))
+        {
+            $posts->where('title', 'like', '%'. $request->search .'%')->orWhere('body', 'like', '%'. $request->search .'%')->orWhereHas('hashtags', function($query) use ($request){
+                $query->where('tag', $request->search);
+            });
         }
 
         if($request->has('first'))
@@ -182,7 +194,7 @@ class PostController extends Controller
                 $post->save();
             }
 
-            $users = $post->group_id ? User::where('group_id', $request->group_id)->get() : User::all();
+            $users = $post->group_id ? User::whereNotIn('id', [$request->user()->id])->where('group_id', $post->group_id)->get() : User::whereNotIn('id', [$request->user()->id])->get();
 
             Notification::send($users, new PostCreated($post));
         });

@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\User;
 use App\Post;
+use App\Comment;
 
 use App\Policies\PostPolicy;
+use App\Policies\CommentPolicy;
 
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -20,6 +22,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         // 'App\Model' => 'App\Policies\ModelPolicy',
         'App\Post' => 'App\Policies\PostPolicy',
+        'App\Comment' => 'App\Policies\CommentPolicy',
     ];
 
     /**
@@ -125,5 +128,9 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('upload-avatar', function($user, $id){
             return $user->id == $id;
         });
+
+        Gate::define('read-notification', function($user, $notifiable_id){
+            return $user->id == $notifiable_id;
+        });        
     }
 }

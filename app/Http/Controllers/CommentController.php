@@ -9,10 +9,13 @@ use App\Http\Requests;
 use App\Post;
 use App\Comment;
 
+use App\Notifications\CommentCreated;
+
 use Auth;
 use Carbon\Carbon;
 use DB;
 use Gate;
+use Notification;
 
 class CommentController extends Controller
 {
@@ -104,13 +107,22 @@ class CommentController extends Controller
 
         $comment = new Comment;
 
-        $comment->message = $request->new_comment;
-        $comment->post_id = $request->id;
-        $comment->user_id = $request->user()->id;
+        DB::transaction(function() use($request, $post, $comment){
+            $comment->message = $request->new_comment;
+            $comment->post_id = $request->id;
+            $comment->user_id = $request->user()->id;
 
-        $comment->save();
+            $comment->save();
 
-        $comment->load('user');
+            $comment->load('user');
+
+            if($post->user_id != $request->user()->id)
+            {
+                $post->load('user');
+
+                $post->user->notify(new CommentCreated($comment));
+            }
+        });
 
         return $comment;
     }
@@ -146,7 +158,21 @@ class CommentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $this->authorize('update', Comment::find($id));
+
+        $this->validate($request, [
+            'new_message' => 'required',
+        ]);
+
+        $comment = Comment::where('id', $id)->first();
+
+        DB::transaction(function() use($request, $comment){
+            $comment->message = $request->new_message;
+
+            $comment->save();
+        });
+
+        return $comment;
     }
 
     /**
@@ -157,6 +183,10 @@ class CommentController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $comment = Comment::with('post')->where('id', $id)->first();
+
+        $this->authorize('delete', $comment);
+
+        $comment->delete();
     }
 }

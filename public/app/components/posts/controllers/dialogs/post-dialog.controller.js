@@ -79,6 +79,8 @@ app
 
 					$scope.post = data;
 					$scope.post.group_id = data.group_id ? data.group_id : 'all';
+					$scope.post.pinned = data.pinned ? true : false;
+					$scope.post.allow_comments = data.allow_comments ? true : false;
 				})
 				.error(function(){
 					Helper.error();

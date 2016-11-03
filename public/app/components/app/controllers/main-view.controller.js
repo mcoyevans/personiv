@@ -235,11 +235,64 @@ app
 
 				channel.user.bindings = [
 				 	channel.user.bind('Illuminate\\Notifications\\Events\\BroadcastNotificationCreated', function(data) {
-				    	console.log(data);
-				    	fetchUnreadNotifications();
+				 		// formating the notification
+				 		data.created_at = data.attachment.created_at;
+
+				 		data.data = {};
+				 		data.data.attachment = data.attachment;
+				 		data.data.url = data.url;
+				 		data.data.withParams = data.withParams;
+				 		data.data.sender = data.sender;
+				 		data.data.message = data.message;
+
+				 		// pushes the new notification in the unread_notifications array
+				 		$scope.$apply(function(){
+					    	$scope.user.unread_notifications.unshift(data);
+				 		});
+
+				 		// notify the user with a toast message
+				 		Helper.notify(data.sender.name + ' ' + data.message);
 				    }),
 				];
 			})
+
+		$scope.markAsRead = function(notification){
+			Helper.post('/user/mark-as-read', notification)
+				.success(function(){
+					var index = $scope.user.unread_notifications.indexOf(notification);
+
+					$scope.user.unread_notifications.splice(index, 1);
+				})
+				.error(function(){
+					Helper.error();
+				});
+		}
+
+		$scope.read = function(notification){
+			console.log(notification);
+
+			if(notification.data.withParams)
+			{
+				$state.go(notification.data.url, {'id':notification.data.attachment.id});
+			}
+			else{
+				$state.go(notification.data.url);
+				
+				if(notification.type == 'App\\Notifications\\PostCreated')
+				{
+					Helper.set(notification.data.attachment.id);
+					$scope.$broadcast('read-post');
+				}
+				else if(notification.type == 'App\\Notifications\\CommentCreated')
+				{
+					Helper.set(notification.data.attachment.post_id);
+					$scope.$broadcast('read-post-and-comments');
+				}
+
+			}
+
+			$scope.markAsRead(notification);
+		}
 
 
 		$scope.fetchLinks = function(){		

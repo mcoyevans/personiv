@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 
 use App\User;
+use App\Notification;
+
 use Auth;
 use Carbon\Carbon;
 use DB;
@@ -16,6 +18,21 @@ use Storage;
 
 class UserController extends Controller
 {
+    /**
+     * Mark notifications as read.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function markAsRead(Request $request)
+    {
+        if(!Gate::forUser($request->user())->allows('read-notification', Notification::find($request->id)->notifiable_id))
+        {
+            abort(403, 'Unauthorized action.');
+        }
+
+        Notification::where('id', $request->id)->update(['read_at' => Carbon::now()]);
+    }
+
     /**
      * Mark all notifications as read.
      *

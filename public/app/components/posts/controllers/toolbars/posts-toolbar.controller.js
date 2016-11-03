@@ -6,6 +6,11 @@ app
 			$scope.hideSearchBar();
 		});
 
+		$scope.$on('open', function(){
+			$scope.showSearchBar();
+			$scope.searchUserInput();
+		});
+
 		$scope.toolbar.getItems = function(query){
 			var results = query ? $filter('filter')($scope.toolbar.items, query) : $scope.toolbar.items;
 			return results;

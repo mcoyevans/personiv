@@ -7,9 +7,9 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-use App\Post;
+use App\Comment;
 
-class PostCreated extends Notification
+class CommentCreated extends Notification
 {
     use Queueable;
 
@@ -18,9 +18,9 @@ class PostCreated extends Notification
      *
      * @return void
      */
-    public function __construct(Post $post)
+    public function __construct(Comment $comment)
     {
-        $this->post = $post;
+        $this->comment = $comment;
     }
 
     /**
@@ -43,11 +43,9 @@ class PostCreated extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->subject('New Post!')
-            ->greeting('Hey there!')        
-            ->line($this->post->user->name. ' created a new post at Personiv portal.')
-            ->action('View Post', 'http://localhost:91/')
-            ->line('Thank you for using our application!');
+                    ->line('The introduction to the notification.')
+                    ->action('Notification Action', 'https://laravel.com')
+                    ->line('Thank you for using our application!');
     }
 
     /**
@@ -59,9 +57,9 @@ class PostCreated extends Notification
     public function toArray($notifiable)
     {
         return [
-            'attachment' => $this->post,
-            'sender' => $this->post->user,
-            'message' => 'created a new post.',
+            'attachment' => $this->comment,
+            'sender' => $this->comment->user,
+            'message' => 'commented on your post.',
             'url' => 'main',
             'withParams' => false,
         ];

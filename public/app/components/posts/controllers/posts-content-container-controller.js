@@ -31,6 +31,7 @@ app
 
 						angular.forEach(data.data, function(item){
 							item.created_at = new Date(item.created_at);
+							item.updated_at = new Date(item.updated_at);
 							post.comments.unshift(item);
 						});
 					})
@@ -67,6 +68,7 @@ app
 
 						angular.forEach(data.data, function(item){
 							item.created_at = new Date(item.created_at);
+							item.updated_at = new Date(item.updated_at);
 							post.comments.unshift(item);
 						});
 					})
@@ -81,18 +83,23 @@ app
 
 		$scope.submit = function(post)
 		{
+			$scope.busy = true;
 			if(post.new_comment)
 			{
 				$scope.fetchComments(post);
 
 				Helper.post('/comment', post)
 					.success(function(data){
+						post.error = false;
 						data.created_at = new Date(data.created_at);
 						post.comments_count += 1;
 						post.comments.push(data);
 						post.new_comment = null;
+
+						$scope.busy = false;
 					})
 					.error(function(){
+						$scope.busy = false;
 						post.error = true;
 					})
 			}
@@ -144,6 +151,38 @@ app
 			$scope.refresh();
 		});
 
+		$scope.$on('read-post', function(){
+			$scope.request.where = [
+				{
+					'label':'id',
+					'condition':'=',
+					'value': Helper.fetch()
+				}
+			];
+
+			$scope.isLoading = true;
+  			$scope.post.show = false;
+  			$scope.currentTime = Date.now();
+
+			$scope.init($scope.request);
+		});
+
+		$scope.$on('read-post-and-comments', function(){
+			$scope.request.where = [
+				{
+					'label':'id',
+					'condition':'=',
+					'value': Helper.fetch()
+				}
+			];
+
+			$scope.isLoading = true;
+  			$scope.post.show = false;
+  			$scope.currentTime = Date.now();
+
+			$scope.init($scope.request, true);
+		});
+
 		$scope.updatePost = function(data){
 			var dialog = {
 				'template':'/app/components/posts/templates/dialogs/post-dialog.template.html',
@@ -185,6 +224,62 @@ app
 				})
 		}
 
+		$scope.editComment = function(comment, post){
+			angular.forEach(post.comments, function(item){
+				item.edit = false;
+			});
+
+			comment.edit = true;
+
+			comment.new_message = comment.message;
+		}
+
+		$scope.updateComment = function(comment){
+			$scope.busy = true;
+
+			Helper.put('/comment/' + comment.id, comment)
+				.success(function(data){
+					data.updated_at = new Date(data.updated_at);
+					comment.message = data.message;
+					comment.error = false;
+					comment.edit = false;
+					
+					$scope.busy = false;
+
+					Helper.notify('Comment updated.');
+				})
+				.error(function(){
+					$scope.busy = false;
+					comment.error = true;
+				});			
+		}
+
+		$scope.deleteComment = function(comment, post){
+			var dialog = {};
+			dialog.title = 'Delete';
+			dialog.message = 'Delete this comment?'
+			dialog.ok = 'Delete';
+			dialog.cancel = 'Cancel';
+
+			Helper.confirm(dialog)
+				.then(function(){
+					Helper.delete('/comment/' + comment.id)
+						.success(function(){
+							var index = post.comments.indexOf(comment);
+
+							post.comments.splice(index, 1);
+							post.comments_count--;
+
+							Helper.notify('Comment deleted.');
+						})
+						.error(function(){
+							Helper.error();
+						});
+				}, function(){
+					return;
+				})
+		}
+
 		/* Formats every data in the paginated call */
 		var pushItem = function(data){
 			data.created_at = new Date(data.created_at);
@@ -196,12 +291,17 @@ app
 			
 			var item = {};
 
-			item.display = data.name;
+			item.display = data.title;
 
 			$scope.toolbar.items.push(item);
 		}
 
-		$scope.init = function(query){
+		$scope.test = function(chip){
+			$scope.toolbar.searchText = chip;
+			$scope.$broadcast('open');
+		}
+
+		$scope.init = function(query, withComments){
 			$scope.post = {};
 			$scope.post.items = [];
 			$scope.toolbar.items = [];
@@ -221,6 +321,10 @@ app
 						// iterate over each record and set the format
 						angular.forEach(data.data, function(item){
 							pushItem(item);
+
+							if(withComments){
+								$scope.fetchComments(item);
+							}
 						});
 					}
 
@@ -261,6 +365,7 @@ app
 			$scope.isLoading = true;
   			$scope.post.show = false;
   			$scope.currentTime = Date.now();
+			$scope.request.where = null;
 
   			$scope.init($scope.request);
 		};
@@ -273,13 +378,18 @@ app
 		$scope.request.with = [
 			{
 				'relation':'user',
-				'withTrashed': false,
+				'withTrashed': true,
 			},
 			{
 				'relation':'hashtags',
 				'withTrashed': false,	
 			},
+			{
+				'relation':'group',
+				'withTrashed': true,	
+			},
 		];
+
 		$scope.request.withCount = [
 			{
 				'relation':'comments',
