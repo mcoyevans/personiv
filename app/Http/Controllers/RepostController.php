@@ -61,6 +61,20 @@ class RepostController extends Controller
             }
         }
 
+        if($request->has('where'))
+        {
+            for ($i=0; $i < count($request->where); $i++) { 
+                $reposts->where($request->input('where')[$i]['label'], $request->input('where')[$i]['condition'], $request->input('where')[$i]['value']);
+            }
+        }
+
+        if($request->has('orderBy'))
+        {
+            for ($i=0; $i < count($request->orderBy); $i++) { 
+                $reposts->orderBy($request->input('orderBy')[$i]['column'], $request->input('orderBy')[$i]['order']);
+            }
+        }
+
         if($request->has('first'))
         {
             return $reposts->first();

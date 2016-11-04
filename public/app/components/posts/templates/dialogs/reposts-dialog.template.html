@@ -1,0 +1,26 @@
+<md-dialog aria-label="Reposts Form"  flex flex-gt-sm="35" ng-cloak>
+    <md-toolbar >
+        <div class="md-toolbar-tools">
+            <h2 class="white-text">People who repost this</h2>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="cancel()">
+                <md-icon class="mdi mdi-close" aria-label="Close dialog"></md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+    <md-dialog-content flex layout-padding layout-wrap>
+        <div infinite-scroll='repost.paginateLoad()' infinite-scroll-distance="1" infinite-scroll-disabled="repost.busy" infinite-scroll-parent ng-if="repost.show" layout="row">
+            <md-list>
+                <md-list-item class="md-2-line" ng-repeat="repost in repost.items">
+                    <img ng-src="/user/avatar/{{repost.post.user.id}}" alt="avatar" class="md-avatar" ng-if="repost.post.user.avatar_path">
+                    <img src="/img/2Color-Favicon_512x512-1.png" class="md-avatar" alt="" ng-if="!repost.post.user.avatar_path">
+                    <div class="md-list-item-text">
+                        <h3>{{repost.post.user.name}} - {{repost.post.user.position}}</h3>
+                        <p><span am-time-ago="repost.created_at"></span> | {{repost.created_at | date: 'EEEE, MMM. dd, yyyy'}} at {{repost.created_at | date: 'hh:mma'}}</p>
+                    </div>
+                </md-list-item>
+            </md-list>
+        </div>
+        
+    </md-dialog-content>
+</md-dialog>

@@ -107,7 +107,7 @@
 		          	</md-button>
 		        </md-card-icon-actions>
           		<md-button ng-if="post.comments_count" ng-click="fetchComments(post)">{{post.comments_count}} Comment<span ng-if="post.comments_count > 1">s</span></md-button>
-          		<md-button ng-if="post.reposts_count">{{post.reposts_count}} Repost<span ng-if="post.reposts_count > 1">s</span></md-button>
+          		<md-button ng-if="post.reposts_count" ng-click="viewReposts(post)">{{post.reposts_count}} Repost<span ng-if="post.reposts_count > 1">s</span></md-button>
 	        </md-card-actions>
 	        <md-card-content ng-if="!post.allow_comments">
 		        <em class="secondary-post">Comments are disabled for this post.</em>

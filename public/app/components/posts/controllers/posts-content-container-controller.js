@@ -14,6 +14,17 @@ app
 				$scope.current_user = data;
 			});
 
+		$scope.viewReposts = function(post){
+			var dialog = {
+				'template':'/app/components/posts/templates/dialogs/reposts-dialog.template.html',
+				'controller': 'repostsDialogController',
+			}
+
+			Helper.set(post);
+
+			Helper.customDialog(dialog);
+		}
+
 		$scope.fetchComments = function(post){
 			if(!post.comments)
 			{
