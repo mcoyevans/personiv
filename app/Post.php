@@ -30,4 +30,14 @@ class Post extends Model
     {
         return $this->belongsTo('App\User');
     }
+
+    public function repost()
+    {
+        return $this->belongsTo('App\Repost');
+    }
+
+    public function reposts()
+    {
+        return $this->hasMany('App\Repost');
+    }
 }

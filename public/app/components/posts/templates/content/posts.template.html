@@ -1,5 +1,5 @@
 <div infinite-scroll='post.paginateLoad()' infinite-scroll-distance="1" infinite-scroll-disabled="post.busy" infinite-scroll-parent ng-if="post.show" layout="row" layout-align="center start">
-	<div layout="column" layout-align="center center" layout-margin flex flex-gt-sm="50">
+	<div layout="column" layout-align="center center" layout-margin flex flex-gt-sm="60" flex-gt-lg="50">
 		<md-card ng-repeat="post in post.items | filter: toolbar.searchText | orderBy:sortType:sortReverse" layout-fill>
 			<md-card-header>
 	          	<md-card-avatar>
@@ -8,7 +8,16 @@
 	          	</md-card-avatar>
 	          	<md-card-header-text layout="row">
 	            	<div layout="column" flex>            		
-		            	<span class="md-title"><span class="primary-text">{{post.user.name}} - {{post.user.position}}</span> <md-icon class="mdi mdi-chevron-right grey" ng-if="post.group_id"></md-icon> {{post.group.name}}</span> 
+		            	<span class="md-title">
+		            		<span class="primary-text">{{post.user.name}} - {{post.user.position}}</span> 
+		            		<span ng-if="post.repost_id">reposted <span ng-if="post.user_id == post.repost.post.user_id">own</span>
+			            		<span ng-if="post.user_id != post.repost.post.user_id">
+			            			<span class="primary-text">{{post.repost.post.user.name}}</span>'s
+			            		</span> post.
+		            		</span>
+		            		<md-icon class="mdi mdi-chevron-right grey" ng-if="post.group_id"></md-icon> 
+		            		<span>{{post.group.name}}</span>
+		            	</span> 
 		            	<span class="md-subhead">
 		            		<span am-time-ago="post.created_at"></span>
 		            		<span hide-xs hide-sm> | {{post.created_at | date: 'EEEE, MMM. dd, yyyy,'}} at {{post.created_at | date: 'hh:mma'}}</span>
@@ -47,19 +56,58 @@
 	          	<p>
 	          		{{post.body}}
 	          	</p>
+	          	<md-card ng-if="post.repost_id">
+	          		<md-card-header>
+			          	<md-card-avatar>
+			            	<img ng-src="/user/avatar/{{post.repost.post.user.id}}" alt="avatar" class="md-user-avatar" ng-if="post.repost.post.user.avatar_path">
+			            	<img src="/img/2Color-Favicon_512x512-1.png" class="md-user-avatar" alt="" ng-if="!post.repost.post.user.avatar_path">
+			          	</md-card-avatar>
+			          	<md-card-header-text layout="row">
+			            	<div layout="column" flex>            		
+				            	<span class="md-title"><span class="primary-text">{{post.repost.post.user.name}} - {{post.repost.post.user.position}}</span> <md-icon class="mdi mdi-chevron-right grey" ng-if="post.repost.post.group_id"></md-icon> {{post.repost.post.group.name}}</span> 
+				            	<span class="md-subhead">
+				            		<span am-time-ago="post.repost.post.created_at"></span>
+				            		<span hide-xs hide-sm> | {{post.repost.post.created_at | date: 'EEEE, MMM. dd, yyyy,'}} at {{post.repost.post.created_at | date: 'hh:mma'}}</span>
+				            	</span>
+			            	</div>
+			          	</md-card-header-text>
+			        </md-card-header>
+			        <img ng-src="/post/photo/{{post.repost.post.id}}?={{currentTime}}" class="md-card-image" alt="{{post.repost.post.title}} Photo" ng-if="post.repost.post.image_path">
+			        <md-card-title>
+			          	<md-card-title-text>
+			            	<span class="md-headline">{{post.repost.post.title}}</span>
+			          	</md-card-title-text>
+			        </md-card-title>
+			        <md-card-content>
+			          	<p>
+			          		{{post.repost.post.body}}
+			          	</p>
+			          	<md-chips ng-model="post.repost.post.chips" name="hashTags" readonly="true">
+			          		<md-chip-template ng-click="searchHashTag($chip)">
+			          			{{$chip}}
+			          		</md-chip-template>
+			          	</md-chips>
+		          	</md-card-content>
+	          	</md-card>
 	          	<md-chips ng-model="post.chips" name="hashTags" readonly="true">
 	          		<md-chip-template ng-click="searchHashTag($chip)">
 	          			{{$chip}}
 	          		</md-chip-template>
 	          	</md-chips>
 	        </md-card-content>
-	        <md-card-actions layout="row" layout-align="start center" ng-if="post.allow_comments">
+	        <md-card-actions layout="row" layout-align="start center">
 	        	<md-card-icon-actions>
-		          	<md-button class="md-icon-button" ng-click="commentSection(post)" ng-if="user">
+		          	<md-button ng-click="commentSection(post)" ng-if="user && post.allow_comments">
 		          		<md-icon class="mdi mdi-comment grey"></md-icon>
+		          		<span>Comment</span>
+		          	</md-button>
+		          	<md-button ng-click="repost(post)" ng-if="current_user.can_post">
+		          		<md-icon class="mdi mdi-share grey"></md-icon>
+		          		<span>Repost</span>
 		          	</md-button>
 		        </md-card-icon-actions>
           		<md-button ng-if="post.comments_count" ng-click="fetchComments(post)">{{post.comments_count}} Comment<span ng-if="post.comments_count > 1">s</span></md-button>
+          		<md-button ng-if="post.reposts_count">{{post.reposts_count}} Repost<span ng-if="post.reposts_count > 1">s</span></md-button>
 	        </md-card-actions>
 	        <md-card-content ng-if="!post.allow_comments">
 		        <em class="secondary-post">Comments are disabled for this post.</em>

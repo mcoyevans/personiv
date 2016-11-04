@@ -123,6 +123,18 @@ guest
 		/* Formats every data in the paginated call */
 		var pushItem = function(data){
 			data.created_at = new Date(data.created_at);
+
+			if(data.repost_id)
+			{
+				data.repost.post.created_at = new Date(data.repost.post.created_at);
+
+				data.repost.post.chips = [];
+
+				angular.forEach(data.repost.post.hashtags, function(hashtag){
+					data.repost.post.chips.push(hashtag.tag);
+				});
+			}
+			
 			data.chips = [];
 
 			angular.forEach(data.hashtags, function(hashtag){
@@ -131,7 +143,7 @@ guest
 			
 			var item = {};
 
-			item.display = data.name;
+			item.display = data.title;
 
 			$scope.toolbar.items.push(item);
 		}
@@ -215,6 +227,10 @@ guest
 			},
 			{
 				'relation':'hashtags',
+				'withTrashed': false,	
+			},
+			{
+				'relation':'repost.post',
 				'withTrashed': false,	
 			},
 		];

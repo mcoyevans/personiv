@@ -101,7 +101,11 @@ app
 				var settings_menu = [];
 
 				angular.forEach(data.roles, function(role){
-					if(role.name == 'approvals')
+					if(role.name == 'posts')
+					{
+						data.can_post = true;
+					}
+					else if(role.name == 'approvals')
 					{
 						var item = {
 							'state': 'main.approvals',
@@ -278,7 +282,7 @@ app
 			else{
 				$state.go(notification.data.url);
 				
-				if(notification.type == 'App\\Notifications\\PostCreated')
+				if(notification.type == 'App\\Notifications\\PostCreated' || notification.type == 'App\\Notifications\\RepostCreated')
 				{
 					Helper.set(notification.data.attachment.id);
 					$scope.$broadcast('read-post');
@@ -288,7 +292,6 @@ app
 					Helper.set(notification.data.attachment.post_id);
 					$scope.$broadcast('read-post-and-comments');
 				}
-
 			}
 
 			$scope.markAsRead(notification);

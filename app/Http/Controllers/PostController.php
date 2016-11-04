@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 
 use App\Post;
+use App\Repost;
 use App\Hashtag;
 use App\User;
 
@@ -32,6 +33,7 @@ class PostController extends Controller
 
         return response()->file(storage_path() .'/app/'. $post->image_path);
     }
+
     /**
      * Display a listing of the resource with parameters.
      *
@@ -44,6 +46,23 @@ class PostController extends Controller
         if($request->has('with'))
         {
             for ($i=0; $i < count($request->with); $i++) { 
+                if($request->input('with')[$i]['relation'] == 'repost.post')
+                {
+                    $posts->with([$request->input('with')[$i]['relation'] => function($query){
+                        $query->with('hashtags');
+                        
+                        $query->with(['user' => function($query){
+                            $query->withTrashed();
+                        }]);
+
+                        $query->with(['group' => function($query){
+                            $query->withTrashed();
+                        }]);
+                    }]);
+                    
+                    continue;
+                }
+
                 if(!$request->input('with')[$i]['withTrashed'])
                 {
                     $posts->with($request->input('with')[$i]['relation']);
@@ -208,7 +227,7 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        //
+        return Post::withTrashed()->where('id', $id)->first();
     }
 
     /**
@@ -296,9 +315,14 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        $post = Post::find($id);
+        $post = Post::with('repost')->where('id', $id)->first();
 
         $this->authorize('delete', $post);
+
+        if($post->repost_id)
+        {
+            Repost::where('id', $post->repost_id)->delete();
+        }    
 
         $post->delete();
     }

@@ -31,6 +31,7 @@ Route::resource('location', 'LocationController');
 Route::resource('post', 'PostController');
 Route::resource('temp-upload', 'TempUploadController');
 Route::resource('reservation', 'ReservationController');
+Route::resource('repost', 'RepostController');
 Route::resource('reservation-equipment', 'ReservationEquipmentController');
 Route::resource('role', 'RoleController');
 Route::resource('user', 'UserController');
@@ -104,7 +105,13 @@ Route::group(['prefix' => 'comment'], function(){
 	Route::post('enlist', 'CommentController@enlist');
 });
 
+/* Temp Upload */
 Route::group(['prefix' => 'temp-upload'], function(){
 	Route::post('upload-photo', 'TempUploadController@uploadPhoto');
 	Route::post('cancel-upload', 'TempUploadController@cancelUpload');
+});
+
+/* Repost */
+Route::group(['prefix' => 'repost'], function(){
+	Route::post('enlist', 'RepostController@enlist');
 });

@@ -2,6 +2,18 @@ app
 	.controller('postsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
 		$scope.$emit('closeSidenav');
 
+		Helper.post('/user/check')
+			.success(function(data){
+				angular.forEach(data.roles, function(role){
+					if(role.name == 'posts')
+					{
+						data.can_post = true;
+					}
+				});
+
+				$scope.current_user = data;
+			});
+
 		$scope.fetchComments = function(post){
 			if(!post.comments)
 			{
@@ -74,6 +86,46 @@ app
 					})
 			}
 
+		}
+
+		$scope.repost = function(post){
+			if(!post.repost_id)
+			{			
+				var dialog = {
+					'template':'/app/components/posts/templates/dialogs/repost-dialog.template.html',
+					'controller': 'repostDialogController',
+				}
+
+				post.action = 'create';
+
+				Helper.set(post);
+
+				Helper.customDialog(dialog)
+					.then(function(){
+						Helper.notify('Repost successful.');
+						$scope.refresh();
+					}, function(){
+						return;
+					});
+			}
+			else{
+				var dialog = {
+					'template':'/app/components/posts/templates/dialogs/repost-dialog.template.html',
+					'controller': 'repostDialogController',
+				}
+
+				post.repost.post.action = 'create';
+
+				Helper.set(post.repost.post);
+
+				Helper.customDialog(dialog)
+					.then(function(){
+						Helper.notify('Repost successful.');
+						$scope.refresh();
+					}, function(){
+						return;
+					});
+			}
 		}
 
 		$scope.commentSection = function(post){
@@ -184,22 +236,43 @@ app
 		});
 
 		$scope.updatePost = function(data){
-			var dialog = {
-				'template':'/app/components/posts/templates/dialogs/post-dialog.template.html',
-				'controller': 'postDialogController',
+			if(!data.repost_id)
+			{			
+				var dialog = {
+					'template':'/app/components/posts/templates/dialogs/post-dialog.template.html',
+					'controller': 'postDialogController',
+				}
+
+				data.action = 'edit';
+
+				Helper.set(data);
+
+				Helper.customDialog(dialog)
+					.then(function(){
+						$scope.refresh();
+						Helper.notify('Post updated.');
+					}, function(){
+						return;
+					});
 			}
+			else{
+				var dialog = {
+					'template':'/app/components/posts/templates/dialogs/repost-dialog.template.html',
+					'controller': 'repostDialogController',
+				}
 
-			data.action = 'edit';
+				data.action = 'edit';
 
-			Helper.set(data);
+				Helper.set(data);
 
-			Helper.customDialog(dialog)
-				.then(function(){
-					$scope.refresh();
-					Helper.notify('Post updated.');
-				}, function(){
-					return;
-				});
+				Helper.customDialog(dialog)
+					.then(function(){
+						Helper.notify('Repost updated.');
+						$scope.refresh();
+					}, function(){
+						return;
+					});
+			}
 		}
 
 		$scope.deletePost = function(data){
@@ -283,6 +356,18 @@ app
 		/* Formats every data in the paginated call */
 		var pushItem = function(data){
 			data.created_at = new Date(data.created_at);
+
+			if(data.repost_id)
+			{
+				data.repost.post.created_at = new Date(data.repost.post.created_at);
+
+				data.repost.post.chips = [];
+
+				angular.forEach(data.repost.post.hashtags, function(hashtag){
+					data.repost.post.chips.push(hashtag.tag);
+				});
+			}
+			
 			data.chips = [];
 
 			angular.forEach(data.hashtags, function(hashtag){
@@ -315,7 +400,7 @@ app
 					$scope.post.items = data.data;
 					$scope.post.show = true;
 
-					$scope.fab.show = true;
+					$scope.fab.show = $scope.user.can_post ? true : false;
 
 					if(data.data.length){
 						// iterate over each record and set the format
@@ -388,13 +473,21 @@ app
 				'relation':'group',
 				'withTrashed': true,	
 			},
+			{
+				'relation':'repost.post',
+				'withTrashed': false,	
+			},
 		];
 
 		$scope.request.withCount = [
 			{
 				'relation':'comments',
 				'withTrashed': false,
-			}
+			},
+			{
+				'relation':'reposts',
+				'withTrashed': false,
+			}			
 		]	
 
 		$scope.request.orderBy = [
@@ -405,7 +498,7 @@ app
 			{
 				'column':'updated_at',
 				'order':'desc',
-			},	
+			},
 		]
 
 		$scope.isLoading = true;

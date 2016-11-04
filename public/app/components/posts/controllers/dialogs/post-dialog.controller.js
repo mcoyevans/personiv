@@ -2,10 +2,16 @@ app
 	.controller('postDialogController', ['$scope', 'Helper', 'FileUploader', function($scope, Helper, FileUploader){
 		$scope.config = Helper.fetch();
 
-		Helper.get('/group')
+		var query = {};
+
+		query.self_group = true;
+
+		Helper.post('/group/enlist', query)
 			.success(function(data){
 				$scope.groups = data;
 			});
+
+		$scope.repost = {};
 
 		$scope.post = {};
 		$scope.post.group_id = 'all';

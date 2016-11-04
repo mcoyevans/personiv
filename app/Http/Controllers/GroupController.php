@@ -68,6 +68,11 @@ class GroupController extends Controller
             }
         }
 
+        if($request->self_group && !$request->user()->super_admin)
+        {
+            $groups->where('id', $request->user()->group_id);
+        }
+
         if($request->has('search'))
         {
             $groups->where('name', 'like', '%'.$request->search.'%');
