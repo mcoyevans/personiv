@@ -115,3 +115,8 @@ Route::group(['prefix' => 'temp-upload'], function(){
 Route::group(['prefix' => 'repost'], function(){
 	Route::post('enlist', 'RepostController@enlist');
 });
+
+/* Reservation */
+Route::group(['prefix' => 'reservation'], function(){
+	Route::post('enlist', 'ReservationController@enlist');
+});

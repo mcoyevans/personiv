@@ -24,6 +24,29 @@ app
 					}
 				}
 			})
+			.state('main.reservations', {
+				url: 'reservations',
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'reservationsContentContainerController',
+					},
+					'toolbar@main.reservations': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'reservationsToolbarController',
+					},
+					'subheader@main.reservations': {
+						templateUrl: '/app/components/reservations/templates/subheaders/reservations-subheader.template.html',
+						controller: 'reservationsSubheaderController',
+					},
+					'left-sidenav@main.reservations': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.reservations':{
+						templateUrl: '/app/components/reservations/templates/content/reservations-content.template.html',
+					}
+				}
+			})
 			.state('main.equipments', {
 				url: 'settings/equipments',
 				resolve:{

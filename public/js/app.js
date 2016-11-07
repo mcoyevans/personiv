@@ -25,6 +25,29 @@ app
 					}
 				}
 			})
+			.state('main.reservations', {
+				url: 'reservations',
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'reservationsContentContainerController',
+					},
+					'toolbar@main.reservations': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'reservationsToolbarController',
+					},
+					'subheader@main.reservations': {
+						templateUrl: '/app/components/reservations/templates/subheaders/reservations-subheader.template.html',
+						controller: 'reservationsSubheaderController',
+					},
+					'left-sidenav@main.reservations': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.reservations':{
+						templateUrl: '/app/components/reservations/templates/content/reservations-content.template.html',
+					}
+				}
+			})
 			.state('main.equipments', {
 				url: 'settings/equipments',
 				resolve:{
@@ -1028,6 +1051,142 @@ app
 		$scope.$broadcast('close');
 
 		$scope.init($scope.request);
+	}]);
+app
+	.controller('reservationsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
+		$scope.$emit('closeSidenav');
+
+		/*
+		 * Object for toolbar
+		 *
+		*/
+		$scope.toolbar = {};
+
+		$scope.toolbar.toggleActive = function(){
+			$scope.showInactive = !$scope.showInactive;
+		}
+		$scope.toolbar.sortBy = function(filter){
+			filter.sortReverse = !filter.sortReverse;			
+			$scope.sortType = filter.type;
+			$scope.sortReverse = filter.sortReverse;
+		}
+
+		/*
+		 * Object for subheader
+		 *
+		*/
+		$scope.subheader = {};
+		$scope.subheader.show = true;
+		
+		$scope.subheader.all = {};
+		$scope.subheader.all.label = 'All';
+		
+		$scope.subheader.all.request = {
+			'withTrashed':false,
+		}
+		
+		$scope.subheader.all.fab = {
+			'template':'/app/components/settings/templates/dialogs/reservation-dialog.template.html',
+			'controller': 'reservationDialogController',
+			'action':'create',
+			'message': 'Reservation created',
+			'location_id': location.id,
+		}
+
+		/*
+		 * Object for fab
+		 *
+		*/
+		$scope.fab = {};
+		$scope.fab.icon = 'mdi-plus';
+
+		/* Action originates from subheader */
+		$scope.$on('setInit', function(){
+			$scope.isLoading = true;
+			$scope.$broadcast('close');
+			$scope.showInactive = false;
+			
+			var current = Helper.fetch();
+
+			if(current)
+			{
+				$scope.subheader.current = current;
+				$scope.init(current);
+			}
+			else{
+				$scope.subheader.current = $scope.subheader.all;
+				$scope.init($scope.subheader.all);
+			}
+		});
+
+		/* Action originates from toolbar */
+		$scope.$on('search', function(){
+			$scope.subheader.current.request.search = $scope.toolbar.searchText;
+			$scope.refresh();
+			$scope.showInactive = true;
+		});
+
+		/* Listens for any request for refresh */
+		$scope.$on('refresh', function(){
+			$scope.subheader.current.request.search = null;
+			$scope.$broadcast('close');
+			$scope.refresh();
+		});
+
+		/* Formats every data in the paginated call */
+		var pushItem = function(data){
+			data.deleted_at =  data.deleted_at ? new Date(data.deleted_at) : null;
+			data.created_at = new Date(data.created_at);
+			data.start = new Date(data.start);
+			data.end = new Date(data.end);
+
+			var item = {};
+
+			item.display = data.asset_tag;
+			item.brand = data.brand;
+			item.model = data.model;
+
+			$scope.toolbar.items.push(item);
+		}
+
+		$scope.init = function(query, refresh){
+			$scope.reservation = {};
+			$scope.toolbar.items = [];
+
+			Helper.post('/reservation/enlist', query.request)
+				.success(function(data){
+					$scope.reservation.items = data.data;
+					$scope.reservation.show = true;
+
+					$scope.fab.label = query.label;
+					$scope.fab.action = function(){
+						Helper.set(query.fab);
+
+						Helper.customDialog(query.fab)
+							.then(function(){
+								Helper.notify(query.fab.message);
+								$scope.refresh();
+							}, function(){
+								return;
+							});
+					}
+					$scope.fab.show = true;
+
+					if(data.length){
+						// iterate over each record and set the format
+						angular.forEach(data.data, function(item){
+							pushItem(item);
+						});
+					}
+				});
+		}
+
+		$scope.refresh = function(){
+			$scope.isLoading = true;
+  			$scope.reservation.show = false;
+
+  			$scope.init($scope.subheader.current);
+		};
 	}]);
 app
 	.controller('equipmentsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
@@ -2498,6 +2657,121 @@ app
 
 		$scope.toolbar.options = true;
 		
+		$scope.toolbar.refresh = function(){
+			$scope.$emit('refresh');
+		}
+	}]);
+app
+	.controller('reservationsSubheaderController', ['$scope', 'Helper', function($scope, Helper){
+		var setInit = function(data){
+			if(data){
+				Helper.set(data);
+
+				$scope.current_tab = data;
+			}
+			else {
+				$scope.current_tab = $scope.subheader.all;
+			}
+
+			console.log($scope.current_tab);
+
+			$scope.$emit('setInit');
+		}
+
+		$scope.subheader.all.action = function(){
+			setInit();
+		}
+
+		$scope.init = function(){
+			Helper.get('/location')
+				.success(function(data){
+					$scope.locations = data;
+					$scope.subheader.navs = [];
+					
+					angular.forEach($scope.locations, function(location){
+						var item = {};
+
+						item.id = location.id;
+						item.label = location.name;
+						item.request = {
+							'withTrashed': false,
+							'where': [
+								{
+									'label':'location_id',
+									'condition':'=',
+									'value': location.id,
+								},
+							],
+						}
+						item.fab = {
+							'template':'/app/components/settings/templates/dialogs/reservation-dialog.template.html',
+							'controller': 'reservationDialogController',
+							'action':'create',
+							'message': 'Reservation created',
+							'location_id': location.id,
+						}
+						item.action = function(current){
+							setInit(current);
+						}
+
+						$scope.subheader.navs.push(item);
+					});
+
+					setInit();
+				})
+		}
+
+		$scope.init();
+	}]);
+app
+	.controller('reservationsToolbarController', ['$scope', '$filter', function($scope, $filter){
+		$scope.toolbar.childState = 'Reservations';
+
+		$scope.$on('close', function(){
+			$scope.hideSearchBar();
+		});
+
+		$scope.toolbar.getItems = function(query){
+			var results = query ? $filter('filter')($scope.toolbar.items, query) : $scope.toolbar.items;
+			return results;
+		}
+
+		$scope.toolbar.searchAll = true;
+		/**
+		 * Reveals the search bar.
+		 *
+		*/
+		$scope.showSearchBar = function(){
+			$scope.reservation.busy = true;
+			$scope.searchBar = true;
+		};
+
+		/**
+		 * Hides the search bar.
+		 *
+		*/
+		$scope.hideSearchBar = function(){
+			$scope.searchBar = false;
+			$scope.toolbar.searchText = '';
+			$scope.toolbar.searchItem = '';
+			/* Cancels the paginate when the user sent a query */
+			if($scope.searched){
+				$scope.reservation.page = 1;
+				$scope.reservation.no_matches = false;
+				$scope.reservation.items = [];
+				$scope.searched = false;
+				$scope.$emit('refresh');
+			}
+		};
+
+		$scope.searchUserInput = function(){
+			$scope.$emit('search');
+			$scope.searched = true;
+		};
+
+		$scope.toolbar.options = true;
+		$scope.toolbar.showInactive = true;
+
 		$scope.toolbar.refresh = function(){
 			$scope.$emit('refresh');
 		}

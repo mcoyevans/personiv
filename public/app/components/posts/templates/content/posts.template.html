@@ -99,11 +99,11 @@
 	        	<md-card-icon-actions>
 		          	<md-button ng-click="commentSection(post)" ng-if="user && post.allow_comments">
 		          		<md-icon class="mdi mdi-comment grey"></md-icon>
-		          		<span>Comment</span>
+		          		<span hide-xs>Comment</span>
 		          	</md-button>
 		          	<md-button ng-click="repost(post)" ng-if="current_user.can_post">
 		          		<md-icon class="mdi mdi-share grey"></md-icon>
-		          		<span>Repost</span>
+		          		<span hide-xs>Repost</span>
 		          	</md-button>
 		        </md-card-icon-actions>
           		<md-button ng-if="post.comments_count" ng-click="fetchComments(post)">{{post.comments_count}} Comment<span ng-if="post.comments_count > 1">s</span></md-button>
