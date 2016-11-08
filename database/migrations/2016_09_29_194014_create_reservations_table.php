@@ -16,12 +16,14 @@ class CreateReservationsTable extends Migration
         Schema::create('reservations', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
-            $table->string('event');
+            $table->string('title');
             $table->integer('location_id')->unsigned();
-            $table->dateTime('start');
-            $table->dateTime('end');
             $table->integer('user_id')->unsigned();
-            $table->boolean('approved');
+            $table->timestamp('start');
+            $table->timestamp('end')->nullable();
+            $table->boolean('allDay');
+            $table->boolean('approved_schedule');
+            $table->boolean('approved_equipments');
             $table->timestamps();
             $table->softDeletes();
         });

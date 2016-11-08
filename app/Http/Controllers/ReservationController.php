@@ -28,6 +28,21 @@ class ReservationController extends Controller
         {
             $reservations->withTrashed();
         }
+
+        if($request->has('with'))
+        {
+            for ($i=0; $i < count($request->with); $i++) { 
+                if(!$request->input('with')[$i]['withTrashed'])
+                {
+                    $reservations->with($request->input('with')[$i]['relation']);
+                }
+                else{
+                    $reservations->with([$request->input('with')[$i]['relation'] => function($query){ 
+                        $query->withTrashed();
+                    }]);
+                }
+            }
+        }
         
         if($request->has('where'))
         {
@@ -36,6 +51,14 @@ class ReservationController extends Controller
             }
         }
         
+        if($request->has('whereBetween'))
+        {
+            $reservations->whereBetween($request->input('whereBetween.label'), [Carbon::parse($request->input('whereBetween.start')), Carbon::parse($request->input('whereBetween.end'))->addDay()]);   
+        }
+        else{
+            $reservations->whereBetween('start', [Carbon::parse('first day of this month'), Carbon::parse('first day of next month')]);   
+        }
+
         if($request->has('paginate'))
         {
             return $reservations->paginate($request->paginate);

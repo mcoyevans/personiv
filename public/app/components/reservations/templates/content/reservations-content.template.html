@@ -1,0 +1,15 @@
+<div layout="row" layout-align="center start">
+	<div layout="column" layout-align="center center" layout-margin flex flex-gt-sm="70">
+		<div layout-padding>
+			<md-radio-group ng-model="calendarType" ng-change="changeView(calendarType)" layout="row">
+				<md-radio-button value="agendaDay" class="md-primary">Day</md-radio-button>
+				<md-radio-button value="agendaWeek" class="md-primary">Week</md-radio-button>
+				<md-radio-button value="month" class="md-primary">Month</md-radio-button>
+			</md-radio-group>
+			<div ui-calendar="uiConfig.calendar" ng-model="eventSources" calendar="reservationCalendar" flex></div> 
+			<md-subheader class="md-no-sticky">
+				Reservations
+			</md-subheader>
+		</div>
+	</div>
+</div>

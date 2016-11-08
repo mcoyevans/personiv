@@ -292,6 +292,9 @@ md-content.dirty-white {
   width: 200px;
   max-width: 200px; }
 
+.fc-event-container {
+  cursor: pointer; }
+
 /* transition duration */
 .transition, .fade-transition, .main-view {
   -webkit-transition: all 0.3s cubic-bezier(0.55, 0, 0.55, 0.2);
