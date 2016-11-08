@@ -1,4 +1,4 @@
-<md-dialog aria-label="Post Form"  flex flex-gt-sm="35" ng-cloak>
+<md-dialog aria-label="Post Form"  flex flex-gt-sm="40" ng-cloak>
 	<md-toolbar>
         <div class="md-toolbar-tools">
             <h2 class="white-text">{{reservation.title}}</h2>
@@ -9,6 +9,27 @@
         </div>
     </md-toolbar>
     <md-dialog-content flex layout-padding layout-wrap>
-        
+        <md-list>
+        	<md-list-item class="md-3-line">
+        		<div class="md-list-item-text">
+        			<h3>
+						{{reservation.user.name}} - {{reservation.user.position}}
+        			</h3>
+        			<h4>
+						{{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} at {{reservation.start | date: 'hh:mma'}}
+        				<span ng-if="!reservation.allDay"> to {{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at {{reservation.end | date: 'hh:mma'}}</span>
+        			</h4>
+        			<p>
+        				<strong>Remarks: </strong>
+        				<span>{{reservation.remarks}}</span>
+        				<br>
+        				<strong ng-if="reservation.equipments.length">Reserved equipments:</strong>
+						<ul ng-if="reservation.equipments.length">
+							<li ng-repeat="reservation_equipment in reservation.equipments">{{reservation_equipment.equipment.brand}} {{reservation_equipment.equipment.model}}</li>
+						</ul>
+        			</p>
+        		</div>
+        	</md-list-item>
+        </md-list>
     </md-dialog-content>
 </md-dialog>

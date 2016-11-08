@@ -33,6 +33,9 @@ app
 
 		Helper.post('/reservation/enlist', request)
 			.success(function(data){
+				data.start = new Date(data.start);
+				data.end = data.end ? new Date(data.end) : null;
+
 				$scope.reservation = data;
 			})
 			.error(function(){

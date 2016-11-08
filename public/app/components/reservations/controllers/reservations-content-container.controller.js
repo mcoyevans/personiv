@@ -49,7 +49,7 @@ app
 		*/
 		$scope.uiConfig = {
 		    calendar: {
-		    	// height: 450,
+		    	height: 500,
 		        editable: false,
 		        header:{
 		          	left: 'title',
@@ -60,12 +60,12 @@ app
 		        eventDrop: $scope.alertOnDrop,
 		        eventResize: $scope.alertOnResize,
 		        viewRender: function(date) {
-		            var dateRange = {};
+		            $scope.dateRange = {};
 
-		            dateRange.start = new Date(date.start._d).toDateString();
-		            dateRange.end = new Date(date.end._d).toDateString();
+		            $scope.dateRange.start = new Date(date.start._d).toDateString();
+		            $scope.dateRange.end = new Date(date.end._d).toDateString();
 
-		            Helper.set(dateRange);
+		            Helper.set($scope.dateRange);
 
 		            $scope.$broadcast('dateRange');
 
@@ -92,7 +92,7 @@ app
 			var current = Helper.fetch();
 
 			$scope.subheader.current = current;
-			// $scope.init(current);
+			$scope.init(current);
 		});
 
 		/* Action originates from toolbar */
@@ -144,6 +144,10 @@ app
 
 					$scope.refresh = function(){
 						$scope.isLoading = true;
+
+						Helper.set($scope.dateRange);
+
+			            $scope.$broadcast('dateRange');
 
 			  			$scope.init($scope.subheader.current);
 					};

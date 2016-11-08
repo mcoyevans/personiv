@@ -14,6 +14,7 @@ class ReservationsTableSeeder extends Seeder
         DB::table('reservations')->insert([
         	[
         		'title' => 'All day reservation',
+                'remarks' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nesciunt quis consequuntur quasi odio voluptates molestias, placeat, esse cum repellat provident praesentium molestiae quod, aperiam dolor ducimus illum. Molestiae, hic, unde.',
         		'location_id' => 1,
         		'start' => Carbon\Carbon::today(),
         		'end' => null,
@@ -26,6 +27,7 @@ class ReservationsTableSeeder extends Seeder
         	],
         	[
         		'title' => '1 Hour reservation',
+                'remarks' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nesciunt quis consequuntur quasi odio voluptates molestias, placeat, esse cum repellat provident praesentium molestiae quod, aperiam dolor ducimus illum. Molestiae, hic, unde.',
         		'location_id' => 2,
         		'start' => Carbon\Carbon::now(),
         		'end' => Carbon\Carbon::now()->addHour(),

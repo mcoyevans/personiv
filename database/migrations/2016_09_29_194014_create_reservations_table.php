@@ -17,6 +17,7 @@ class CreateReservationsTable extends Migration
             $table->engine = 'InnoDB';
             $table->increments('id');
             $table->string('title');
+            $table->text('remarks')->nullable();
             $table->integer('location_id')->unsigned();
             $table->integer('user_id')->unsigned();
             $table->timestamp('start');

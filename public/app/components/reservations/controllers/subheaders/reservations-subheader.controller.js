@@ -34,7 +34,12 @@ app
 			],
 			'where':[
 				{
-					'label':'approved',
+					'label':'approved_schedule',
+					'condition': '=',
+					'value': true,
+				},
+				{
+					'label':'approved_equipments',
 					'condition': '=',
 					'value': true,
 				},
@@ -91,7 +96,12 @@ app
 									'value': location.id,
 								},
 								{
-									'label':'approved',
+									'label':'approved_schedule',
+									'condition': '=',
+									'value': true,
+								},
+								{
+									'label':'approved_equipments',
 									'condition': '=',
 									'value': true,
 								},
