@@ -1,0 +1,88 @@
+<md-dialog aria-label="Reservation Form"  flex flex-gt-sm="50" ng-cloak>
+    <form name="reservationForm">
+        <md-toolbar >
+            <div class="md-toolbar-tools">
+                <h2 class="white-text">Reservation</h2>
+                <span flex></span>
+                <md-button class="md-icon-button" ng-click="cancel()">
+                    <md-icon class="mdi mdi-close" aria-label="Close dialog"></md-icon>
+                </md-button>
+            </div>
+        </md-toolbar>
+        <md-dialog-content flex layout-padding layout-wrap>
+            <md-subheader class="red-text" ng-if="error">Oops! Something went wrong! An error occured. Please try again.</md-subheader>
+            <div layout="row" layout-wrap flex>
+                <!-- Title -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Title</label>
+                    <input type="text" name="Title" required ng-model="reservation.title" ng-disabled="busy">
+                    <div ng-messages="reservationForm.Title.$error" ng-if="reservationForm.Title.$touched">
+                        <div ng-message="required">Title is required.</div>
+                    </div>
+                </md-input-container>
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Location</label>
+                    <md-select name="Location" ng-model="reservation.location_id" required ng-disabled="busy">
+                        <md-option ng-repeat="location in locations | orderBy:'name'" value="{{location.id}}">{{location.name}}</md-option>
+                    </md-select>
+                    <div ng-messages="reservationForm.Location.$error" ng-if="reservationForm.Location.$touched">
+                        <div ng-message="required">Location is required.</div>
+                    </div>
+                </md-input-container>
+            </div>
+            <!-- Start -->
+            <div layout="row" layout-wrap flex>
+                <div layout="column" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <h4>Date Start</h4>
+                    <md-datepicker name="DateStart" ng-model="reservation.date_start" md-placeholder="Enter date" md-min-date="min_start_date" ng-change="setDateStart()"></md-datepicker>
+                    <div class="validation-messages" ng-messages="reservationForm.DateStart.$error">
+                        <div ng-message="valid">The entered value is not a date!</div>
+                        <div ng-message="required">Date start is required!</div>
+                        <div ng-message="mindate">Date cannot be earlier than today</div>
+                    </div>
+                </div>
+                <div layout="column" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <h4>Time Start</h4>
+                    <div uib-timepicker ng-model="reservation.time_start" ng-change="timeStartChanged()" hour-step="1" minute-step="1" show-meridian="true" min="min_start_time"></div>
+                </div>
+            </div>
+            <!-- End -->
+            <div layout="row" layout-wrap flex ng-if="!reservation.allDay">
+                <div layout="column" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <h4>Date End</h4>
+                    <md-datepicker name="DateEnd" ng-model="reservation.date_end" md-placeholder="Enter date" md-min-date="reservation.date_start" ng-change="setDateEnd()"></md-datepicker>
+                    <div class="validation-messages" ng-messages="reservationForm.DateEnd.$error">
+                        <div ng-message="valid">The entered value is not a date!</div>
+                        <div ng-message="required">Date end is required!</div>
+                        <div ng-message="mindate">Date cannot be earlier than today</div>
+                    </div>
+                </div>
+                <div layout="column" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <h4>Time End</h4>
+                    <div uib-timepicker ng-model="reservation.time_end" ng-change="timeEndChanged()" hour-step="1" minute-step="1" show-meridian="true" min="min_end_time"></div>
+                    <div class="red-text" ng-if="reservation.time_end < reservation.time_start">Time end cannot be earlier than time start.</div>
+                </div>
+            </div>
+            <md-switch class="md-primary" ng-model="reservation.allDay">All Day</md-switch>
+            <div layout="row" layout-wrap flex>
+                <!-- Remarks -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Remarks</label>
+                    <textarea name="Remarks" ng-model="reservation.body" ng-disabled="busy"></textarea>
+                </md-input-container>
+            </div>
+            <md-subheader>Equipments</md-subheader>
+            <div layout="row" flex ng-if="!count">
+                <md-checkbox ng-repeat="equipment_type in equipment_types" ng-model="reservation.equipments[$index]" ng-if="equipment_type.equipments.length" aria-label="{{equipment_type.name}}" ng-true-value="{{equipment_type}}" ng-false-value="null" flex class="md-primary" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    {{equipment_type.name}}
+                </md-checkbox>
+            </div>        
+        </md-dialog-content>
+    </form>
+    <div layout="row" layout-align="end center">   
+        <md-button ng-if="!busy" class="md-primary" aria-label="Submit" ng-click="submit()">
+            Submit
+        </md-button>
+        <md-progress-circular ng-if="busy" md-mode="indeterminate" class="md-primary" md-diameter="60"></md-progress-circular>
+    </div>
+</md-dialog>

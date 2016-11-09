@@ -19,6 +19,7 @@ class CreateReservationEquipmentsTable extends Migration
             $table->integer('reservation_id')->unsigned();
             $table->integer('equipment_id')->unsigned();
             $table->boolean('approved');
+            $table->timestamps();
         });
     }
 

@@ -16,6 +16,16 @@ class Reservation extends Model
     	return $this->belongsTo('App\User');
     }
 
+    public function schedule_approver()
+    {
+        return $this->belongsTo('App\User', 'schedule_approver_id');
+    }
+
+    public function equipment_approver()
+    {
+        return $this->belongsTo('App\User', 'equipment_approver_id');
+    }    
+
     public function equipments()
     {
     	return $this->belongsToMany('App\Equipment', 'reservation_equipments');

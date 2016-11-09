@@ -20,11 +20,11 @@ class CreateReservationsTable extends Migration
             $table->text('remarks')->nullable();
             $table->integer('location_id')->unsigned();
             $table->integer('user_id')->unsigned();
+            $table->integer('schedule_approver_id')->unsigned()->nullable();
+            $table->integer('equipment_approver_id')->unsigned()->nullable();
             $table->timestamp('start');
             $table->timestamp('end')->nullable();
             $table->boolean('allDay');
-            $table->boolean('approved_schedule');
-            $table->boolean('approved_equipments');
             $table->timestamps();
             $table->softDeletes();
         });

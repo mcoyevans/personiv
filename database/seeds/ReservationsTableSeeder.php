@@ -20,8 +20,8 @@ class ReservationsTableSeeder extends Seeder
         		'end' => null,
         		'user_id' => 1,
         		'allDay' => true,
-                'approved_schedule' => true,
-        		'approved_equipments' => true,
+                'schedule_approver_id' => 2,
+        		'equipment_approver_id' => 1,
         		'created_at' => Carbon\Carbon::now(),
         		'updated_at' => Carbon\Carbon::now()
         	],
@@ -33,11 +33,37 @@ class ReservationsTableSeeder extends Seeder
         		'end' => Carbon\Carbon::now()->addHour(),
         		'user_id' => 1,
         		'allDay' => false,
-                'approved_schedule' => true,
-        		'approved_equipments' => true,
+                'schedule_approver_id' => 2,
+        		'equipment_approver_id' => 1,
         		'created_at' => Carbon\Carbon::now(),
         		'updated_at' => Carbon\Carbon::now()
-        	]
+        	],
+            [
+                'title' => 'Pending reservation',
+                'remarks' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nesciunt quis consequuntur quasi odio voluptates molestias, placeat, esse cum repellat provident praesentium molestiae quod, aperiam dolor ducimus illum. Molestiae, hic, unde.',
+                'location_id' => 3,
+                'start' => Carbon\Carbon::now(),
+                'end' => Carbon\Carbon::now()->addHour(),
+                'user_id' => 1,
+                'allDay' => false,
+                'schedule_approver_id' => null,
+                'equipment_approver_id' => null,
+                'created_at' => Carbon\Carbon::now(),
+                'updated_at' => Carbon\Carbon::now()
+            ],
+            [
+                'title' => 'Pending reservation',
+                'remarks' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nesciunt quis consequuntur quasi odio voluptates molestias, placeat, esse cum repellat provident praesentium molestiae quod, aperiam dolor ducimus illum. Molestiae, hic, unde.',
+                'location_id' => 3,
+                'start' => Carbon\Carbon::now(),
+                'end' => Carbon\Carbon::now()->addHour(),
+                'user_id' => 1,
+                'allDay' => false,
+                'schedule_approver_id' => null,
+                'equipment_approver_id' => null,
+                'created_at' => Carbon\Carbon::now(),
+                'updated_at' => Carbon\Carbon::now()
+            ],
         ]);
     }
 }

@@ -13,11 +13,10 @@ app
 		$scope.subheader.all.label = 'All';
 		
 		$scope.subheader.all.fab = {
-			'template':'/app/components/settings/templates/dialogs/reservation-dialog.template.html',
+			'template':'/app/components/reservations/templates/dialogs/reservation-dialog.template.html',
 			'controller': 'reservationDialogController',
 			'action':'create',
 			'message': 'Reservation created',
-			'location_id': location.id,
 		}
 
 		$scope.subheader.all.request = {
@@ -31,17 +30,13 @@ app
 					'relation':'user',
 					'withTrashed': false,
 				},
-			],
-			'where':[
 				{
-					'label':'approved_schedule',
-					'condition': '=',
-					'value': true,
+					'relation':'schedule_approver',
+					'withTrashed': false,
 				},
 				{
-					'label':'approved_equipments',
-					'condition': '=',
-					'value': true,
+					'relation':'equipment_approver',
+					'withTrashed': false,
 				},
 			],
 		}
@@ -88,6 +83,14 @@ app
 									'relation':'user',
 									'withTrashed': false,
 								},
+								{
+									'relation':'schedule_approver',
+									'withTrashed': false,
+								},
+								{
+									'relation':'equipment_approver',
+									'withTrashed': false,
+								},
 							],
 							'where': [
 								{
@@ -95,20 +98,10 @@ app
 									'condition':'=',
 									'value': location.id,
 								},
-								{
-									'label':'approved_schedule',
-									'condition': '=',
-									'value': true,
-								},
-								{
-									'label':'approved_equipments',
-									'condition': '=',
-									'value': true,
-								},
 							],
 						}
 						item.fab = {
-							'template':'/app/components/settings/templates/dialogs/reservation-dialog.template.html',
+							'template':'/app/components/reservations/templates/dialogs/reservation-dialog.template.html',
 							'controller': 'reservationDialogController',
 							'action':'create',
 							'message': 'Reservation created',

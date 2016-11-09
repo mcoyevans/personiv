@@ -38,9 +38,20 @@ class EquipmentTypeController extends Controller
         if($request->has('with'))
         {
             for ($i=0; $i < count($request->with); $i++) { 
-                if(!$request->input('with')[$i]['withTrashed'])
+                if(!$request->input('with')[$i]['withTrashed'] && !$request->input('with')[$i]['whereDoesntHave'])
                 {
                     $equipment_types->with($request->input('with')[$i]['relation']);
+                }
+
+                if($request->input('with')[$i]['whereDoesntHave'])
+                {
+                    $equipment_types->with([$request->input('with')[$i]['relation'] => function($query) use($request, $i){
+                        $query->whereDoesntHave($request->input('with')[$i]['whereDoesntHave']['relation'], function($query) use($request, $i){
+                            for ($j=0; $j < count($request->input('with')[$i]['whereDoesntHave']['whereNull']); $j++) { 
+                                $query->whereNull($request->input('with')[$i]['whereDoesntHave']['whereNull'][$j]);
+                            }
+                        });
+                    }]);
                 }
             }
         }

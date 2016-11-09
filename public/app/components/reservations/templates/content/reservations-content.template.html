@@ -7,9 +7,53 @@
 				<md-radio-button value="agendaWeek" class="md-primary">Week</md-radio-button>
 			</md-radio-group>
 			<div ui-calendar="uiConfig.calendar" ng-model="eventSources" calendar="reservationCalendar" flex></div> 
-			<md-subheader class="md-no-sticky">
-				Reservations
+			<!-- Approved -->
+			<md-subheader class="md-no-sticky" ng-if="reservation.approved.length">
+				Approved
 			</md-subheader>
+			<md-list>
+				<md-list-item class="md-3-line secondary-button-padding" ng-repeat="reservation in reservation.approved" ng-click="viewReservation(reservation)" ng-if="reservation.schedule_approver_id && reservation.equipment_approver_id">
+					<div class="md-list-item-text">
+						<h3>{{reservation.title}}</h3>
+						<h4>{{reservation.user.name}} - {{reservation.user.position}}</h4>
+						<p>{{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{reservation.start | date: 'hh:mma'}} to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span></p>
+					</div>
+				</md-list-item>
+			</md-list>
+			<!-- Pending -->
+			<md-subheader class="md-no-sticky" ng-if="reservation.pending.length">
+				Pending
+			</md-subheader>
+			<md-list>
+				<md-list-item class="md-3-line secondary-button-padding" ng-repeat="reservation in reservation.pending" ng-mouseover="reservation.options = true" ng-mouseout="reservation.options = false" ng-click="viewReservation(reservation)" ng-if="!reservation.schedule_approver_id && !reservation.equipment_approver_id">
+					<div class="md-list-item-text">
+						<h3>{{reservation.title}}</h3>
+						<h4>{{reservation.user.name}} - {{reservation.user.position}}</h4>
+						<p>{{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{reservation.start | date: 'hh:mma'}} to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span></p>
+					</div>
+					<md-menu md-position-mode="target-right target" class="md-secondary" ng-show="reservation.options" ng-if="user.id == reservation.user_id">
+						<md-button aria-label="Menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+				            <md-icon class="mdi mdi-dots-vertical grey"></md-icon>
+				            <md-tooltip>Edit or delete this</md-tooltip>
+				        </md-button>
+
+				        <md-menu-content width="3">
+							<!-- Edit -->
+				            <md-menu-item>
+					            <md-button aria-label="Edit" ng-click="editReservation(reservation)" flex>
+					                Edit
+					            </md-button>
+				        	</md-menu-item>
+				        	<md-menu-item>
+					            <!-- Delete -->
+					            <md-button aria-label="Delete" ng-click="deleteReservation(reservation)" flex>
+					                Delete
+					            </md-button>
+				        	</md-menu-item>
+				        </md-menu-content>
+					</md-menu>
+				</md-list-item>
+			</md-list>
 		</div>
 	</div>
 </div>

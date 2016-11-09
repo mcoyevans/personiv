@@ -19,7 +19,15 @@ app
 				{
 					'relation': 'equipments',
 					'withTrashed': false,
-				}
+				},
+				{
+					'relation':'schedule_approver',
+					'withTrashed': false,
+				},
+				{
+					'relation':'equipment_approver',
+					'withTrashed': false,
+				},
 			],
 			'where': [
 				{

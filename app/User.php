@@ -54,4 +54,14 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Comment');
     }
+
+    public function equipment_approved_reservations()
+    {
+        return $this->hasMany('App\Reservation', 'equipment_approver_id');
+    }
+
+    public function schedule_approved_reservations()
+    {
+        return $this->hasMany('App\Reservation', 'schedule_approver_id');
+    }    
 }

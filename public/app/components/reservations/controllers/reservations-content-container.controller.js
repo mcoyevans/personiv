@@ -31,8 +31,21 @@ app
 		*/
 		$scope.fab = {};
 		$scope.fab.icon = 'mdi-plus';
+		$scope.fab.label = 'Reservation';
 
-	    $scope.alertOnEventClick = function(data){
+		$scope.fab.action = function(){
+			Helper.set($scope.subheader.current.fab);
+
+			Helper.customDialog($scope.subheader.current.fab)
+				.then(function(){
+					Helper.notify('Reservation created.');
+					$scope.refresh();
+				}, function(){
+					return;
+				});
+		}
+
+	    $scope.viewReservation = function(data){
 	    	Helper.set(data);
 
 	    	var dialog = {
@@ -56,7 +69,7 @@ app
 		          	center: '',
 		          	right: 'today prev,next'
 		        },
-		        eventClick: $scope.alertOnEventClick,
+		        eventClick: $scope.viewReservation,
 		        eventDrop: $scope.alertOnDrop,
 		        eventResize: $scope.alertOnResize,
 		        viewRender: function(date) {
@@ -126,19 +139,32 @@ app
 		}
 
 		$scope.init = function(query){
+			$scope.reservation = {};
 			$scope.toolbar.items = [];
 
 			Helper.post('/reservation/enlist', query.request)
 				.success(function(data){
 					$scope.eventSources.splice(0,1);
 
+					$scope.reservation.approved = [];
+					$scope.reservation.pending = [];
+
 					if(data.length){
 						// iterate over each record and set the format
 						angular.forEach(data, function(item){
 							pushItem(item);
+
+							if(item.schedule_approver_id && item.equipment_approver_id)
+							{
+								$scope.reservation.approved.push(item);
+							}
+							else{
+								$scope.reservation.pending.push(item);
+							}
 						});
 
-						$scope.eventSources.push(data);
+						$scope.eventSources.push($scope.reservation.approved);
+					
 						$scope.fab.show = true;
 					}
 
