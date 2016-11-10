@@ -34,9 +34,9 @@
 				                Update
 				            </md-button>
 			        	</md-menu-item>
-			        	<md-menu-item>
+			        	<md-menu-item ng-if="!model.hideDelete">
 				            <!-- Delete -->
-				            <md-button aria-label="Delete" ng-click="deleteModel(model)" flex ng-if="!model.hideDelete">
+				            <md-button aria-label="Delete" ng-click="deleteModel(model)" flex>
 				                Delete
 				            </md-button>
 			        	</md-menu-item>
