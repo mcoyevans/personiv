@@ -8,9 +8,6 @@ app
 		*/
 		$scope.toolbar = {};
 
-		$scope.toolbar.toggleActive = function(){
-			$scope.showInactive = !$scope.showInactive;
-		}
 		$scope.toolbar.sortBy = function(filter){
 			filter.sortReverse = !filter.sortReverse;			
 			$scope.sortType = filter.type;
@@ -100,7 +97,6 @@ app
 		$scope.$on('setInit', function(){
 			$scope.isLoading = true;
 			$scope.$broadcast('close');
-			$scope.showInactive = false;
 			
 			var current = Helper.fetch();
 
@@ -112,7 +108,6 @@ app
 		$scope.$on('search', function(){
 			$scope.subheader.current.request.search = $scope.toolbar.searchText;
 			$scope.refresh();
-			$scope.showInactive = true;
 		});
 
 		/* Listens for any request for refresh */

@@ -20,12 +20,12 @@
         				<span ng-if="!reservation.allDay"> to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span>
         			</h4>
         			<p>
-        				<strong>Remarks: </strong>
+        				<strong ng-if="reservation.remarks">Remarks: </strong>
         				<span>{{reservation.remarks}}</span>
         				<br>
-        				<strong ng-if="reservation.equipments.length">Reserved equipments:</strong>
-						<ul ng-if="reservation.equipments.length">
-							<li ng-repeat="reservation_equipment in reservation.equipments">{{reservation_equipment.equipment.brand}} {{reservation_equipment.equipment.model}}</li>
+        				<strong ng-if="reservation.equipment_types.length">Reserved equipments:</strong>
+						<ul ng-if="reservation.equipment_types.length">
+							<li ng-repeat="equipment_type in reservation.equipment_types">{{equipment_type.name}}</li>
 						</ul>
         			</p>
         		</div>

@@ -13,7 +13,7 @@ class Equipment extends Model
 
     public function reservations()
     {
-    	return $this->belongsToMany('App\Reservation', 'reservation_equipments');
+    	return $this->belongsToMany('App\Reservation', 'reservation_equipments')->withTimestamps();;
     }
 
     public function equipment_type()

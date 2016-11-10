@@ -17,7 +17,7 @@ class ReservationsTableSeeder extends Seeder
                 'remarks' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nesciunt quis consequuntur quasi odio voluptates molestias, placeat, esse cum repellat provident praesentium molestiae quod, aperiam dolor ducimus illum. Molestiae, hic, unde.',
         		'location_id' => 1,
         		'start' => Carbon\Carbon::today(),
-        		'end' => null,
+        		'end' => Carbon\Carbon::today(),
         		'user_id' => 1,
         		'allDay' => true,
                 'schedule_approver_id' => 2,

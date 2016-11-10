@@ -7,11 +7,16 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 
 use App\Reservation;
+use App\EquipmentType;
+use App\User;
+
+use App\Notifications\ReservationCreated;
 
 use Auth;
 use Carbon\Carbon;
 use DB;
 use Gate;
+use Notification;
 
 class ReservationController extends Controller
 {
@@ -59,6 +64,11 @@ class ReservationController extends Controller
             $reservations->whereBetween('start', [Carbon::parse('first day of this month'), Carbon::parse('first day of next month')]);   
         }
 
+        if($request->has('search'))
+        {
+            $reservations->where('title', 'like', '%'.$request->search.'%');
+        }
+
         if($request->has('paginate'))
         {
             return $reservations->paginate($request->paginate);
@@ -100,7 +110,52 @@ class ReservationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if(!Gate::forUser($request->user())->allows('reservations'))
+        {
+            abort(403, 'Unauthorized action');
+        }
+
+        $this->validate($request, [
+            'title' => 'required',
+            'location_id' => 'required',
+            'date_start' => 'required',
+            'date_end' => 'required',
+            'time_start' => 'required',
+            'time_end' => 'required',
+        ]);
+
+        DB::transaction(function() use($request){
+            $reservation = new Reservation;
+
+            $reservation->title = $request->title;
+            $reservation->remarks = $request->remarks;
+            $reservation->location_id = $request->location_id;
+            $reservation->user_id = $request->user()->id;
+            $reservation->start = Carbon::parse($request->date_start .' '. $request->time_start)->toDateTimeString();
+
+            if(Carbon::parse($request->date_start .' '. $request->time_start)->gt(Carbon::parse($request->date_end .' '. $request->time_end)))
+            {
+                abort(422, 'End date cannot be earlier than start date');
+            }
+
+            $reservation->end = Carbon::parse($request->date_end .' '. $request->time_end)->toDateTimeString();
+            $reservation->allDay = $request->has('allDay') ? true : false;
+
+            $reservation->save();
+
+            $reservation->load('user');
+
+            if($request->has('equipment_types'))
+            {
+                for ($i=0; $i < count($request->equipment_types); $i++) { 
+                    $reservation->equipment_types()->save(EquipmentType::find($request->input('equipment_types')[$i]['id']), ['approved' => false]);
+                }
+            }
+
+            $users = User::whereNotIn('id', [$request->user()->id])->whereIn('group_id', [1,2])->get();
+
+            Notification::send($users, new ReservationCreated($reservation));
+        });
     }
 
     /**

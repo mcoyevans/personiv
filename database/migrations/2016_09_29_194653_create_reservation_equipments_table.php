@@ -17,7 +17,8 @@ class CreateReservationEquipmentsTable extends Migration
             $table->engine = 'InnoDB';
             $table->increments('id');
             $table->integer('reservation_id')->unsigned();
-            $table->integer('equipment_id')->unsigned();
+            $table->integer('equipment_id')->unsigned()->nullable();
+            $table->integer('equipment_type_id')->unsigned();
             $table->boolean('approved');
             $table->timestamps();
         });

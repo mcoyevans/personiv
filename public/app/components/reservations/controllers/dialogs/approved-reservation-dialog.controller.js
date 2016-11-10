@@ -17,7 +17,7 @@ app
 					'withTrashed': true,
 				},
 				{
-					'relation': 'equipments',
+					'relation': 'equipment_types',
 					'withTrashed': false,
 				},
 				{

@@ -67,12 +67,12 @@
                 <!-- Remarks -->
                 <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
                     <label>Remarks</label>
-                    <textarea name="Remarks" ng-model="reservation.body" ng-disabled="busy"></textarea>
+                    <textarea name="Remarks" ng-model="reservation.remarks" ng-disabled="busy"></textarea>
                 </md-input-container>
             </div>
-            <md-subheader>Equipments</md-subheader>
+            <md-subheader>Equipment</md-subheader>
             <div layout="row" flex ng-if="!count">
-                <md-checkbox ng-repeat="equipment_type in equipment_types" ng-model="reservation.equipments[$index]" ng-if="equipment_type.equipments.length" aria-label="{{equipment_type.name}}" ng-true-value="{{equipment_type}}" ng-false-value="null" flex class="md-primary" flex-xs="100" flex-sm="100" flex-gt-sm>
+                <md-checkbox ng-repeat="equipment_type in equipment_types" ng-model="reservation.equipment_types[$index]" ng-if="equipment_type.equipment.length" aria-label="{{equipment_type.name}}" ng-true-value="{{equipment_type}}" ng-false-value="null" flex class="md-primary" flex-xs="100" flex-sm="100" flex-gt-sm>
                     {{equipment_type.name}}
                 </md-checkbox>
             </div>        

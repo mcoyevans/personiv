@@ -8,6 +8,8 @@ app
 
 		$scope.reservation = {};
 
+		$scope.reservation.equipment_types = [];
+
 		$scope.reservation.date_start = new Date();
 		$scope.reservation.time_start = new Date();
 		$scope.reservation.date_end = new Date();
@@ -59,30 +61,23 @@ app
 				$scope.reservation.time_end = new Date($scope.reservation.time_start);
 			}
 
-			$scope.checkEquipments($scope.reservation.time_start, $scope.reservation.time_end);
+			$scope.checkEquipment($scope.reservation.time_start, $scope.reservation.time_end);
 		} 
 
 		$scope.timeEndChanged = function(){			
-			$scope.checkEquipments($scope.reservation.time_start, $scope.reservation.time_end);
+			$scope.checkEquipment($scope.reservation.time_start, $scope.reservation.time_end);
 		}
 
 		$scope.allDay = function(){
 			if($scope.reservation.allDay)
 			{
-				console.log($scope.reservation.time_start , $scope.reservation.time_end)
-				$scope.reservation.time_start.setHours(0);
-				$scope.reservation.time_start.setMinutes(0);
-				$scope.reservation.time_start.setSeconds(0);
+				$scope.reservation.time_start.setHours(0,0,0,0);
 
 				$scope.reservation.time_start = new Date($scope.reservation.time_start);
 				
-				$scope.reservation.time_end.setHours(0);
-				$scope.reservation.time_end.setMinutes(0);
-				$scope.reservation.time_end.setSeconds(0);
+				$scope.reservation.time_end.setHours(0,0,0,0);
 
 				$scope.reservation.time_end = new Date($scope.reservation.time_end);
-
-				console.log($scope.reservation.time_start , $scope.reservation.time_end)
 			}
 			else{
 				$scope.reservation.time_start = new Date();
@@ -91,15 +86,14 @@ app
 				$scope.min_start_date = new Date();
 
 				$scope.min_end_time = new Date();
-				console.log($scope.reservation.time_start , $scope.reservation.time_end)
 			}
 		}
 
-		$scope.checkEquipments = function(start, end){
+		$scope.checkEquipment = function(start, end){
 			var request = {
 				'with': [
 					{
-						'relation': 'equipments',
+						'relation': 'equipment',
 						'withTrashed': false,
 						'whereDoesntHave': {
 							'relation': 'reservations',
@@ -120,7 +114,7 @@ app
 				});
 		}
 		
-		$scope.checkEquipments($scope.reservation.time_start, $scope.reservation.time_end);
+		$scope.checkEquipment($scope.reservation.time_start, $scope.reservation.time_end);
 
 		$scope.busy = false;
 
@@ -148,7 +142,7 @@ app
 						'withTrashed': true,
 					},
 					{
-						'relation': 'equipments',
+						'relation': 'equipment',
 						'withTrashed': false,
 					},
 				],
@@ -187,6 +181,12 @@ app
 
 			$scope.busy = true;
 
+			$scope.reservation.date_start = $scope.reservation.date_start.toDateString();
+			$scope.reservation.date_end = $scope.reservation.date_end.toDateString();
+
+			$scope.reservation.time_start = $scope.reservation.time_start.toLocaleTimeString();
+			$scope.reservation.time_end = $scope.reservation.time_end.toLocaleTimeString();
+
 			if($scope.config.action == 'create')
 			{
 				Helper.post('/reservation', $scope.reservation)
@@ -196,6 +196,11 @@ app
 					.error(function(){
 						$scope.busy = false;
 						$scope.error = true;
+
+						$scope.reservation.date_start = new Date($scope.reservation.date_start);
+						$scope.reservation.date_end = new Date($scope.reservation.date_end);
+						$scope.reservation.time_start = new Date($scope.reservation.time_start);
+						$scope.reservation.time_end = new Date($scope.reservation.time_end);
 					});
 			}
 			else if($scope.config.action == 'edit')
@@ -207,6 +212,9 @@ app
 					.error(function(){
 						$scope.busy = false;
 						$scope.error = true;
+
+						$scope.reservation.time_start = new Date($scope.reservation.time_start);
+						$scope.reservation.time_end = new Date($scope.reservation.time_end);
 					});
 			}
 		}
