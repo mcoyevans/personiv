@@ -1,5 +1,5 @@
 app
-	.controller('equipmentsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
+	.controller('equipmentContentContainerController', ['$scope', 'Helper', function($scope, Helper){
 		$scope.$emit('closeSidenav');
 
 		/*

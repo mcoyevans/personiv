@@ -102,11 +102,11 @@ class AuthServiceProvider extends ServiceProvider
             return false;
         });
 
-        Gate::define('manage-equipments', function($user){
+        Gate::define('manage-equipment', function($user){
             $user = User::with('roles')->where('id', $user->id)->first();
 
             foreach ($user->roles as $role) {
-                if($role->name == 'manage-equipments')
+                if($role->name == 'manage-equipment')
                 {
                     return true;
                 }

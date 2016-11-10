@@ -47,8 +47,8 @@ app
 					}
 				}
 			})
-			.state('main.equipments', {
-				url: 'settings/equipments',
+			.state('main.equipment', {
+				url: 'settings/equipment',
 				resolve:{
 					authorization: ['Helper', '$state', function(Helper, $state){
 						Helper.get('/equipment/create')
@@ -63,20 +63,20 @@ app
 				views: {
 					'content-container': {
 						templateUrl: '/app/shared/views/content-container.view.html',
-						controller: 'equipmentsContentContainerController',
+						controller: 'equipmentContentContainerController',
 					},
-					'toolbar@main.equipments': {
+					'toolbar@main.equipment': {
 						templateUrl: '/app/shared/templates/toolbar.template.html',
-						controller: 'equipmentsToolbarController',
+						controller: 'equipmentToolbarController',
 					},
-					'subheader@main.equipments': {
-						templateUrl: '/app/components/settings/templates/subheaders/equipments-subheader.template.html',
-						controller: 'equipmentsSubheaderController',
+					'subheader@main.equipment': {
+						templateUrl: '/app/components/settings/templates/subheaders/equipment-subheader.template.html',
+						controller: 'equipmentSubheaderController',
 					},
-					'left-sidenav@main.equipments': {
+					'left-sidenav@main.equipment': {
 						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
 					},
-					'content@main.equipments':{
+					'content@main.equipment':{
 						templateUrl: '/app/components/settings/templates/content/settings-content.template.html',
 					}
 				}

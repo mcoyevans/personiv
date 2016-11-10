@@ -154,14 +154,14 @@ app
 
 						settings_menu.push(item); 
 					}
-					else if(role.name == 'manage-equipments')
+					else if(role.name == 'manage-equipment')
 					{
 						settings = true;
 
 						var item = {
-							'label': 'Equipments',
+							'label': 'Equipment',
 							action: function(){
-								$state.go('main.equipments');
+								$state.go('main.equipment');
 							},
 						}
 
@@ -273,8 +273,6 @@ app
 		}
 
 		$scope.read = function(notification){
-			console.log(notification);
-
 			if(notification.data.withParams)
 			{
 				$state.go(notification.data.url, {'id':notification.data.attachment.id});

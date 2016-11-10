@@ -103,7 +103,7 @@ class EquipmentController extends Controller
      */
     public function create()
     {
-        if(!Gate::forUser(Auth::user())->allows('manage-equipments'))
+        if(!Gate::forUser(Auth::user())->allows('manage-equipment'))
         {
             abort(403, 'Unauthorized action.');
         }

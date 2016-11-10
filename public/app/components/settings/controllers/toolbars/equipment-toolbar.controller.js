@@ -1,7 +1,7 @@
 app
-	.controller('equipmentsToolbarController', ['$scope', '$filter', function($scope, $filter){
+	.controller('equipmentToolbarController', ['$scope', '$filter', function($scope, $filter){
 		$scope.toolbar.parentState = 'Settings';
-		$scope.toolbar.childState = 'Equipments';
+		$scope.toolbar.childState = 'Equipment';
 
 		$scope.$on('close', function(){
 			$scope.hideSearchBar();

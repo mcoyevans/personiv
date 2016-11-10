@@ -1,5 +1,5 @@
 app
-	.controller('equipmentsSubheaderController', ['$scope', 'Helper', function($scope, Helper){
+	.controller('equipmentSubheaderController', ['$scope', 'Helper', function($scope, Helper){
 		var setInit = function(data){
 			Helper.set(data);
 
@@ -69,7 +69,7 @@ app
 			var query = {};
 			query.withCount = [
 				{
-					'relation':'equipments',
+					'relation':'equipment',
 					'withTrashed': false,
 				}
 			];
@@ -83,7 +83,7 @@ app
 						var item = {};
 
 						item.id = equipment_type.id;
-						item.equipments_count = equipment_type.equipments_count;
+						item.equipment_count = equipment_type.equipment_count;
 						item.label = equipment_type.name;
 						item.request = {
 							'withTrashed': true,
