@@ -2819,10 +2819,41 @@ app
 			{
 				$scope.reservation.time_end = new Date($scope.reservation.time_start);
 			}
+
+			$scope.checkEquipments($scope.reservation.time_start, $scope.reservation.time_end);
 		} 
 
 		$scope.timeEndChanged = function(){			
-			// console.log($scope.reservation.time_start, $scope.reservation.time_end);
+			$scope.checkEquipments($scope.reservation.time_start, $scope.reservation.time_end);
+		}
+
+		$scope.allDay = function(){
+			if($scope.reservation.allDay)
+			{
+				console.log($scope.reservation.time_start , $scope.reservation.time_end)
+				$scope.reservation.time_start.setHours(0);
+				$scope.reservation.time_start.setMinutes(0);
+				$scope.reservation.time_start.setSeconds(0);
+
+				$scope.reservation.time_start = new Date($scope.reservation.time_start);
+				
+				$scope.reservation.time_end.setHours(0);
+				$scope.reservation.time_end.setMinutes(0);
+				$scope.reservation.time_end.setSeconds(0);
+
+				$scope.reservation.time_end = new Date($scope.reservation.time_end);
+
+				console.log($scope.reservation.time_start , $scope.reservation.time_end)
+			}
+			else{
+				$scope.reservation.time_start = new Date();
+				$scope.reservation.time_end = new Date();
+				$scope.min_start_time = new Date();
+				$scope.min_start_date = new Date();
+
+				$scope.min_end_time = new Date();
+				console.log($scope.reservation.time_start , $scope.reservation.time_end)
+			}
 		}
 
 		$scope.checkEquipments = function(start, end){
@@ -2834,6 +2865,11 @@ app
 						'whereDoesntHave': {
 							'relation': 'reservations',
 							'whereNull': ['schedule_approver_id' ,'equipment_approver_id'],
+							'whereBetween': {
+								'label': 'start',
+								'start': start,
+								'end': end,
+							}
 						},
 					}
 				]
@@ -2845,7 +2881,7 @@ app
 				});
 		}
 		
-		$scope.checkEquipments();
+		$scope.checkEquipments($scope.reservation.time_start, $scope.reservation.time_end);
 
 		$scope.busy = false;
 

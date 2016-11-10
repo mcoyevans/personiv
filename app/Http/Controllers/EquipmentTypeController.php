@@ -50,6 +50,7 @@ class EquipmentTypeController extends Controller
                             for ($j=0; $j < count($request->input('with')[$i]['whereDoesntHave']['whereNull']); $j++) { 
                                 $query->whereNull($request->input('with')[$i]['whereDoesntHave']['whereNull'][$j]);
                             }
+                            $query->whereBetween($request->input('with')[$i]['whereDoesntHave']['whereBetween']['label'], [Carbon::parse($request->input('with')[$i]['whereDoesntHave']['whereBetween']['start']), Carbon::parse($request->input('with')[$i]['whereDoesntHave']['whereBetween']['end'])]);
                         });
                     }]);
                 }

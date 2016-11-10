@@ -22,5 +22,6 @@ class DatabaseSeeder extends Seeder
         $this->call(HashtagsTableSeeder::class);
         $this->call(CommentsTableSeeder::class);
         $this->call(ReservationsTableSeeder::class);
+        $this->call(EquipmentTableSeeder::class);
     }
 }
