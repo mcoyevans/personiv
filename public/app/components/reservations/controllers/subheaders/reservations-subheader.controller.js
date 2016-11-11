@@ -16,11 +16,9 @@ app
 			'template':'/app/components/reservations/templates/dialogs/reservation-dialog.template.html',
 			'controller': 'reservationDialogController',
 			'action':'create',
-			'message': 'Reservation created',
 		}
 
 		$scope.subheader.all.request = {
-			'withTrashed':false,
 			'with': [
 				{
 					'relation':'location',
@@ -73,7 +71,6 @@ app
 						item.id = location.id;
 						item.label = location.name;
 						item.request = {
-							'withTrashed': false,
 							'with': [
 								{
 									'relation':'location',

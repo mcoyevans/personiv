@@ -45,7 +45,6 @@ app
 		};
 
 		$scope.toolbar.options = true;
-		$scope.toolbar.showInactive = true;
 
 		$scope.toolbar.refresh = function(){
 			$scope.$emit('refresh');

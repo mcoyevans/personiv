@@ -204,6 +204,334 @@ app
 			})
 	}]);
 app
+	.controller('mainViewController', ['$scope', '$filter', '$state', '$mdDialog', '$mdSidenav', '$mdToast', 'Helper', 'FileUploader', function($scope, $filter, $state, $mdDialog, $mdSidenav, $mdToast, Helper, FileUploader){
+		$scope.toggleSidenav = function(menuID){
+			$mdSidenav(menuID).toggle();
+		}
+
+		$scope.menu = {};
+		$scope.menu.pages = [];
+
+		$scope.menu.static = [
+			{
+				'state': 'main',
+				'icon': 'mdi-bulletin-board',
+				'label': 'Posts',
+			},
+			{
+				'state': 'main.reservations',
+				'icon': 'mdi-format-list-numbers',
+				'label': 'Reservations',
+			},
+		];
+
+		$scope.menu.section = [
+			{
+				'name':'Apps',
+				'icon':'mdi-application',
+			},
+		];
+
+		// set section as active
+		$scope.setActive = function(index){
+		 	angular.element($('[aria-label="'+ 'section-' + index + '"]').closest('li').toggleClass('active'));
+		 	angular.element($('[aria-label="'+ 'section-' + index + '"]').closest('li').siblings().removeClass('active'));
+		};
+		
+		$scope.logout = function(){
+			Helper.post('/user/logout')
+				.success(function(){
+					window.location.href = '/';
+				});
+		}
+
+		$scope.changePassword = function()
+		{
+			$mdDialog.show({
+		      controller: 'changePasswordDialogController',
+		      templateUrl: '/app/shared/templates/dialogs/change-password-dialog.template.html',
+		      parent: angular.element(document.body),
+		      fullscreen: true,
+		    })
+		    .then(function(){
+		    	Helper.notify('Password changed.')
+		    });
+		}
+
+		var uploader = {};
+
+		uploader.filter = {
+            name: 'photoFilter',
+            fn: function(item /*{File|FileLikeObject}*/, options) {
+                var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
+                return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
+            }
+        };
+
+        uploader.sizeFilter = {
+		    'name': 'enforceMaxFileSize',
+		    'fn': function (item) {
+		        return item.size <= 2000000;
+		    }
+        }
+
+        uploader.error = function(item /*{File|FileLikeObject}*/, filter, options) {
+            $scope.fileError = true;
+            $scope.photoUploader.queue = [];
+        };
+
+        uploader.headers = { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')};
+
+		$scope.clickUpload = function(){
+		    angular.element('#upload').trigger('click');
+		};
+
+		$scope.markAllAsRead = function(){
+			Helper.post('/user/mark-all-as-read')
+				.success(function(){
+					$scope.user.unread_notifications = [];
+				})
+		}
+
+		var fetchUnreadNotifications = function(){
+			Helper.post('/user/check')
+	    		.success(function(data){
+	    			$scope.user = data;
+	    		});
+		}
+
+		Helper.post('/user/check')
+			.success(function(data){
+				var settings = false;
+				var settings_menu = [];
+
+				angular.forEach(data.roles, function(role){
+					if(role.name == 'posts')
+					{
+						data.can_post = true;
+					}
+					else if(role.name == 'approvals')
+					{
+						var item = {
+							'state': 'main.approvals',
+							'icon': 'mdi-clipboard-check',
+							'label': 'Approvals',
+						}
+
+						$scope.menu.static[2] = item;
+					}
+					else if(role.name == 'manage-groups')
+					{
+						settings = true;
+
+						var item = {
+							'label': 'Groups',
+							action: function(){
+								$state.go('main.groups');
+							},
+						}
+
+						settings_menu.push(item);
+					}
+					else if(role.name == 'manage-users')
+					{
+						settings = true;
+
+						var item = {
+							'label': 'Users',
+							action: function(){
+								$state.go('main.users');
+							},
+						}
+
+						settings_menu.push(item); 
+					}
+					else if(role.name == 'manage-locations')
+					{
+						settings = true;
+
+						var item = {
+							'label': 'Locations',
+							action: function(){
+								$state.go('main.locations');
+							},
+						}
+
+						settings_menu.push(item); 
+					}
+					else if(role.name == 'manage-equipment')
+					{
+						settings = true;
+
+						var item = {
+							'label': 'Equipment',
+							action: function(){
+								$state.go('main.equipment');
+							},
+						}
+
+						settings_menu.push(item); 
+					}
+					else if(role.name == 'manage-links')
+					{
+						settings = true;
+
+						var item = {
+							'label': 'Links',
+							action: function(){
+								$state.go('main.links');
+							},
+						}
+
+						settings_menu.push(item); 
+					}
+
+				});
+
+				if(settings)
+				{
+					$scope.menu.section[1] = {
+						'name':'Settings',
+						'icon':'mdi-settings',
+					}
+
+					$scope.menu.pages[1] = settings_menu;
+				}
+
+				$scope.user = data;
+
+				$scope.currentTime = Date.now();
+
+				Helper.setAuthUser(data);
+
+				/* Photo Uploader */
+				$scope.photoUploader = new FileUploader({
+					url: '/user/upload-avatar/' + $scope.user.id,
+					headers: uploader.headers,
+					queueLimit : 1
+				})
+
+				// FILTERS
+		        $scope.photoUploader.filters.push(uploader.filter);
+		        $scope.photoUploader.filters.push(uploader.sizeFilter);
+		        
+				$scope.photoUploader.onWhenAddingFileFailed = uploader.error;
+				$scope.photoUploader.onAfterAddingFile  = function(){
+					$scope.fileError = false;
+					if($scope.photoUploader.queue.length)
+					{	
+						$scope.photoUploader.uploadAll()
+					}
+				};
+
+				$scope.photoUploader.onCompleteItem  = function(data, response){
+					$scope.currentTime = Date.now();
+					$scope.photoUploader.queue = [];
+				}
+
+				var pusher = new Pusher('73a46f761ea4637481b5', {
+			      	encrypted: true,
+			      	auth: {
+					    headers: {
+					      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+					    }
+				  	}
+			    });
+
+				var channel = {};
+
+				channel.user = pusher.subscribe('private-App.User.' + $scope.user.id);
+
+				channel.user.bindings = [
+				 	channel.user.bind('Illuminate\\Notifications\\Events\\BroadcastNotificationCreated', function(data) {
+				 		// formating the notification
+				 		data.created_at = data.attachment.created_at;
+
+				 		data.data = {};
+				 		data.data.attachment = data.attachment;
+				 		data.data.url = data.url;
+				 		data.data.withParams = data.withParams;
+				 		data.data.sender = data.sender;
+				 		data.data.message = data.message;
+
+				 		// pushes the new notification in the unread_notifications array
+				 		$scope.$apply(function(){
+					    	$scope.user.unread_notifications.unshift(data);
+				 		});
+
+				 		// notify the user with a toast message
+				 		Helper.notify(data.sender.name + ' ' + data.message);
+				    }),
+				];
+			})
+
+		$scope.markAsRead = function(notification){
+			Helper.post('/user/mark-as-read', notification)
+				.success(function(){
+					var index = $scope.user.unread_notifications.indexOf(notification);
+
+					$scope.user.unread_notifications.splice(index, 1);
+				})
+				.error(function(){
+					Helper.error();
+				});
+		}
+
+		$scope.read = function(notification){
+			if(notification.data.withParams)
+			{
+				$state.go(notification.data.url, {'id':notification.data.attachment.id});
+			}
+			else{
+				$state.go(notification.data.url);
+				
+				if(notification.type == 'App\\Notifications\\PostCreated' || notification.type == 'App\\Notifications\\RepostCreated')
+				{
+					Helper.set(notification.data.attachment.id);
+					$scope.$broadcast('read-post');
+				}
+				else if(notification.type == 'App\\Notifications\\CommentCreated')
+				{
+					Helper.set(notification.data.attachment.post_id);
+					$scope.$broadcast('read-post-and-comments');
+				}
+			}
+
+			$scope.markAsRead(notification);
+		}
+
+
+		$scope.fetchLinks = function(){		
+			Helper.get('/link')
+				.success(function(data){
+					var links = [];
+
+					angular.forEach(data, function(link){
+						var item = {};
+
+						item.label = link.name;	
+						item.action = function(){
+							window.open(link.link);
+						}
+
+						links.push(item);
+					});
+					
+					$scope.menu.pages[0] = links;
+				})
+		}
+
+		$scope.fetchLinks();
+
+		$scope.$on('closeSidenav', function(){
+			$mdSidenav('left').close();
+		});
+
+		$scope.$on('fetchLinks', function(){
+			$scope.fetchLinks();
+		});
+	}]);
+app
 	.controller('postsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
 		$scope.$emit('closeSidenav');
 
@@ -777,6 +1105,47 @@ app
 	    	Helper.customDialog(dialog);
 	    }
 
+	    $scope.editReservation = function(data){
+	    	data.action = 'edit';
+
+	    	Helper.set(data);
+
+	    	var dialog = {
+	    		'template':'/app/components/reservations/templates/dialogs/reservation-dialog.template.html',
+				'controller': 'reservationDialogController',
+	    	}
+
+			Helper.customDialog(dialog)
+				.then(function(){
+					Helper.notify('Reservation updated.');
+					$scope.refresh();
+				}, function(){
+					return;
+				});
+	    }
+
+	    $scope.deleteReservation = function(data){
+	    	var dialog = {};
+			dialog.title = 'Delete';
+			dialog.message = 'Delete this reservation?'
+			dialog.ok = 'Delete';
+			dialog.cancel = 'Cancel';
+
+			Helper.confirm(dialog)
+				.then(function(){
+					Helper.delete('/reservation/' + data.id)
+						.success(function(){
+							$scope.refresh();
+							Helper.notify('Reservation deleted.');
+						})
+						.error(function(){
+							Helper.error();
+						});
+				}, function(){
+					return;
+				})
+	    }
+
 		/*
 		 *
 		 * Object for calendar
@@ -898,334 +1267,6 @@ app
 					};
 				});
 		}
-	}]);
-app
-	.controller('mainViewController', ['$scope', '$filter', '$state', '$mdDialog', '$mdSidenav', '$mdToast', 'Helper', 'FileUploader', function($scope, $filter, $state, $mdDialog, $mdSidenav, $mdToast, Helper, FileUploader){
-		$scope.toggleSidenav = function(menuID){
-			$mdSidenav(menuID).toggle();
-		}
-
-		$scope.menu = {};
-		$scope.menu.pages = [];
-
-		$scope.menu.static = [
-			{
-				'state': 'main',
-				'icon': 'mdi-bulletin-board',
-				'label': 'Posts',
-			},
-			{
-				'state': 'main.reservations',
-				'icon': 'mdi-format-list-numbers',
-				'label': 'Reservations',
-			},
-		];
-
-		$scope.menu.section = [
-			{
-				'name':'Apps',
-				'icon':'mdi-application',
-			},
-		];
-
-		// set section as active
-		$scope.setActive = function(index){
-		 	angular.element($('[aria-label="'+ 'section-' + index + '"]').closest('li').toggleClass('active'));
-		 	angular.element($('[aria-label="'+ 'section-' + index + '"]').closest('li').siblings().removeClass('active'));
-		};
-		
-		$scope.logout = function(){
-			Helper.post('/user/logout')
-				.success(function(){
-					window.location.href = '/';
-				});
-		}
-
-		$scope.changePassword = function()
-		{
-			$mdDialog.show({
-		      controller: 'changePasswordDialogController',
-		      templateUrl: '/app/shared/templates/dialogs/change-password-dialog.template.html',
-		      parent: angular.element(document.body),
-		      fullscreen: true,
-		    })
-		    .then(function(){
-		    	Helper.notify('Password changed.')
-		    });
-		}
-
-		var uploader = {};
-
-		uploader.filter = {
-            name: 'photoFilter',
-            fn: function(item /*{File|FileLikeObject}*/, options) {
-                var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
-                return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
-            }
-        };
-
-        uploader.sizeFilter = {
-		    'name': 'enforceMaxFileSize',
-		    'fn': function (item) {
-		        return item.size <= 2000000;
-		    }
-        }
-
-        uploader.error = function(item /*{File|FileLikeObject}*/, filter, options) {
-            $scope.fileError = true;
-            $scope.photoUploader.queue = [];
-        };
-
-        uploader.headers = { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')};
-
-		$scope.clickUpload = function(){
-		    angular.element('#upload').trigger('click');
-		};
-
-		$scope.markAllAsRead = function(){
-			Helper.post('/user/mark-all-as-read')
-				.success(function(){
-					$scope.user.unread_notifications = [];
-				})
-		}
-
-		var fetchUnreadNotifications = function(){
-			Helper.post('/user/check')
-	    		.success(function(data){
-	    			$scope.user = data;
-	    		});
-		}
-
-		Helper.post('/user/check')
-			.success(function(data){
-				var settings = false;
-				var settings_menu = [];
-
-				angular.forEach(data.roles, function(role){
-					if(role.name == 'posts')
-					{
-						data.can_post = true;
-					}
-					else if(role.name == 'approvals')
-					{
-						var item = {
-							'state': 'main.approvals',
-							'icon': 'mdi-clipboard-check',
-							'label': 'Approvals',
-						}
-
-						$scope.menu.static[2] = item;
-					}
-					else if(role.name == 'manage-groups')
-					{
-						settings = true;
-
-						var item = {
-							'label': 'Groups',
-							action: function(){
-								$state.go('main.groups');
-							},
-						}
-
-						settings_menu.push(item);
-					}
-					else if(role.name == 'manage-users')
-					{
-						settings = true;
-
-						var item = {
-							'label': 'Users',
-							action: function(){
-								$state.go('main.users');
-							},
-						}
-
-						settings_menu.push(item); 
-					}
-					else if(role.name == 'manage-locations')
-					{
-						settings = true;
-
-						var item = {
-							'label': 'Locations',
-							action: function(){
-								$state.go('main.locations');
-							},
-						}
-
-						settings_menu.push(item); 
-					}
-					else if(role.name == 'manage-equipment')
-					{
-						settings = true;
-
-						var item = {
-							'label': 'Equipment',
-							action: function(){
-								$state.go('main.equipment');
-							},
-						}
-
-						settings_menu.push(item); 
-					}
-					else if(role.name == 'manage-links')
-					{
-						settings = true;
-
-						var item = {
-							'label': 'Links',
-							action: function(){
-								$state.go('main.links');
-							},
-						}
-
-						settings_menu.push(item); 
-					}
-
-				});
-
-				if(settings)
-				{
-					$scope.menu.section[1] = {
-						'name':'Settings',
-						'icon':'mdi-settings',
-					}
-
-					$scope.menu.pages[1] = settings_menu;
-				}
-
-				$scope.user = data;
-
-				$scope.currentTime = Date.now();
-
-				Helper.setAuthUser(data);
-
-				/* Photo Uploader */
-				$scope.photoUploader = new FileUploader({
-					url: '/user/upload-avatar/' + $scope.user.id,
-					headers: uploader.headers,
-					queueLimit : 1
-				})
-
-				// FILTERS
-		        $scope.photoUploader.filters.push(uploader.filter);
-		        $scope.photoUploader.filters.push(uploader.sizeFilter);
-		        
-				$scope.photoUploader.onWhenAddingFileFailed = uploader.error;
-				$scope.photoUploader.onAfterAddingFile  = function(){
-					$scope.fileError = false;
-					if($scope.photoUploader.queue.length)
-					{	
-						$scope.photoUploader.uploadAll()
-					}
-				};
-
-				$scope.photoUploader.onCompleteItem  = function(data, response){
-					$scope.currentTime = Date.now();
-					$scope.photoUploader.queue = [];
-				}
-
-				var pusher = new Pusher('73a46f761ea4637481b5', {
-			      	encrypted: true,
-			      	auth: {
-					    headers: {
-					      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-					    }
-				  	}
-			    });
-
-				var channel = {};
-
-				channel.user = pusher.subscribe('private-App.User.' + $scope.user.id);
-
-				channel.user.bindings = [
-				 	channel.user.bind('Illuminate\\Notifications\\Events\\BroadcastNotificationCreated', function(data) {
-				 		// formating the notification
-				 		data.created_at = data.attachment.created_at;
-
-				 		data.data = {};
-				 		data.data.attachment = data.attachment;
-				 		data.data.url = data.url;
-				 		data.data.withParams = data.withParams;
-				 		data.data.sender = data.sender;
-				 		data.data.message = data.message;
-
-				 		// pushes the new notification in the unread_notifications array
-				 		$scope.$apply(function(){
-					    	$scope.user.unread_notifications.unshift(data);
-				 		});
-
-				 		// notify the user with a toast message
-				 		Helper.notify(data.sender.name + ' ' + data.message);
-				    }),
-				];
-			})
-
-		$scope.markAsRead = function(notification){
-			Helper.post('/user/mark-as-read', notification)
-				.success(function(){
-					var index = $scope.user.unread_notifications.indexOf(notification);
-
-					$scope.user.unread_notifications.splice(index, 1);
-				})
-				.error(function(){
-					Helper.error();
-				});
-		}
-
-		$scope.read = function(notification){
-			if(notification.data.withParams)
-			{
-				$state.go(notification.data.url, {'id':notification.data.attachment.id});
-			}
-			else{
-				$state.go(notification.data.url);
-				
-				if(notification.type == 'App\\Notifications\\PostCreated' || notification.type == 'App\\Notifications\\RepostCreated')
-				{
-					Helper.set(notification.data.attachment.id);
-					$scope.$broadcast('read-post');
-				}
-				else if(notification.type == 'App\\Notifications\\CommentCreated')
-				{
-					Helper.set(notification.data.attachment.post_id);
-					$scope.$broadcast('read-post-and-comments');
-				}
-			}
-
-			$scope.markAsRead(notification);
-		}
-
-
-		$scope.fetchLinks = function(){		
-			Helper.get('/link')
-				.success(function(data){
-					var links = [];
-
-					angular.forEach(data, function(link){
-						var item = {};
-
-						item.label = link.name;	
-						item.action = function(){
-							window.open(link.link);
-						}
-
-						links.push(item);
-					});
-					
-					$scope.menu.pages[0] = links;
-				})
-		}
-
-		$scope.fetchLinks();
-
-		$scope.$on('closeSidenav', function(){
-			$mdSidenav('left').close();
-		});
-
-		$scope.$on('fetchLinks', function(){
-			$scope.fetchLinks();
-		});
 	}]);
 app
 	.controller('equipmentContentContainerController', ['$scope', 'Helper', function($scope, Helper){
@@ -2760,6 +2801,8 @@ app
 			Helper.cancel();
 		}
 
+		$scope.duplicate = false;
+
 		$scope.reservation = {};
 
 		$scope.reservation.equipment_types = [];
@@ -2769,10 +2812,36 @@ app
 		$scope.reservation.date_end = new Date();
 		$scope.reservation.time_end = new Date();
 
-		$scope.min_start_time = new Date();
-		$scope.min_start_date = new Date();
+		var formatDateToObject = function(){
+			$scope.reservation.date_start = new Date($scope.reservation.date_start);
+			$scope.reservation.date_end = new Date($scope.reservation.date_end);
+			$scope.reservation.time_start = new Date($scope.reservation.time_start);
+			$scope.reservation.time_end = new Date($scope.reservation.time_end);
+		}
 
-		$scope.min_end_time = new Date();
+		$scope.checkDuplicate = function(){
+			if($scope.reservation.location_id)
+			{				
+				var request = {};
+
+				request.location_id = $scope.reservation.location_id;
+				request.date_start = new Date($scope.reservation.date_start).toDateString();
+				request.date_end = new Date($scope.reservation.date_end).toDateString();
+				request.time_start = new Date($scope.reservation.time_start).toLocaleTimeString();
+				request.time_end = new Date($scope.reservation.time_end).toLocaleTimeString();
+
+
+				Helper.post('/reservation/check-duplicate', request)
+					.success(function(data){
+						$scope.duplicate = data;
+						formatDateToObject();
+					});
+			}
+		}
+
+		$scope.locationChange = function(){
+			$scope.checkDuplicate();
+		}
 
 		$scope.setDateStart = function(){
 			$scope.reservation.time_start.setMonth($scope.reservation.date_start.getMonth());
@@ -2792,6 +2861,8 @@ app
 			{
 				$scope.reservation.date_end = new Date($scope.reservation.date_start);				
 			}
+
+			$scope.checkDuplicate();
 		}
 
 		$scope.setDateEnd = function(){
@@ -2805,6 +2876,8 @@ app
 			{
 				$scope.reservation.time_end = new Date($scope.reservation.time_start);
 			}
+
+			$scope.checkDuplicate();
 		}
 
 		$scope.timeStartChanged = function(){
@@ -2816,9 +2889,12 @@ app
 			}
 
 			$scope.checkEquipment($scope.reservation.time_start, $scope.reservation.time_end);
+
+			$scope.checkDuplicate();
 		} 
 
 		$scope.timeEndChanged = function(){			
+			$scope.checkDuplicate();
 			$scope.checkEquipment($scope.reservation.time_start, $scope.reservation.time_end);
 		}
 
@@ -2829,7 +2905,7 @@ app
 
 				$scope.reservation.time_start = new Date($scope.reservation.time_start);
 				
-				$scope.reservation.time_end.setHours(0,0,0,0);
+				$scope.reservation.time_end.setHours(23,59,59);
 
 				$scope.reservation.time_end = new Date($scope.reservation.time_end);
 			}
@@ -2841,9 +2917,16 @@ app
 
 				$scope.min_end_time = new Date();
 			}
+
+			$scope.checkDuplicate();
 		}
 
 		$scope.checkEquipment = function(start, end){
+			var date = {
+				'start': new Date(start).toDateString(),
+				'end': new Date(end).toDateString(),
+			}
+
 			var request = {
 				'with': [
 					{
@@ -2854,8 +2937,8 @@ app
 							'whereNull': ['schedule_approver_id' ,'equipment_approver_id'],
 							'whereBetween': {
 								'label': 'start',
-								'start': start,
-								'end': end,
+								'start': date.start,
+								'end': date.end,
 							}
 						},
 					}
@@ -2865,11 +2948,46 @@ app
 			Helper.post('/equipment-type/enlist', request)
 				.success(function(data){
 					$scope.equipment_types = data
+
+					if($scope.config.action == 'edit')
+					{
+						angular.forEach($scope.equipment_types, function(item, key){
+							$scope.reservation.equipment_types.push(null);
+
+							var query = {};
+							query.with = [
+								{
+									'relation': 'equipment_type.equipment',
+									'withTrashed': false,
+								}
+							];
+							query.where = [
+								{
+									'label': 'reservation_id',
+									'condition': '=',
+									'value': $scope.reservation.id,
+								},
+								{
+									'label': 'equipment_type_id',
+									'condition': '=',
+									'value': item.id,
+								},
+							];
+							query.first = true;
+
+							Helper.post('/reservation-equipment/enlist', query)
+								.success(function(data){
+									$scope.count--;
+									if(data)
+									{
+										$scope.reservation.equipment_types.splice(key, 1, data.equipment_type);
+									}
+								});
+						});
+					}
 				});
 		}
 		
-		$scope.checkEquipment($scope.reservation.time_start, $scope.reservation.time_end);
-
 		$scope.busy = false;
 
 		Helper.get('/location')
@@ -2877,26 +2995,22 @@ app
 				$scope.locations = data;
 			});
 
+		if($scope.config.action == 'create')
+		{
+			$scope.min_start_time = new Date();
+			$scope.min_start_date = new Date();
 
-		// Helper.get('/equipment-type')
-		// 	.success(function(data){
-		// 		$scope.equipment_types = data;
-		// 	})
+			$scope.min_end_time = new Date();
+
+			$scope.checkEquipment($scope.reservation.time_start, $scope.reservation.time_end);
+		}
 
 		if($scope.config.action == 'edit')
 		{
 			var request = {
 				'with': [
 					{
-						'relation': 'location',
-						'withTrashed': true,
-					},
-					{
-						'relation': 'user',
-						'withTrashed': true,
-					},
-					{
-						'relation': 'equipment',
+						'relation': 'equipment_types',
 						'withTrashed': false,
 					},
 				],
@@ -2904,7 +3018,7 @@ app
 					{
 						'label': 'id',
 						'condition': '=',
-						'value': config.id,
+						'value': $scope.config.id,
 					},
 				],
 				'first' : true,
@@ -2916,6 +3030,21 @@ app
 					data.end = data.end ? new Date(data.end) : null;
 
 					$scope.reservation = data;
+					
+					$scope.reservation.allDay = data.allDay ? true : false;
+
+					$scope.reservation.date_start = new Date(data.start);
+					$scope.reservation.date_end = new Date(data.end);
+
+					$scope.reservation.time_start = new Date(data.start);
+					$scope.reservation.time_end = new Date(data.end);
+
+					$scope.min_start_time = new Date(data.start);
+					$scope.min_start_date = new Date(data.end);
+
+					$scope.min_end_time = new Date(data.end);
+
+					$scope.checkEquipment($scope.reservation.time_start, $scope.reservation.time_end);
 				})
 				.error(function(){
 					Helper.error();
@@ -2933,43 +3062,53 @@ app
 				return;
 			}
 
-			$scope.busy = true;
+			if(!$scope.duplicate)
+			{			
+				$scope.busy = true;
 
-			$scope.reservation.date_start = $scope.reservation.date_start.toDateString();
-			$scope.reservation.date_end = $scope.reservation.date_end.toDateString();
+				$scope.reservation.date_start = $scope.reservation.date_start.toDateString();
+				$scope.reservation.date_end = $scope.reservation.date_end.toDateString();
+				$scope.reservation.time_start = $scope.reservation.time_start.toLocaleTimeString();
+				$scope.reservation.time_end = $scope.reservation.time_end.toLocaleTimeString();
 
-			$scope.reservation.time_start = $scope.reservation.time_start.toLocaleTimeString();
-			$scope.reservation.time_end = $scope.reservation.time_end.toLocaleTimeString();
+				if($scope.config.action == 'create')
+				{
+					Helper.post('/reservation', $scope.reservation)
+						.success(function(duplicate){
+							if(!duplicate)
+							{
+								Helper.stop();
+							}
+							
+							$scope.busy = false;
+							$scope.duplicate = duplicate;
+						})
+						.error(function(){
+							$scope.busy = false;
+							$scope.error = true;
 
-			if($scope.config.action == 'create')
-			{
-				Helper.post('/reservation', $scope.reservation)
-					.success(function(){
-						Helper.stop();
-					})
-					.error(function(){
-						$scope.busy = false;
-						$scope.error = true;
+							formatDateToObject();
+						});
+				}
+				else if($scope.config.action == 'edit')
+				{
+					Helper.put('/reservation' + '/' + $scope.config.id, $scope.reservation)
+						.success(function(duplicate){
+							if(!duplicate)
+							{
+								Helper.stop();
+							}
+							
+							$scope.busy = false;
+							$scope.duplicate = duplicate;
+						})
+						.error(function(){
+							$scope.busy = false;
+							$scope.error = true;
 
-						$scope.reservation.date_start = new Date($scope.reservation.date_start);
-						$scope.reservation.date_end = new Date($scope.reservation.date_end);
-						$scope.reservation.time_start = new Date($scope.reservation.time_start);
-						$scope.reservation.time_end = new Date($scope.reservation.time_end);
-					});
-			}
-			else if($scope.config.action == 'edit')
-			{
-				Helper.put('/reservation' + '/' + $scope.config.id, $scope.reservation)
-					.success(function(){
-						Helper.stop();
-					})
-					.error(function(){
-						$scope.busy = false;
-						$scope.error = true;
-
-						$scope.reservation.time_start = new Date($scope.reservation.time_start);
-						$scope.reservation.time_end = new Date($scope.reservation.time_end);
-					});
+							formatDateToObject();
+						});
+				}
 			}
 		}
 	}]);
@@ -2991,11 +3130,9 @@ app
 			'template':'/app/components/reservations/templates/dialogs/reservation-dialog.template.html',
 			'controller': 'reservationDialogController',
 			'action':'create',
-			'message': 'Reservation created',
 		}
 
 		$scope.subheader.all.request = {
-			'withTrashed':false,
 			'with': [
 				{
 					'relation':'location',
@@ -3048,7 +3185,6 @@ app
 						item.id = location.id;
 						item.label = location.name;
 						item.request = {
-							'withTrashed': false,
 							'with': [
 								{
 									'relation':'location',
@@ -3142,7 +3278,6 @@ app
 		};
 
 		$scope.toolbar.options = true;
-		$scope.toolbar.showInactive = true;
 
 		$scope.toolbar.refresh = function(){
 			$scope.$emit('refresh');

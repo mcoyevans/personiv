@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 
 use App\Reservation;
+use App\ReservationEquipment;
 use App\EquipmentType;
 use App\User;
 
@@ -20,6 +21,36 @@ use Notification;
 
 class ReservationController extends Controller
 {
+    public function checkDuplicate(Request $request)
+    {
+        $start = Carbon::parse($request->date_start .' '. $request->time_start);
+        $end = Carbon::parse($request->date_end .' '. $request->time_end);
+
+        $new = Reservation::whereNotNull('schedule_approver_id')->whereNotNull('equipment_approver_id')->where('location_id', $request->location_id)
+            ->where(function($query) use ($start, $end){
+                // in between approved reservation
+                $query->where('start', '<=', $start)->where('end', '>=', $end);
+                // overlap on start of approved reservation
+                $query->orWhereBetween('start', [$start, $end]);
+                // overlap on end of approved reservation
+                $query->orWhereBetween('end', [$start, $end]);
+            })->first();
+
+        $existing = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->whereNotNull('equipment_approver_id')->where('location_id', $request->location_id)
+            ->where(function($query) use ($start, $end){
+                // in between approved reservation
+                $query->where('start', '<=', $start)->where('end', '>=', $end);
+                // overlap on start of approved reservation
+                $query->orWhereBetween('start', [$start, $end]);
+                // overlap on end of approved reservation
+                $query->orWhereBetween('end', [$start, $end]);
+            })->first();
+
+        $reservation = $request->id ? $existing : $new;
+
+        return response()->json($reservation ? true : false);
+    }
+
     /**
      * Display a listing of the resource with parameters.
      *
@@ -124,21 +155,34 @@ class ReservationController extends Controller
             'time_end' => 'required',
         ]);
 
-        DB::transaction(function() use($request){
+        $start = Carbon::parse($request->date_start .' '. $request->time_start);
+        $end = Carbon::parse($request->date_end .' '. $request->time_end);
+
+        $duplicate = Reservation::whereNotNull('schedule_approver_id')->whereNotNull('equipment_approver_id')->where('location_id', $request->location_id)
+            ->where(function($query) use ($start, $end){
+                // in between approved reservation
+                $query->where('start', '<=', $start)->where('end', '>=', $end);
+                // overlap on start of approved reservation
+                $query->orWhereBetween('start', [$start, $end]);
+                // overlap on end of approved reservation
+                $query->orWhereBetween('end', [$start, $end]);
+            });
+
+        DB::transaction(function() use($request, $start, $end){
             $reservation = new Reservation;
 
             $reservation->title = $request->title;
             $reservation->remarks = $request->remarks;
             $reservation->location_id = $request->location_id;
             $reservation->user_id = $request->user()->id;
-            $reservation->start = Carbon::parse($request->date_start .' '. $request->time_start)->toDateTimeString();
+            $reservation->start = $start->toDateTimeString();
 
             if(Carbon::parse($request->date_start .' '. $request->time_start)->gt(Carbon::parse($request->date_end .' '. $request->time_end)))
             {
                 abort(422, 'End date cannot be earlier than start date');
             }
 
-            $reservation->end = Carbon::parse($request->date_end .' '. $request->time_end)->toDateTimeString();
+            $reservation->end = $end->toDateTimeString();
             $reservation->allDay = $request->has('allDay') ? true : false;
 
             $reservation->save();
@@ -189,7 +233,63 @@ class ReservationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $this->authorize('update', Reservation::find($id));
+
+        $this->validate($request, [
+            'title' => 'required',
+            'location_id' => 'required',
+            'date_start' => 'required',
+            'date_end' => 'required',
+            'time_start' => 'required',
+            'time_end' => 'required',
+        ]);
+
+        $start = Carbon::parse($request->date_start .' '. $request->time_start);
+        $end = Carbon::parse($request->date_end .' '. $request->time_end);
+
+        $duplicate = Reservation::whereNotIn('id', [$id])->whereNotNull('schedule_approver_id')->whereNotNull('equipment_approver_id')->where('location_id', $request->location_id)
+            ->where(function($query) use ($start, $end){
+                // in between approved reservation
+                $query->where('start', '<=', $start)->where('end', '>=', $end);
+                // overlap on start of approved reservation
+                $query->orWhereBetween('start', [$start, $end]);
+                // overlap on end of approved reservation
+                $query->orWhereBetween('end', [$start, $end]);
+            });
+
+        DB::transaction(function() use($request, $start, $end, $id){
+            $reservation = Reservation::where('id', $id)->first();
+
+            $reservation->title = $request->title;
+            $reservation->remarks = $request->remarks;
+            $reservation->location_id = $request->location_id;
+            $reservation->user_id = $request->user()->id;
+            $reservation->start = $start->toDateTimeString();
+
+            if(Carbon::parse($request->date_start .' '. $request->time_start)->gt(Carbon::parse($request->date_end .' '. $request->time_end)))
+            {
+                abort(422, 'End date cannot be earlier than start date');
+            }
+
+            $reservation->end = $end->toDateTimeString();
+            $reservation->allDay = $request->allDay ? true : false;
+
+            $reservation->save();
+
+            $reservation->load('user');
+
+            if($request->has('equipment_types'))
+            {
+                ReservationEquipment::where('reservation_id', $id)->delete();
+
+                for ($i=0; $i < count($request->equipment_types); $i++) { 
+                    if(isset($request->input('equipment_types')[$i]['id']))
+                    {
+                        $reservation->equipment_types()->save(EquipmentType::find($request->input('equipment_types')[$i]['id']), ['approved' => false]);
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -200,6 +300,15 @@ class ReservationController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $reservation = Reservation::withCount('equipment_types')->where('id', $id)->first();
+
+        $this->authorize('delete', $reservation);
+
+        if($reservation->equipment_types_count)
+        {
+            ReservationEquipment::where('reservation_id', $id)->delete();
+        }
+
+        $reservation->delete();
     }
 }

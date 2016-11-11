@@ -13,6 +13,11 @@ class ReservationEquipment extends Model
     	return $this->belongsTo('App\Equipment');
     }
 
+    public function equipment_type()
+    {
+    	return $this->belongsTo('App\EquipmentType');
+    }
+
     public function reservation()
     {
     	return $this->belongsTo('App\Reservation');

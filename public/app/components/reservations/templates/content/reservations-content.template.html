@@ -16,7 +16,7 @@
 					<div class="md-list-item-text">
 						<h3>{{reservation.title}}</h3>
 						<h4>{{reservation.user.name}} - {{reservation.user.position}}</h4>
-						<p>{{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{reservation.start | date: 'hh:mma'}} to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span></p>
+						<p>{{reservation.location.name}} - {{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{reservation.start | date: 'hh:mma'}} to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span></p>
 					</div>
 				</md-list-item>
 			</md-list>
@@ -29,7 +29,7 @@
 					<div class="md-list-item-text">
 						<h3>{{reservation.title}}</h3>
 						<h4>{{reservation.user.name}} - {{reservation.user.position}}</h4>
-						<p>{{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{reservation.start | date: 'hh:mma'}} to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span></p>
+						<p>{{reservation.location.name}} - {{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{reservation.start | date: 'hh:mma'}} to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span></p>
 					</div>
 					<md-menu md-position-mode="target-right target" class="md-secondary" ng-show="reservation.options" ng-if="user.id == reservation.user_id">
 						<md-button aria-label="Menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">

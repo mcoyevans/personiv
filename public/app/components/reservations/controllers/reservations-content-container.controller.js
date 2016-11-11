@@ -53,6 +53,47 @@ app
 	    	Helper.customDialog(dialog);
 	    }
 
+	    $scope.editReservation = function(data){
+	    	data.action = 'edit';
+
+	    	Helper.set(data);
+
+	    	var dialog = {
+	    		'template':'/app/components/reservations/templates/dialogs/reservation-dialog.template.html',
+				'controller': 'reservationDialogController',
+	    	}
+
+			Helper.customDialog(dialog)
+				.then(function(){
+					Helper.notify('Reservation updated.');
+					$scope.refresh();
+				}, function(){
+					return;
+				});
+	    }
+
+	    $scope.deleteReservation = function(data){
+	    	var dialog = {};
+			dialog.title = 'Delete';
+			dialog.message = 'Delete this reservation?'
+			dialog.ok = 'Delete';
+			dialog.cancel = 'Cancel';
+
+			Helper.confirm(dialog)
+				.then(function(){
+					Helper.delete('/reservation/' + data.id)
+						.success(function(){
+							$scope.refresh();
+							Helper.notify('Reservation deleted.');
+						})
+						.error(function(){
+							Helper.error();
+						});
+				}, function(){
+					return;
+				})
+	    }
+
 		/*
 		 *
 		 * Object for calendar
