@@ -1,9 +1,14 @@
 app
-	.controller('reservationsToolbarController', ['$scope', '$filter', function($scope, $filter){
-		$scope.toolbar.childState = 'Reservations';
+	.controller('approvalsToolbarController', ['$scope', '$filter', function($scope, $filter){
+		$scope.toolbar.childState = 'Approvals';
 
 		$scope.$on('close', function(){
 			$scope.hideSearchBar();
+		});
+
+		$scope.$on('open', function(){
+			$scope.showSearchBar();
+			$scope.searchUserInput();
 		});
 
 		$scope.toolbar.getItems = function(query){
@@ -42,7 +47,7 @@ app
 		};
 
 		$scope.toolbar.options = true;
-
+		
 		$scope.toolbar.refresh = function(){
 			$scope.$emit('refresh');
 		}

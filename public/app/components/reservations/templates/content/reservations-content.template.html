@@ -12,7 +12,7 @@
 				Approved
 			</md-subheader>
 			<md-list>
-				<md-list-item class="md-3-line secondary-button-padding" ng-repeat="reservation in reservation.approved" ng-click="viewReservation(reservation)" ng-if="reservation.schedule_approver_id && reservation.equipment_approver_id">
+				<md-list-item class="md-3-line secondary-button-padding" ng-repeat="reservation in reservation.approved | filter:toolbar.searchText" ng-click="viewReservation(reservation)" ng-if="reservation.schedule_approver_id && reservation.equipment_approver_id">
 					<div class="md-list-item-text">
 						<h3>{{reservation.title}}</h3>
 						<h4>{{reservation.user.name}} - {{reservation.user.position}}</h4>
@@ -25,7 +25,7 @@
 				Pending
 			</md-subheader>
 			<md-list>
-				<md-list-item class="md-3-line secondary-button-padding" ng-repeat="reservation in reservation.pending" ng-mouseover="reservation.options = true" ng-mouseout="reservation.options = false" ng-click="viewReservation(reservation)" ng-if="!reservation.schedule_approver_id && !reservation.equipment_approver_id">
+				<md-list-item class="md-3-line secondary-button-padding" ng-repeat="reservation in reservation.pending | filter:toolbar.searchText" ng-mouseover="reservation.options = true" ng-mouseout="reservation.options = false" ng-click="viewReservation(reservation)" ng-if="!reservation.schedule_approver_id && !reservation.equipment_approver_id">
 					<div class="md-list-item-text">
 						<h3>{{reservation.title}}</h3>
 						<h4>{{reservation.user.name}} - {{reservation.user.position}}</h4>

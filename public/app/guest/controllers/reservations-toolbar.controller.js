@@ -1,4 +1,4 @@
-app
+guest
 	.controller('reservationsToolbarController', ['$scope', '$filter', function($scope, $filter){
 		$scope.toolbar.childState = 'Reservations';
 

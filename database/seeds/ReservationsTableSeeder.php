@@ -52,11 +52,11 @@ class ReservationsTableSeeder extends Seeder
                 'updated_at' => Carbon\Carbon::now()
             ],
             [
-                'title' => 'Pending reservation',
+                'title' => 'Another pending reservation',
                 'remarks' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nesciunt quis consequuntur quasi odio voluptates molestias, placeat, esse cum repellat provident praesentium molestiae quod, aperiam dolor ducimus illum. Molestiae, hic, unde.',
                 'location_id' => 3,
-                'start' => Carbon\Carbon::now(),
-                'end' => Carbon\Carbon::now()->addHour(),
+                'start' => Carbon\Carbon::now()->addHour(),
+                'end' => Carbon\Carbon::now()->addHours(2),
                 'user_id' => 1,
                 'allDay' => false,
                 'schedule_approver_id' => null,

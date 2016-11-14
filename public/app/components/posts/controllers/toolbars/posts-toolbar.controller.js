@@ -22,7 +22,7 @@ app
 		 *
 		*/
 		$scope.showSearchBar = function(){
-			// $scope.post.busy = true;
+			$scope.post.busy = true;
 			$scope.searchBar = true;
 		};
 
@@ -36,9 +36,6 @@ app
 			$scope.toolbar.searchItem = '';
 			/* Cancels the paginate when the user sent a query */
 			if($scope.searched){
-				// $scope.post.page = 1;
-				// $scope.post.no_matches = false;
-				// $scope.post.items = [];
 				$scope.searched = false;
 				$scope.$emit('refresh');
 			}

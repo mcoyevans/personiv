@@ -24,6 +24,29 @@ app
 					}
 				}
 			})
+			.state('main.approvals', {
+				url: 'approvals',
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'approvalsContentContainerController',
+					},
+					'toolbar@main.approvals': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'approvalsToolbarController',
+					},
+					'subheader@main.approvals': {
+						templateUrl: '/app/components/approvals/templates/subheaders/approvals-subheader.template.html',
+						controller: 'approvalsSubheaderController',
+					},
+					'left-sidenav@main.approvals': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.approvals':{
+						templateUrl: '/app/components/approvals/templates/content/approvals-content.template.html',
+					}
+				}
+			})
 			.state('main.reservations', {
 				url: 'reservations',
 				views: {

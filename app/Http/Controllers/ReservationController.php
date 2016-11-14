@@ -21,6 +21,66 @@ use Notification;
 
 class ReservationController extends Controller
 {
+    /**
+     * Approve reservation according to users authorization.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function approve(Request $request)
+    {
+        if(!Gate::forUser($request->user())->allows('approvals'))
+        {
+            abort(403, 'Unauthorized action');
+        }
+
+        for ($i=0; $i < count($request->all()); $i++) { 
+            $this->validate($request, [
+                $i.'.id' => 'required',
+            ]);
+
+            DB::transaction(function() use($request, $i){
+                $duplicate = Reservation::whereNotIn('id', [$request->input($i.'.id')])->whereNotNull('schedule_approver_id')->where('location_id', $request->input($i.'.location_id'))
+                    ->where(function($query) use ($request, $i){
+                        // in between approved reservation
+                        $query->where('start', '<=', Carbon::parse($request->input($i.'.start')))->where('end', '>=', $end);
+                        // overlap on start of approved reservation
+                        $query->orWhereBetween('start', [Carbon::parse($request->input($i.'.start')), $end]);
+                        // overlap on end of approved reservation
+                        $query->orWhereBetween('end', [Carbon::parse($request->input($i.'.start')), $end]);
+                    });
+
+                if($duplicate)
+                {
+                    abort(422, 'Time not available.');
+                }
+
+                $reservation = Reservation::where('id', $request->input($i.'.id'))->first();
+
+                $reservation->schedule_approver_id = $request->user()->id;
+
+                $reservation->save();
+            });
+        }
+    }
+
+    /**
+     * Decline reservation according to users authorization.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function decline(Request $request)
+    {
+        if(!Gate::forUser($request->user())->allows('approvals'))
+        {
+            abort(403, 'Unauthorized action');
+        }
+    }
+
+    /**
+     * Checks the time start and end availability.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function checkDuplicate(Request $request)
     {
         $start = Carbon::parse($request->date_start .' '. $request->time_start);
@@ -89,10 +149,27 @@ class ReservationController extends Controller
         
         if($request->has('whereBetween'))
         {
-            $reservations->whereBetween($request->input('whereBetween.label'), [Carbon::parse($request->input('whereBetween.start')), Carbon::parse($request->input('whereBetween.end'))->addDay()]);   
+            $reservations->whereBetween($request->input('whereBetween.label'), [Carbon::parse($request->input('whereBetween.start')), Carbon::parse($request->input('whereBetween.end'))]);   
         }
         else{
             $reservations->whereBetween('start', [Carbon::parse('first day of this month'), Carbon::parse('first day of next month')]);   
+        }
+
+        if($request->has('approvals'))
+        {
+            $reservations->where('start', '>=', Carbon::now());
+
+            // IT
+            if($request->user()->group_id == 1)
+            {
+                $reservations->whereNull('equipment_approver_id');
+            }
+
+            // F & A
+            if($request->user()->group_id == 2)
+            {
+                $reservations->whereNull('schedule_approver_id');
+            }
         }
 
         if($request->has('search'))
@@ -167,6 +244,11 @@ class ReservationController extends Controller
                 // overlap on end of approved reservation
                 $query->orWhereBetween('end', [$start, $end]);
             });
+
+        if($duplicate)
+        {
+            return response()->json(true);
+        }
 
         DB::transaction(function() use($request, $start, $end){
             $reservation = new Reservation;
@@ -256,6 +338,11 @@ class ReservationController extends Controller
                 // overlap on end of approved reservation
                 $query->orWhereBetween('end', [$start, $end]);
             });
+
+        if($duplicate)
+        {
+            return response()->json(true);
+        }
 
         DB::transaction(function() use($request, $start, $end, $id){
             $reservation = Reservation::where('id', $id)->first();

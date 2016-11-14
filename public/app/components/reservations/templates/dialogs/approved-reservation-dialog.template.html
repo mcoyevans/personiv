@@ -24,13 +24,20 @@
         				<strong ng-if="reservation.remarks">Remarks: </strong>
         				<span>{{reservation.remarks}}</span>
         				<br>
-        				<strong ng-if="reservation.equipment_types.length">Reserved equipments:</strong>
-						<ul ng-if="reservation.equipment_types.length">
-							<li ng-repeat="equipment_type in reservation.equipment_types">{{equipment_type.name}}</li>
-						</ul>
         			</p>
         		</div>
         	</md-list-item>
         </md-list>
+        <div layout="column">
+            <strong ng-if="reservation.equipment_types.length">Reserved equipments:</strong>
+            <ul ng-if="reservation.equipment_types.length">
+                <li ng-repeat="equipment_type in reservation.equipment_types">{{equipment_type.name}}</li>
+            </ul>
+            <strong ng-if="reservation.schedule_approver || reservation.equipment_approver">Approved by:</strong>
+            <ul ng-if="reservation.schedule_approver || reservation.equipment_approver">
+                <li>Equipment: {{reservation.equipment_approver.name}}</li>
+                <li>Schedule: {{reservation.schedule_approver.name}}</li>
+            </ul>
+        </div>
     </md-dialog-content>
 </md-dialog>

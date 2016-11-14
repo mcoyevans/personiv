@@ -66,6 +66,19 @@ class AuthServiceProvider extends ServiceProvider
             return false;
         });
 
+        Gate::define('approvals', function($user){
+            $user = User::with('roles')->where('id', $user->id)->first();
+
+            foreach ($user->roles as $role) {
+                if($role->name == 'approvals')
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+
         Gate::define('manage-groups', function($user){
             $user = User::with('roles')->where('id', $user->id)->first();
 

@@ -1,4 +1,4 @@
-app
+guest
 	.controller('reservationsContentContainerController', ['$scope', '$compile', 'Helper', 'uiCalendarConfig', function($scope, $compile, Helper, uiCalendarConfig){
 		$scope.$emit('closeSidenav');
 
@@ -21,26 +21,6 @@ app
 		$scope.subheader = {};
 		$scope.subheader.show = true;
 		$scope.subheader.current = {};
-		
-		/*
-		 * Object for fab
-		 *
-		*/
-		$scope.fab = {};
-		$scope.fab.icon = 'mdi-plus';
-		$scope.fab.label = 'Reservation';
-
-		$scope.fab.action = function(){
-			Helper.set($scope.subheader.current.fab);
-
-			Helper.customDialog($scope.subheader.current.fab)
-				.then(function(){
-					Helper.notify('Reservation created.');
-					$scope.refresh();
-				}, function(){
-					return;
-				});
-		}
 
 	    $scope.viewReservation = function(data){
 	    	Helper.set(data);
@@ -197,9 +177,7 @@ app
 							}
 						});
 
-						$scope.eventSources.push($scope.reservation.approved);
-					
-						$scope.fab.show = true;
+						$scope.eventSources.push($scope.reservation.approved);					
 					}
 
 					$scope.refresh = function(){

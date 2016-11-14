@@ -118,11 +118,13 @@ Route::group(['prefix' => 'repost'], function(){
 
 /* Reservation */
 Route::group(['prefix' => 'reservation'], function(){
+	Route::post('approve', 'ReservationController@approve');
+	Route::post('decline', 'ReservationController@decline');
 	Route::post('enlist', 'ReservationController@enlist');
 	Route::post('check-duplicate', 'ReservationController@checkDuplicate');
 });
 
-/* Reservation */
+/* Reservation Equipment*/
 Route::group(['prefix' => 'reservation-equipment'], function(){
 	Route::post('enlist', 'ReservationEquipmentController@enlist');
 });

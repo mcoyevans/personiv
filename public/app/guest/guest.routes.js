@@ -21,4 +21,24 @@ guest
 					}
 				}
 			})
+			.state('wall.reservations', {
+				url: 'reservations',
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'reservationsContentContainerController',
+					},
+					'toolbar@wall.reservations': {
+						templateUrl: '/app/guest/templates/toolbar.template.html',
+						controller: 'reservationsToolbarController',
+					},
+					'subheader@wall.reservations': {
+						templateUrl: '/app/components/reservations/templates/subheaders/reservations-subheader.template.html',
+						controller: 'reservationsSubheaderController',
+					},
+					'content@wall.reservations':{
+						templateUrl: '/app/components/reservations/templates/content/reservations-content.template.html',
+					}
+				}
+			})
 	}]);
