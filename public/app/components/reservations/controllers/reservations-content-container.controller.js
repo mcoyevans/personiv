@@ -2,6 +2,18 @@ app
 	.controller('reservationsContentContainerController', ['$scope', '$compile', 'Helper', 'uiCalendarConfig', function($scope, $compile, Helper, uiCalendarConfig){
 		$scope.$emit('closeSidenav');
 
+		Helper.post('/user/check')
+			.success(function(data){
+				angular.forEach(data.roles, function(role){
+					if(role.name == 'reservations')
+					{
+						data.can_reserve = true;
+					}
+				});
+
+				$scope.current_user = data;
+			});
+
 		/*
 		 * Object for toolbar
 		 *
@@ -199,7 +211,7 @@ app
 
 						$scope.eventSources.push($scope.reservation.approved);
 					
-						$scope.fab.show = true;
+						$scope.fab.show = $scope.current_user.can_reserve ? true : false;
 					}
 
 					$scope.refresh = function(){

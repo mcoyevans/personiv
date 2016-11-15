@@ -48,6 +48,34 @@ app
 
 		$scope.toolbar.options = true;
 		
+		$scope.toolbar.sort = [
+			{
+				'label': 'Title',
+				'type': 'title',
+				'sortReverse': false,
+			},
+			{
+				'label': 'Remarks',
+				'type': 'remarks',
+				'sortReverse': false,
+			},
+			{
+				'label': 'Date Start',
+				'type': 'start',
+				'sortReverse': false,
+			},
+			{
+				'label': 'Date End',
+				'type': 'end',
+				'sortReverse': false,
+			},
+			{
+				'label': 'Recently added',
+				'type': 'created_at',
+				'sortReverse': false,
+			},
+		];
+		
 		$scope.toolbar.refresh = function(){
 			$scope.$emit('refresh');
 		}

@@ -9,9 +9,12 @@ use App\Http\Requests;
 use App\Reservation;
 use App\ReservationEquipment;
 use App\EquipmentType;
+use App\Hashtag;
+use App\Post;
 use App\User;
 
 use App\Notifications\ReservationCreated;
+use App\Notifications\PostCreated;
 
 use Auth;
 use Carbon\Carbon;
@@ -33,34 +36,60 @@ class ReservationController extends Controller
             abort(403, 'Unauthorized action');
         }
 
-        for ($i=0; $i < count($request->all()); $i++) { 
-            $this->validate($request, [
-                $i.'.id' => 'required',
-            ]);
+        $duplicate = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+            ->where(function($query) use ($request){
+                // in between approved reservation
+                $query->where('start', '<=', Carbon::parse($request->start))->where('end', '>=', Carbon::parse($request->end));
+                // overlap on start of approved reservation
+                $query->orWhereBetween('start', [Carbon::parse($request->start), Carbon::parse($request->end)]);
+                // overlap on end of approved reservation
+                $query->orWhereBetween('end', [Carbon::parse($request->start), Carbon::parse($request->end)]);
+            })->first();
 
-            DB::transaction(function() use($request, $i){
-                $duplicate = Reservation::whereNotIn('id', [$request->input($i.'.id')])->whereNotNull('schedule_approver_id')->where('location_id', $request->input($i.'.location_id'))
-                    ->where(function($query) use ($request, $i){
-                        // in between approved reservation
-                        $query->where('start', '<=', Carbon::parse($request->input($i.'.start')))->where('end', '>=', $end);
-                        // overlap on start of approved reservation
-                        $query->orWhereBetween('start', [Carbon::parse($request->input($i.'.start')), $end]);
-                        // overlap on end of approved reservation
-                        $query->orWhereBetween('end', [Carbon::parse($request->input($i.'.start')), $end]);
-                    });
-
-                if($duplicate)
-                {
-                    abort(422, 'Time not available.');
-                }
-
-                $reservation = Reservation::where('id', $request->input($i.'.id'))->first();
-
-                $reservation->schedule_approver_id = $request->user()->id;
-
-                $reservation->save();
-            });
+        if($duplicate)
+        {
+            return response()->json(true);
         }
+
+        $this->validate($request, [
+            'id' => 'required',
+        ]);
+
+        DB::transaction(function() use($request){
+            $reservation = Reservation::with('location', 'user')->where('id', $request->id)->first();
+
+            $reservation->schedule_approver_id = $request->user()->id;
+
+            $reservation->save();
+
+            $post = new Post;
+
+            $post->title = 'Room reservation for ' . $reservation->location->name;
+            $post->body = $reservation->user->name .' requested a room reservation for ' .$reservation->location->name. ' from ' .Carbon::parse($reservation->start)->toDayDateTimeString(). ' to '. Carbon::parse($reservation->end)->toDayDateTimeString().'.';
+            $post->pinned = false;
+            $post->allow_comments = true;
+            $post->user_id = $request->user()->id;
+
+            $post->save();
+
+            $post->load('user');
+
+            $tags = ['Room Reservation', $reservation->location->name];
+
+            $hashtags = array();
+
+            foreach ($tags as $item) {
+                $hashtag = new Hashtag(['tag' => $item]);
+
+                array_push($hashtags, $hashtag);
+            }
+
+            $post->hashtags()->saveMany($hashtags);
+
+            $users = User::whereNotIn('id', [$request->user()->id])->get();
+
+            Notification::send($users, new PostCreated($post));
+        });
     }
 
     /**
@@ -128,6 +157,32 @@ class ReservationController extends Controller
         if($request->has('with'))
         {
             for ($i=0; $i < count($request->with); $i++) { 
+                if(isset($request->input('with')[$i]['available_units']))
+                {
+                    $reservation = Reservation::find($request->input('where')[0]['value']);
+
+                    $reservations->with(['equipment_types' => function($query) use($request, $reservation){
+                        $query->with(['equipment' => function($query) use($request, $reservation){
+                            $query->whereDoesntHave('reservations', function($query) use($request, $reservation){
+                                $start = Carbon::parse($reservation->start);
+                                $end = Carbon::parse($reservation->end);
+
+                                $query->whereNull('schedule_approver_id')->whereNull('equipment_approver_id');
+                                $query->where(function($query) use ($start, $end){
+                                    // in between approved reservation
+                                    $query->where('start', '<=', $start)->where('end', '>=', $end);
+                                    // overlap on start of approved reservation
+                                    $query->orWhereBetween('start', [$start, $end]);
+                                    // overlap on end of approved reservation
+                                    $query->orWhereBetween('end', [$start, $end]);
+                                });
+                            });
+                        }]);
+                    }]);
+
+                    continue;   
+                }
+
                 if(!$request->input('with')[$i]['withTrashed'])
                 {
                     $reservations->with($request->input('with')[$i]['relation']);
@@ -243,7 +298,7 @@ class ReservationController extends Controller
                 $query->orWhereBetween('start', [$start, $end]);
                 // overlap on end of approved reservation
                 $query->orWhereBetween('end', [$start, $end]);
-            });
+            })->first();
 
         if($duplicate)
         {
@@ -337,7 +392,7 @@ class ReservationController extends Controller
                 $query->orWhereBetween('start', [$start, $end]);
                 // overlap on end of approved reservation
                 $query->orWhereBetween('end', [$start, $end]);
-            });
+            })->first();
 
         if($duplicate)
         {

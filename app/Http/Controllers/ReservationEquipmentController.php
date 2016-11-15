@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 
+use App\Reservation;
 use App\ReservationEquipment;
 
 use Auth;
@@ -15,6 +16,91 @@ use Gate;
 
 class ReservationEquipmentController extends Controller
 {
+    /**
+     * Approve equipment.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function approve(Request $request)
+    {
+        if(!Gate::forUser($request->user())->allows('approvals') && $request->user()->group_id != 1)
+        {
+            abort(403, 'Unauthorized action.');
+        }
+
+        DB::transaction(function() use($request){
+            $reservation = Reservation::find($request->input('0.pivot.reservation_id'));
+
+            for ($i=0; $i < count($request->all()); $i++) {
+                $this->validate($request, [
+                    $i.'.equipment_id' => 'required',
+                    $i.'.pivot' => 'required',
+                ]);
+
+                $duplicate = ReservationEquipment::where('approved', true)->where('equipment_id', $request->input($i.'.pivot.equipment_id'))->whereHas('reservation', function($query) use($reservation){
+                    $start = Carbon::parse($reservation->start);
+                    $end = Carbon::parse($reservation->end);
+
+                    $query->where(function($query) use ($start, $end){
+                        // in between approved reservation
+                        $query->where('start', '<=', $start)->where('end', '>=', $end);
+                        // overlap on start of approved reservation
+                        $query->orWhereBetween('start', [$start, $end]);
+                        // overlap on end of approved reservation
+                        $query->orWhereBetween('end', [$start, $end]);
+                    });
+                })->first();
+
+                if($duplicate)
+                {
+                    abort(422, 'Equipment has conflict with other reservation.');
+                }
+
+                $reservation_equipment = ReservationEquipment::find($request->input($i.'.pivot.id'));
+
+                $reservation_equipment->equipment_id = $request->input($i.'.equipment_id');
+                $reservation_equipment->approved = true;
+
+                $reservation_equipment->save();
+            }
+
+            $reservation->equipment_approver_id = $request->user()->id;
+
+            $reservation->save();
+        });
+    }
+
+    /**
+     * Check equipment for conflict schedule.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function checkDuplicate(Request $request)
+    {
+        $reservation = Reservation::find($request->input('pivot.reservation_id'));
+
+        $duplicate = ReservationEquipment::where('approved', true)->where('equipment_id', $request->input('pivot.equipment_id'))->whereHas('reservation', function($query) use($reservation){
+            $start = Carbon::parse($reservation->start);
+            $end = Carbon::parse($reservation->end);
+
+            $query->where(function($query) use ($start, $end){
+                // in between approved reservation
+                $query->where('start', '<=', $start)->where('end', '>=', $end);
+                // overlap on start of approved reservation
+                $query->orWhereBetween('start', [$start, $end]);
+                // overlap on end of approved reservation
+                $query->orWhereBetween('end', [$start, $end]);
+            });
+        })->first();
+
+        return response()->json($duplicate ? true : false);
+    }
+
+    /**
+     * Display a listing of the resource with parameters.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function enlist(Request $request)
     {
         $reservation_equipment = ReservationEquipment::query();

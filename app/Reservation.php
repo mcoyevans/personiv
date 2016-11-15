@@ -28,12 +28,12 @@ class Reservation extends Model
 
     public function equipment()
     {
-    	return $this->belongsToMany('App\Equipment', 'reservation_equipments')->withTimestamps();;
+    	return $this->belongsToMany('App\Equipment', 'reservation_equipments')->withTimestamps()->withPivot('id');
     }
 
     public function equipment_types()
     {
-        return $this->belongsToMany('App\EquipmentType', 'reservation_equipments')->withTimestamps();;
+        return $this->belongsToMany('App\EquipmentType', 'reservation_equipments')->withTimestamps()->withPivot('id');
     }
 
     public function location()

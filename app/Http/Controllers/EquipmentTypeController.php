@@ -50,7 +50,18 @@ class EquipmentTypeController extends Controller
                             for ($j=0; $j < count($request->input('with')[$i]['whereDoesntHave']['whereNull']); $j++) { 
                                 $query->whereNull($request->input('with')[$i]['whereDoesntHave']['whereNull'][$j]);
                             }
-                            $query->whereBetween($request->input('with')[$i]['whereDoesntHave']['whereBetween']['label'], [Carbon::parse($request->input('with')[$i]['whereDoesntHave']['whereBetween']['start']), Carbon::parse($request->input('with')[$i]['whereDoesntHave']['whereBetween']['end'])]);
+
+                            $start = Carbon::parse($request->input('with')[$i]['whereDoesntHave']['whereBetween']['start']);
+                            $end = Carbon::parse($request->input('with')[$i]['whereDoesntHave']['whereBetween']['end']);
+
+                            $query->where(function($query) use ($start, $end){
+                                // in between approved reservation
+                                $query->where('start', '<=', $start)->where('end', '>=', $end);
+                                // overlap on start of approved reservation
+                                $query->orWhereBetween('start', [$start, $end]);
+                                // overlap on end of approved reservation
+                                $query->orWhereBetween('end', [$start, $end]);
+                            });
                         });
                     }]);
                 }

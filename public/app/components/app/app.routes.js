@@ -36,7 +36,7 @@ app
 						controller: 'approvalsToolbarController',
 					},
 					'subheader@main.approvals': {
-						templateUrl: '/app/components/approvals/templates/subheaders/approvals-subheader.template.html',
+						templateUrl: '/app/components/reservations/templates/subheaders/reservations-subheader.template.html',
 						controller: 'approvalsSubheaderController',
 					},
 					'left-sidenav@main.approvals': {

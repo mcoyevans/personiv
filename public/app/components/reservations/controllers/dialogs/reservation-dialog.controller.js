@@ -8,6 +8,8 @@ app
 
 		$scope.duplicate = false;
 
+		$scope.fallback = {};
+
 		$scope.reservation = {};
 
 		$scope.reservation.equipment_types = [];
@@ -18,10 +20,17 @@ app
 		$scope.reservation.time_end = new Date();
 
 		var formatDateToObject = function(){
-			$scope.reservation.date_start = new Date($scope.reservation.date_start);
-			$scope.reservation.date_end = new Date($scope.reservation.date_end);
-			$scope.reservation.time_start = new Date($scope.reservation.time_start);
-			$scope.reservation.time_end = new Date($scope.reservation.time_end);
+			$scope.fallback.date_start = new Date($scope.reservation.date_start);
+			$scope.fallback.date_end = new Date($scope.reservation.date_end);
+			$scope.fallback.time_start = new Date($scope.reservation.time_start);
+			$scope.fallback.time_end = new Date($scope.reservation.time_end);
+		}
+
+		var fallbackDateToObject = function(){
+			$scope.reservation.date_start = new Date($scope.fallback.date_start);
+			$scope.reservation.date_end = new Date($scope.fallback.date_end);
+			$scope.reservation.time_start = new Date($scope.fallback.time_start);
+			$scope.reservation.time_end = new Date($scope.fallback.time_end);
 		}
 
 		$scope.checkDuplicate = function(){
@@ -39,7 +48,6 @@ app
 				Helper.post('/reservation/check-duplicate', request)
 					.success(function(data){
 						$scope.duplicate = data;
-						formatDateToObject();
 					});
 			}
 		}
@@ -271,6 +279,8 @@ app
 			{			
 				$scope.busy = true;
 
+				formatDateToObject();
+
 				$scope.reservation.date_start = $scope.reservation.date_start.toDateString();
 				$scope.reservation.date_end = $scope.reservation.date_end.toDateString();
 				$scope.reservation.time_start = $scope.reservation.time_start.toLocaleTimeString();
@@ -292,7 +302,7 @@ app
 							$scope.busy = false;
 							$scope.error = true;
 
-							formatDateToObject();
+							fallbackDateToObject();
 						});
 				}
 				else if($scope.config.action == 'edit')
@@ -311,7 +321,7 @@ app
 							$scope.busy = false;
 							$scope.error = true;
 
-							formatDateToObject();
+							fallbackDateToObject();
 						});
 				}
 			}

@@ -8,6 +8,12 @@ app
 		*/
 		$scope.toolbar = {};
 
+		$scope.toolbar.sortBy = function(filter){
+			filter.sortReverse = !filter.sortReverse;			
+			$scope.sortType = filter.type;
+			$scope.sortReverse = filter.sortReverse;
+		}
+
 		/*
 		 * Object for subheader
 		 *
@@ -17,40 +23,6 @@ app
 		$scope.subheader.current = {};
 
 		$scope.subheader.mark = {};
-
-		$scope.subheader.sort = [
-			{
-				'label': 'Title',
-				'type': 'title',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Remarks',
-				'type': 'remarks',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Date Start',
-				'type': 'start',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Date End',
-				'type': 'end',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Recently added',
-				'type': 'created_at',
-				'sortReverse': false,
-			},
-		];
-
-		$scope.subheader.sortBy = function(filter){
-			filter.sortReverse = !filter.sortReverse;			
-			$scope.sortType = filter.type;
-			$scope.sortReverse = filter.sortReverse;
-		}
 
 		$scope.subheader.toggleMark = function(){
 			$scope.subheader.mark.all = !$scope.subheader.mark.all;
@@ -84,11 +56,16 @@ app
 	    	Helper.set(data);
 
 	    	var dialog = {
-	    		'template':'/app/components/reservations/templates/dialogs/approved-reservation-dialog.template.html',
-				'controller': 'approvedReservationDialogController',
+	    		'template':'/app/components/approvals/templates/dialogs/approval-dialog.template.html',
+				'controller': 'approvalDialogController',
 	    	}
 
-	    	Helper.customDialog(dialog);
+	    	Helper.customDialog(dialog)
+	    		.then(function(){
+	    			$scope.refresh();
+	    		}, function(){
+	    			return;
+	    		});
 	    }
 
 	    /* Action originates from subheader */

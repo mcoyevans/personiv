@@ -127,4 +127,6 @@ Route::group(['prefix' => 'reservation'], function(){
 /* Reservation Equipment*/
 Route::group(['prefix' => 'reservation-equipment'], function(){
 	Route::post('enlist', 'ReservationEquipmentController@enlist');
+	Route::post('check-duplicate', 'ReservationEquipmentController@checkDuplicate');
+	Route::post('approve', 'ReservationEquipmentController@approve');
 });

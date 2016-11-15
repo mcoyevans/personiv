@@ -411,7 +411,7 @@ app
 					$scope.post.items = data.data;
 					$scope.post.show = true;
 
-					$scope.fab.show = $scope.user.can_post ? true : false;
+					$scope.fab.show = $scope.current_user.can_post ? true : false;
 
 					if(data.data.length){
 						// iterate over each record and set the format
