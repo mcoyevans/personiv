@@ -62,33 +62,36 @@ class ReservationController extends Controller
 
             $reservation->save();
 
-            $post = new Post;
+            if($reservation->schedule_approver_id && $reservation->equipment_approver_id)
+            {
+                $post = new Post;
 
-            $post->title = 'Room reservation for ' . $reservation->location->name;
-            $post->body = $reservation->user->name .' requested a room reservation for ' .$reservation->location->name. ' from ' .Carbon::parse($reservation->start)->toDayDateTimeString(). ' to '. Carbon::parse($reservation->end)->toDayDateTimeString().'.';
-            $post->pinned = false;
-            $post->allow_comments = true;
-            $post->user_id = $request->user()->id;
+                $post->title = 'Room reservation for ' . $reservation->location->name;
+                $post->body = $reservation->user->name .' requested a room reservation for ' .$reservation->location->name. ' from ' .Carbon::parse($reservation->start)->toDayDateTimeString(). ' to '. Carbon::parse($reservation->end)->toDayDateTimeString().'.';
+                $post->pinned = false;
+                $post->allow_comments = true;
+                $post->user_id = $reservation->user_id;
 
-            $post->save();
+                $post->save();
 
-            $post->load('user');
+                $post->load('user');
 
-            $tags = ['Room Reservation', $reservation->location->name];
+                $tags = ['#Room Reservation', '#'.$reservation->location->name];
 
-            $hashtags = array();
+                $hashtags = array();
 
-            foreach ($tags as $item) {
-                $hashtag = new Hashtag(['tag' => $item]);
+                foreach ($tags as $item) {
+                    $hashtag = new Hashtag(['tag' => $item]);
 
-                array_push($hashtags, $hashtag);
+                    array_push($hashtags, $hashtag);
+                }
+
+                $post->hashtags()->saveMany($hashtags);
+
+                $users = User::whereNotIn('id', [$request->user()->id])->get();
+
+                Notification::send($users, new PostCreated($post));
             }
-
-            $post->hashtags()->saveMany($hashtags);
-
-            $users = User::whereNotIn('id', [$request->user()->id])->get();
-
-            Notification::send($users, new PostCreated($post));
         });
     }
 
@@ -217,7 +220,7 @@ class ReservationController extends Controller
             // IT
             if($request->user()->group_id == 1)
             {
-                $reservations->whereNull('equipment_approver_id');
+                $reservations->whereNull('equipment_approver_id')->has('equipment_types');
             }
 
             // F & A
@@ -329,7 +332,10 @@ class ReservationController extends Controller
             if($request->has('equipment_types'))
             {
                 for ($i=0; $i < count($request->equipment_types); $i++) { 
-                    $reservation->equipment_types()->save(EquipmentType::find($request->input('equipment_types')[$i]['id']), ['approved' => false]);
+                    if(isset($request->input('equipment_types')[$i]['id']))
+                    {
+                        $reservation->equipment_types()->save(EquipmentType::find($request->input('equipment_types')[$i]['id']), ['approved' => false]);
+                    }
                 }
             }
 

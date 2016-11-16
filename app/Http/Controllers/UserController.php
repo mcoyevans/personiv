@@ -19,6 +19,16 @@ use Storage;
 class UserController extends Controller
 {
     /**
+     * Fetch all notifications of authenticated user.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function notifications(Request $request)
+    {
+        return Notification::where('notifiable_id', $request->user()->id)->where('notifiable_type', 'App\\User')->orderBy('created_at', 'desc')->paginate($request->paginate);
+    }
+
+    /**
      * Mark notifications as read.
      *
      * @return \Illuminate\Http\Response
@@ -119,6 +129,11 @@ class UserController extends Controller
             for ($i=0; $i < count($request->where); $i++) { 
                 $users->where($request->input('where')[$i]['label'], $request->input('where')[$i]['condition'], $request->input('where')[$i]['value']);
             }
+        }
+
+        if($request->has('do_not_include_current_user'))
+        {
+            $users->whereNotIn('id', [$request->user()->id]);
         }
 
         if($request->has('search'))

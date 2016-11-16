@@ -58,8 +58,8 @@ app
 
 		Helper.post('/reservation/enlist', request)
 			.success(function(data){
-				data.start = new Date(data.start);
-				data.end = data.end ? new Date(data.end) : null;
+				$scope.start = new Date(data.start);
+				$scope.end = data.end ? new Date(data.end) : null;
 
 				$scope.reservation = data;
 			})
@@ -80,6 +80,7 @@ app
 
 			if(!$scope.duplicate)
 			{
+				$scope.busy = true;
 				// IT
 				if($scope.approver.group_id == 1){
 					Helper.post('/reservation-equipment/approve', $scope.reservation.equipment_types)
@@ -88,10 +89,12 @@ app
 								Helper.stop();
 							}
 							else{
-								$scope.error = true;
+								$scope.duplicate = true;
+								$scope.busy = false;
 							}
 						})
 						.error(function(){
+							$scope.busy = false;
 							$scope.error = true;
 						})
 				}
@@ -104,10 +107,12 @@ app
 							Helper.stop();
 						}
 						else{
-							$scope.error = true;
+							$scope.duplicate = true;
+							$scope.busy = false;
 						}
 					})
 					.error(function(){
+						$scope.busy = false;
 						$scope.error = true;
 					})
 			}

@@ -2,18 +2,6 @@ app
 	.controller('postsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
 		$scope.$emit('closeSidenav');
 
-		Helper.post('/user/check')
-			.success(function(data){
-				angular.forEach(data.roles, function(role){
-					if(role.name == 'posts')
-					{
-						data.can_post = true;
-					}
-				});
-
-				$scope.current_user = data;
-			});
-
 		$scope.viewReposts = function(post){
 			var dialog = {
 				'template':'/app/components/posts/templates/dialogs/reposts-dialog.template.html',
@@ -405,55 +393,67 @@ app
 			// 2 is default so the next page to be loaded will be page 2 
 			$scope.post.page = 2;
 
-			Helper.post('/post/enlist', query)
+			Helper.post('/user/check')
 				.success(function(data){
-					$scope.post.details = data;
-					$scope.post.items = data.data;
-					$scope.post.show = true;
+					angular.forEach(data.roles, function(role){
+						if(role.name == 'posts')
+						{
+							data.can_post = true;
+						}
+					});
 
-					$scope.fab.show = $scope.current_user.can_post ? true : false;
+					$scope.current_user = data;
 
-					if(data.data.length){
-						// iterate over each record and set the format
-						angular.forEach(data.data, function(item){
-							pushItem(item);
+					Helper.post('/post/enlist', query)
+						.success(function(data){
+							$scope.post.details = data;
+							$scope.post.items = data.data;
+							$scope.post.show = true;
 
-							if(withComments){
-								$scope.fetchComments(item);
+							$scope.fab.show = $scope.current_user.can_post ? true : false;
+
+							if(data.data.length){
+								// iterate over each record and set the format
+								angular.forEach(data.data, function(item){
+									pushItem(item);
+
+									if(withComments){
+										$scope.fetchComments(item);
+									}
+								});
+							}
+
+							$scope.post.paginateLoad = function(){
+								// kills the function if ajax is busy or pagination reaches last page
+								if($scope.post.busy || ($scope.post.page > $scope.post.details.last_page)){
+									$scope.isLoading = false;
+									return;
+								}
+								/**
+								 * Executes pagination call
+								 *
+								*/
+								// sets to true to disable pagination call if still busy.
+								$scope.post.busy = true;
+								$scope.isLoading = true;
+								// Calls the next page of pagination.
+								Helper.post('/post/enlist' + '?page=' + $scope.post.page, query)
+									.success(function(data){
+										// increment the page to set up next page for next AJAX Call
+										$scope.post.page++;
+
+										// iterate over each data then splice it to the data array
+										angular.forEach(data.data, function(item, key){
+											pushItem(item);
+											$scope.post.items.push(item);
+										});
+
+										// Enables again the pagination call for next call.
+										$scope.post.busy = false;
+										$scope.isLoading = false;
+									});
 							}
 						});
-					}
-
-					$scope.post.paginateLoad = function(){
-						// kills the function if ajax is busy or pagination reaches last page
-						if($scope.post.busy || ($scope.post.page > $scope.post.details.last_page)){
-							$scope.isLoading = false;
-							return;
-						}
-						/**
-						 * Executes pagination call
-						 *
-						*/
-						// sets to true to disable pagination call if still busy.
-						$scope.post.busy = true;
-						$scope.isLoading = true;
-						// Calls the next page of pagination.
-						Helper.post('/post/enlist' + '?page=' + $scope.post.page, query)
-							.success(function(data){
-								// increment the page to set up next page for next AJAX Call
-								$scope.post.page++;
-
-								// iterate over each data then splice it to the data array
-								angular.forEach(data.data, function(item, key){
-									pushItem(item);
-									$scope.post.items.push(item);
-								});
-
-								// Enables again the pagination call for next call.
-								$scope.post.busy = false;
-								$scope.isLoading = false;
-							});
-					}
 				});
 		}
 

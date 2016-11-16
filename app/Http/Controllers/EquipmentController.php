@@ -117,7 +117,7 @@ class EquipmentController extends Controller
      */
     public function store(Request $request)
     {
-        if(!Gate::forUser($request->user())->allows('manage-equipments'))
+        if(!Gate::forUser($request->user())->allows('manage-equipment'))
         {
             abort(403, 'Unauthorized action.');
         }
@@ -180,7 +180,7 @@ class EquipmentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if(!Gate::forUser($request->user())->allows('manage-equipments'))
+        if(!Gate::forUser($request->user())->allows('manage-equipment'))
         {
             abort(403, 'Unauthorized action.');
         }
@@ -220,7 +220,7 @@ class EquipmentController extends Controller
      */
     public function destroy($id)
     {
-        if(!Gate::forUser(Auth::user())->allows('manage-equipments'))
+        if(!Gate::forUser(Auth::user())->allows('manage-equipment'))
         {
             abort(403, 'Unauthorized action.');
         }

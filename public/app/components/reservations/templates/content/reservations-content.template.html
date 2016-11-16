@@ -27,7 +27,7 @@
 				Pending
 			</md-subheader>
 			<md-list>
-				<md-list-item class="md-3-line secondary-button-padding" ng-repeat="reservation in reservation.pending | filter:toolbar.searchText" ng-mouseover="reservation.options = true" ng-mouseout="reservation.options = false" ng-click="viewReservation(reservation)" ng-if="!reservation.schedule_approver_id && !reservation.equipment_approver_id">
+				<md-list-item class="md-3-line secondary-button-padding" ng-repeat="reservation in reservation.pending | filter:toolbar.searchText" ng-mouseover="reservation.options = true" ng-mouseout="reservation.options = false" ng-click="viewReservation(reservation)" ng-if="!reservation.schedule_approver_id || !reservation.equipment_approver_id">
 					<img src="/img/2Color-Favicon_512x512-1.png" class="md-avatar" alt="" ng-if="!reservation.user.avatar_path">
 	    			<img ng-src="/user/avatar/{{reservation.user_id}}" class="md-avatar" alt="" ng-if="reservation.user.avatar_path">
 					<div class="md-list-item-text">

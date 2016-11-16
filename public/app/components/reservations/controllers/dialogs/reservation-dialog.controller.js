@@ -136,8 +136,8 @@ app
 
 		$scope.checkEquipment = function(start, end){
 			var date = {
-				'start': new Date(start).toDateString(),
-				'end': new Date(end).toDateString(),
+				'start': new Date(start).toDateString() + ' ' + new Date(start).toLocaleTimeString(),
+				'end': new Date(end).toDateString() + ' ' + new Date(end).toLocaleTimeString(),
 			}
 
 			var request = {
@@ -147,7 +147,7 @@ app
 						'withTrashed': false,
 						'whereDoesntHave': {
 							'relation': 'reservations',
-							'whereNull': ['schedule_approver_id' ,'equipment_approver_id'],
+							'whereNotNull': ['schedule_approver_id' ,'equipment_approver_id'],
 							'whereBetween': {
 								'label': 'start',
 								'start': date.start,
@@ -193,8 +193,9 @@ app
 									$scope.count--;
 									if(data)
 									{
-										$scope.reservation.equipment_types.splice(key, 1, data.equipment_type);
+										$scope.reservation.equipment_types[key] = data.equipment_type;
 									}
+									console.log($scope.reservation.equipment_types);
 								});
 						});
 					}
@@ -221,12 +222,6 @@ app
 		if($scope.config.action == 'edit')
 		{
 			var request = {
-				'with': [
-					{
-						'relation': 'equipment_types',
-						'withTrashed': false,
-					},
-				],
 				'where': [
 					{
 						'label': 'id',
@@ -243,6 +238,7 @@ app
 					data.end = data.end ? new Date(data.end) : null;
 
 					$scope.reservation = data;
+					$scope.reservation.equipment_types = [];
 					
 					$scope.reservation.allDay = data.allDay ? true : false;
 

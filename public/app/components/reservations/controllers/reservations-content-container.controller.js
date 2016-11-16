@@ -2,18 +2,6 @@ app
 	.controller('reservationsContentContainerController', ['$scope', '$compile', 'Helper', 'uiCalendarConfig', function($scope, $compile, Helper, uiCalendarConfig){
 		$scope.$emit('closeSidenav');
 
-		Helper.post('/user/check')
-			.success(function(data){
-				angular.forEach(data.roles, function(role){
-					if(role.name == 'reservations')
-					{
-						data.can_reserve = true;
-					}
-				});
-
-				$scope.current_user = data;
-			});
-
 		/*
 		 * Object for toolbar
 		 *
@@ -188,41 +176,53 @@ app
 			$scope.reservation = {};
 			$scope.toolbar.items = [];
 
-			Helper.post('/reservation/enlist', query.request)
+			Helper.post('/user/check')
 				.success(function(data){
-					$scope.eventSources.splice(0,1);
+					angular.forEach(data.roles, function(role){
+						if(role.name == 'reservations')
+						{
+							data.can_reserve = true;
+						}
+					});
 
-					$scope.reservation.approved = [];
-					$scope.reservation.pending = [];
+					$scope.current_user = data;
 
-					if(data.length){
-						// iterate over each record and set the format
-						angular.forEach(data, function(item){
-							pushItem(item);
+					Helper.post('/reservation/enlist', query.request)
+						.success(function(data){
+							$scope.eventSources.splice(0,1);
 
-							if(item.schedule_approver_id && item.equipment_approver_id)
-							{
-								$scope.reservation.approved.push(item);
+							$scope.reservation.approved = [];
+							$scope.reservation.pending = [];
+
+							if(data.length){
+								// iterate over each record and set the format
+								angular.forEach(data, function(item){
+									pushItem(item);
+
+									if(item.schedule_approver_id && item.equipment_approver_id)
+									{
+										$scope.reservation.approved.push(item);
+									}
+									else{
+										$scope.reservation.pending.push(item);
+									}
+								});
+
+								$scope.eventSources.push($scope.reservation.approved);
+							
+								$scope.fab.show = $scope.current_user.can_reserve ? true : false;
 							}
-							else{
-								$scope.reservation.pending.push(item);
-							}
+
+							$scope.refresh = function(){
+								$scope.isLoading = true;
+
+								Helper.set($scope.dateRange);
+
+					            $scope.$broadcast('dateRange');
+
+					  			$scope.init($scope.subheader.current);
+							};
 						});
-
-						$scope.eventSources.push($scope.reservation.approved);
-					
-						$scope.fab.show = $scope.current_user.can_reserve ? true : false;
-					}
-
-					$scope.refresh = function(){
-						$scope.isLoading = true;
-
-						Helper.set($scope.dateRange);
-
-			            $scope.$broadcast('dateRange');
-
-			  			$scope.init($scope.subheader.current);
-					};
 				});
 		}
 	}]);

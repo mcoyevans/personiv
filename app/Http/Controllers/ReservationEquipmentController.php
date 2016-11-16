@@ -6,13 +6,19 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 
+use App\Hashtag;
+use App\Post;
 use App\Reservation;
 use App\ReservationEquipment;
+use App\User;
+
+use App\Notifications\PostCreated;
 
 use Auth;
 use Carbon\Carbon;
 use DB;
 use Gate;
+use Notification;
 
 class ReservationEquipmentController extends Controller
 {
@@ -29,7 +35,7 @@ class ReservationEquipmentController extends Controller
         }
 
         DB::transaction(function() use($request){
-            $reservation = Reservation::find($request->input('0.pivot.reservation_id'));
+            $reservation = Reservation::with('location', 'user')->where('id', $request->input('0.pivot.reservation_id'))->first();
 
             for ($i=0; $i < count($request->all()); $i++) {
                 $this->validate($request, [
@@ -67,6 +73,37 @@ class ReservationEquipmentController extends Controller
             $reservation->equipment_approver_id = $request->user()->id;
 
             $reservation->save();
+
+            if($reservation->schedule_approver_id && $reservation->equipment_approver_id)
+            {
+                $post = new Post;
+
+                $post->title = 'Room reservation for ' . $reservation->location->name;
+                $post->body = $reservation->user->name .' requested a room reservation for ' .$reservation->location->name. ' from ' .Carbon::parse($reservation->start)->toDayDateTimeString(). ' to '. Carbon::parse($reservation->end)->toDayDateTimeString().'.';
+                $post->pinned = false;
+                $post->allow_comments = true;
+                $post->user_id = $reservation->user_id;
+
+                $post->save();
+
+                $post->load('user');
+
+                $tags = ['#Room Reservation', '#'.$reservation->location->name];
+
+                $hashtags = array();
+
+                foreach ($tags as $item) {
+                    $hashtag = new Hashtag(['tag' => $item]);
+
+                    array_push($hashtags, $hashtag);
+                }
+
+                $post->hashtags()->saveMany($hashtags);
+
+                $users = User::whereNotIn('id', [$request->user()->id])->get();
+
+                Notification::send($users, new PostCreated($post));
+            }
         });
     }
 

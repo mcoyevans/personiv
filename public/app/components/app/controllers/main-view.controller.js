@@ -290,6 +290,11 @@ app
 					Helper.set(notification.data.attachment.post_id);
 					$scope.$broadcast('read-post-and-comments');
 				}
+				else if(notification.type == 'App\\Notifications\\ReservationCreated')
+				{
+					Helper.set(notification.data.attachment.id);
+					$scope.$broadcast('read-approval');
+				}
 			}
 
 			$scope.markAsRead(notification);

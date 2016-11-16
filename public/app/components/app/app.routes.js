@@ -224,4 +224,23 @@ app
 					}
 				}
 			})
+			.state('main.notifications', {
+				url: 'notifications',
+				views: {
+					'content-container':{
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'notificationsContentContainerController',
+					},
+					'toolbar@main.notifications': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'notificationsToolbarController',
+					},
+					'left-sidenav@main.notifications': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.notifications':{
+						templateUrl: '/app/components/notifications/templates/content/notifications-content.template.html',
+					},
+				}
+			})
 	}]);

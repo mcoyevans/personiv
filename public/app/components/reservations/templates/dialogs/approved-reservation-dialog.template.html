@@ -28,16 +28,20 @@
         		</div>
         	</md-list-item>
         </md-list>
-        <div layout="column">
-            <strong ng-if="reservation.equipment_types.length">Reserved equipments:</strong>
-            <ul ng-if="reservation.equipment_types.length">
-                <li ng-repeat="equipment_type in reservation.equipment_types">{{equipment_type.name}}</li>
-            </ul>
-            <strong ng-if="reservation.schedule_approver || reservation.equipment_approver">Approved by:</strong>
-            <ul ng-if="reservation.schedule_approver || reservation.equipment_approver">
-                <li>Equipment: {{reservation.equipment_approver.name}}</li>
-                <li>Schedule: {{reservation.schedule_approver.name}}</li>
-            </ul>
+        <div layout="row">
+            <div flex-sm="100" flex-gt-sm ng-if="reservation.equipment_types.length">            
+                <strong>Reserved equipment:</strong>
+                <ul ng-if="reservation.equipment_types.length">
+                    <li ng-repeat="equipment_type in reservation.equipment_types">{{equipment_type.name}}</li>
+                </ul>
+            </div>
+            <div flex-sm="100" flex-gt-sm ng-if="reservation.schedule_approver || reservation.equipment_approver">            
+                <strong>Approved by:</strong>
+                <ul ng-if="reservation.schedule_approver || reservation.equipment_approver">
+                    <li>Equipment: {{reservation.equipment_approver.name}}</li>
+                    <li>Schedule: {{reservation.schedule_approver.name}}</li>
+                </ul>
+            </div>
         </div>
     </md-dialog-content>
 </md-dialog>

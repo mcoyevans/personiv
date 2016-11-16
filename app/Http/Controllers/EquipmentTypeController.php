@@ -47,8 +47,8 @@ class EquipmentTypeController extends Controller
                 {
                     $equipment_types->with([$request->input('with')[$i]['relation'] => function($query) use($request, $i){
                         $query->whereDoesntHave($request->input('with')[$i]['whereDoesntHave']['relation'], function($query) use($request, $i){
-                            for ($j=0; $j < count($request->input('with')[$i]['whereDoesntHave']['whereNull']); $j++) { 
-                                $query->whereNull($request->input('with')[$i]['whereDoesntHave']['whereNull'][$j]);
+                            for ($j=0; $j < count($request->input('with')[$i]['whereDoesntHave']['whereNotNull']); $j++) { 
+                                $query->whereNotNull($request->input('with')[$i]['whereDoesntHave']['whereNotNull'][$j]);
                             }
 
                             $start = Carbon::parse($request->input('with')[$i]['whereDoesntHave']['whereBetween']['start']);

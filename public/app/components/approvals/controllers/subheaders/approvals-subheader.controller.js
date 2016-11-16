@@ -33,6 +33,7 @@ app
 					'withTrashed': false,
 				},
 			],
+			'where': [],
 			'approvals': true,
 			'paginate': 10,
 		}

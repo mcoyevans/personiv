@@ -101,6 +101,21 @@ app
 			$scope.subheader.cancelSelectMultiple();
 		});
 
+		$scope.$on('read-approval', function(){
+			$scope.subheader.current.request.where.push(
+				{
+					'label':'id',
+					'condition':'=',
+					'value': Helper.fetch()
+				}
+			);
+
+			$scope.isLoading = true;
+  			$scope.reservation.show = false;
+
+			$scope.init($scope.subheader.current);
+		});
+
 		/* Formats every data in the paginated call */
 		var pushItem = function(data){
 			data.deleted_at =  data.deleted_at ? new Date(data.deleted_at) : null;

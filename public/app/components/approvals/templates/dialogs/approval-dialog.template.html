@@ -11,6 +11,7 @@
         </md-toolbar>
         <md-dialog-content flex layout-padding layout-wrap>
             <md-subheader class="red-text" ng-if="error">Oops! Something went wrong! An error occured. Please try again.</md-subheader>
+            <md-subheader class="red-text" ng-if="duplicate">Reservation has conflict with other reservations.</md-subheader>
             <md-list>
             	<md-list-item class="md-3-line">
             		<div class="md-list-item-text">
@@ -19,8 +20,8 @@
             			</h3>
                         <h4>
                             {{reservation.location.name}} - 
-                            {{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{reservation.start | date: 'hh:mma'}}</span> <span ng-if="reservation.allDay">- All Day</span>
-                            <span ng-if="!reservation.allDay"> to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span>
+                            {{start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{start | date: 'hh:mma'}}</span> <span ng-if="reservation.allDay">- All Day</span>
+                            <span ng-if="!reservation.allDay"> to <span ng-if="start.toDateString() != end.toDateString()">{{end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{end | date: 'hh:mma'}}</span>
             			</h4>
             			<p>
             				<strong ng-if="reservation.remarks">Remarks: </strong>

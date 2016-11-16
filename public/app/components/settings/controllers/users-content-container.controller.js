@@ -196,6 +196,7 @@ app
 				'value':true,
 			},
 		]
+		$scope.request.do_not_include_current_user = true;
 
 
 		$scope.isLoading = true;
