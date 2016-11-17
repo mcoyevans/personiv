@@ -20,15 +20,15 @@ guest
 				},
 				{
 					'relation':'user',
-					'withTrashed': false,
+					'withTrashed': true,
 				},
 				{
 					'relation':'schedule_approver',
-					'withTrashed': false,
+					'withTrashed': true,
 				},
 				{
 					'relation':'equipment_approver',
-					'withTrashed': false,
+					'withTrashed': true,
 				},
 			],
 		}

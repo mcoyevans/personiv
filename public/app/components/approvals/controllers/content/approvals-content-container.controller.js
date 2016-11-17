@@ -62,6 +62,7 @@ app
 
 	    	Helper.customDialog(dialog)
 	    		.then(function(){
+	    			Helper.notify('Reservation approved.');
 	    			$scope.refresh();
 	    		}, function(){
 	    			return;
@@ -204,6 +205,11 @@ app
 		}
 
 		$scope.refresh = function(){
+			$scope.isLoading = true;
+  			$scope.reservation.show = false;
+
+  			$scope.init($scope.subheader.current);
+
   			$state.go('main.approvals', {'reservationID':null});
 		};
 	}]);

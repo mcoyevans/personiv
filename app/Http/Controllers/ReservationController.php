@@ -170,7 +170,7 @@ class ReservationController extends Controller
                                 $start = Carbon::parse($reservation->start);
                                 $end = Carbon::parse($reservation->end);
 
-                                $query->whereNull('schedule_approver_id')->whereNull('equipment_approver_id');
+                                $query->whereNotNull('schedule_approver_id')->whereNotNull('equipment_approver_id');
                                 $query->where(function($query) use ($start, $end){
                                     // in between approved reservation
                                     $query->where('start', '<=', $start)->where('end', '>=', $end);
@@ -292,6 +292,11 @@ class ReservationController extends Controller
 
         $start = Carbon::parse($request->date_start .' '. $request->time_start);
         $end = Carbon::parse($request->date_end .' '. $request->time_end);
+        
+        if($start->lt(Carbon::now()))
+        {
+            abort(422, 'Reservation cannot be earlier than current time.');
+        }
 
         $duplicate = Reservation::whereNotNull('schedule_approver_id')->whereNotNull('equipment_approver_id')->where('location_id', $request->location_id)
             ->where(function($query) use ($start, $end){
@@ -389,6 +394,11 @@ class ReservationController extends Controller
 
         $start = Carbon::parse($request->date_start .' '. $request->time_start);
         $end = Carbon::parse($request->date_end .' '. $request->time_end);
+
+        if($start->lt(Carbon::now()))
+        {
+            abort(422, 'Reservation cannot be earlier than current time.');
+        }
 
         $duplicate = Reservation::whereNotIn('id', [$id])->whereNotNull('schedule_approver_id')->whereNotNull('equipment_approver_id')->where('location_id', $request->location_id)
             ->where(function($query) use ($start, $end){

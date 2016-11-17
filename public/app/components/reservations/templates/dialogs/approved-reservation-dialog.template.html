@@ -32,7 +32,7 @@
             <div flex-sm="100" flex-gt-sm ng-if="reservation.equipment_types.length">            
                 <strong>Reserved equipment:</strong>
                 <ul ng-if="reservation.equipment_types.length">
-                    <li ng-repeat="equipment_type in reservation.equipment_types">{{equipment_type.name}}</li>
+                    <li ng-repeat="equipment_type in reservation.equipment_types">{{equipment_type.name}} <span ng-if="reservation.equipment[$index].asset_tag">-</span> {{reservation.equipment[$index].asset_tag}}</li>
                 </ul>
             </div>
             <div flex-sm="100" flex-gt-sm ng-if="reservation.schedule_approver || reservation.equipment_approver">            

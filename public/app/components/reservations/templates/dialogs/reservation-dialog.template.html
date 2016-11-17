@@ -72,7 +72,7 @@
                 </md-input-container>
             </div>
             <md-subheader>Equipment</md-subheader>
-            <div layout="row" flex ng-if="!count">
+            <div layout="row" flex>
                 <md-checkbox ng-repeat="equipment_type in equipment_types" ng-model="reservation.equipment_types[$index]" ng-if="equipment_type.equipment.length" aria-label="{{equipment_type.name}}" ng-true-value="{{equipment_type}}" ng-false-value="null" flex class="md-primary" flex-xs="100" flex-sm="100" flex-gt-sm>
                     {{equipment_type.name}}
                 </md-checkbox>

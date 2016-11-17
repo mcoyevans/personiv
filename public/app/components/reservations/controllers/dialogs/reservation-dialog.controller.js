@@ -161,6 +161,7 @@ app
 			Helper.post('/equipment-type/enlist', request)
 				.success(function(data){
 					$scope.equipment_types = data
+					// $scope.count = data.length;
 
 					if($scope.config.action == 'edit')
 					{
@@ -190,12 +191,10 @@ app
 
 							Helper.post('/reservation-equipment/enlist', query)
 								.success(function(data){
-									$scope.count--;
 									if(data)
 									{
 										$scope.reservation.equipment_types[key] = data.equipment_type;
 									}
-									console.log($scope.reservation.equipment_types);
 								});
 						});
 					}
@@ -248,10 +247,10 @@ app
 					$scope.reservation.time_start = new Date(data.start);
 					$scope.reservation.time_end = new Date(data.end);
 
-					$scope.min_start_time = new Date(data.start);
-					$scope.min_start_date = new Date(data.end);
+					$scope.min_start_time = new Date();
+					$scope.min_start_date = new Date();
 
-					$scope.min_end_time = new Date(data.end);
+					$scope.min_end_time = new Date();
 
 					$scope.checkEquipment($scope.reservation.time_start, $scope.reservation.time_end);
 				})
@@ -290,9 +289,12 @@ app
 							{
 								Helper.stop();
 							}
-							
-							$scope.busy = false;
-							$scope.duplicate = duplicate;
+							else{
+								$scope.busy = false;
+								$scope.duplicate = duplicate;
+								
+								fallbackDateToObject();
+							}
 						})
 						.error(function(){
 							$scope.busy = false;
@@ -309,9 +311,12 @@ app
 							{
 								Helper.stop();
 							}
-							
-							$scope.busy = false;
-							$scope.duplicate = duplicate;
+							else{
+								$scope.busy = false;
+								$scope.duplicate = duplicate;
+
+								fallbackDateToObject();
+							}
 						})
 						.error(function(){
 							$scope.busy = false;
