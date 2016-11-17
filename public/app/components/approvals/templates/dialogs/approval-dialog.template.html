@@ -38,7 +38,7 @@
                     <md-select name="Equipment{{$index}}" ng-model="equipment_type.equipment_id" ng-change="checkDuplicate(equipment_type)" required>
                         <md-option ng-repeat="item in equipment_type.equipment" value="{{item.id}}">{{item.asset_tag}}</md-option>
                     </md-select>
-                    <div class="pattern" ng-if="equipment_type.duplicate">{{equipment_type.name}} has conflict with others reservation.</div>
+                    <div class="pattern" ng-if="equipment_type.duplicate">{{equipment_type.name}} has conflict with other reservations.</div>
                     <div ng-messages="approvalForm['Equipment' + $index].$error" ng-if="approvalForm['Equipment' + $index].$touched">
                         <div ng-message="required">{{equipment_type.name}} is required.</div>
                     </div>

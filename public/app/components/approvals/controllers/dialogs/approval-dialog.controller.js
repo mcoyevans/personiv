@@ -14,11 +14,8 @@ app
 		$scope.checkDuplicate = function(equipment){
 			Helper.post('/reservation-equipment/check-duplicate', equipment)
 				.success(function(data){
-					if(data)
-					{
-						$scope.duplicate = data;
-						equipment.duplicate = data;
-					}
+					$scope.duplicate = data;
+					equipment.duplicate = data;
 				});
 		}
 
@@ -39,11 +36,11 @@ app
 				},
 				{
 					'relation':'schedule_approver',
-					'withTrashed': false,
+					'withTrashed': true,
 				},
 				{
 					'relation':'equipment_approver',
-					'withTrashed': false,
+					'withTrashed': true,
 				},
 			],
 			'where': [

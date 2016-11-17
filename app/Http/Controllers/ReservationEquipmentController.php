@@ -43,7 +43,7 @@ class ReservationEquipmentController extends Controller
                     $i.'.pivot' => 'required',
                 ]);
 
-                $duplicate = ReservationEquipment::where('approved', true)->where('equipment_id', $request->input($i.'.pivot.equipment_id'))->whereHas('reservation', function($query) use($reservation){
+                $duplicate = ReservationEquipment::where('approved', 1)->where('equipment_id', $request->input($i.'.equipment_id'))->whereHas('reservation', function($query) use($reservation){
                     $start = Carbon::parse($reservation->start);
                     $end = Carbon::parse($reservation->end);
 
@@ -116,7 +116,7 @@ class ReservationEquipmentController extends Controller
     {
         $reservation = Reservation::find($request->input('pivot.reservation_id'));
 
-        $duplicate = ReservationEquipment::where('approved', true)->where('equipment_id', $request->input('pivot.equipment_id'))->whereHas('reservation', function($query) use($reservation){
+        $duplicate = ReservationEquipment::where('approved', 1)->where('equipment_id', $request->input('equipment_id'))->whereHas('reservation', function($query) use($reservation){
             $start = Carbon::parse($reservation->start);
             $end = Carbon::parse($reservation->end);
 
