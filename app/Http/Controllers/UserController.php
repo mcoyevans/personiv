@@ -23,6 +23,25 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function resetPassword(Request $request)
+    {
+        if(Gate::forUser($request->user())->denies('manage-users'))
+        {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $user = User::find($request->id);
+
+        $user->password = Hash::make('!welcome10');
+
+        $user->save();
+    }
+
+    /**
+     * Fetch all notifications of authenticated user.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function notifications(Request $request)
     {
         return Notification::where('notifiable_id', $request->user()->id)->where('notifiable_type', 'App\\User')->orderBy('created_at', 'desc')->paginate($request->paginate);

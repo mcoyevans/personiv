@@ -50,6 +50,7 @@ Route::group(['prefix' => 'user'], function(){
 	Route::post('mark-all-as-read', 'UserController@markAllAsRead');
 	Route::post('mark-as-read', 'UserController@markAsRead');
 	Route::post('notifications', 'UserController@notifications');
+	Route::post('reset-password', 'UserController@resetPassword');
 	Route::post('upload-avatar/{userID}', 'UserController@uploadAvatar');
 	Route::get('avatar/{userID}', 'UserController@avatar');
 });

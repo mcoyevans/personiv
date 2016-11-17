@@ -1,5 +1,5 @@
 app
-	.controller('approvalsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
+	.controller('approvalsContentContainerController', ['$scope', '$state', '$stateParams', 'Helper', function($scope, $state, $stateParams, Helper){
 		$scope.$emit('closeSidenav');
 
 		/*
@@ -131,6 +131,17 @@ app
 		}
 
 		$scope.init = function(query){
+			if($stateParams.reservationID)
+			{
+				query.request.where.push(
+					{
+						'label':'id',
+						'condition':'=',
+						'value': $stateParams.reservationID,	
+					}
+				);
+			}
+
 			$scope.subheader.mark.all = false;
 			$scope.subheader.mark.icon = 'mdi-checkbox-blank-outline';
 			$scope.subheader.mark.label = 'Check all';
@@ -140,7 +151,6 @@ app
 			$scope.reservation = {};
 			$scope.reservation.items = [];
 			$scope.reservation.show = true;
-
 
 			// 2 is default so the next page to be loaded will be page 2 
 			$scope.reservation.page = 2;
@@ -194,8 +204,6 @@ app
 		}
 
 		$scope.refresh = function(){
-			$scope.isLoading = true;
-
-  			$scope.init($scope.subheader.current);
+  			$state.go('main.approvals', {'reservationID':null});
 		};
 	}]);

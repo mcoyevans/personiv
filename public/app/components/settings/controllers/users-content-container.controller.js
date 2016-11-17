@@ -1,6 +1,8 @@
 app
-	.controller('usersContentContainerController', ['$scope', 'Helper', function($scope, Helper){
+	.controller('usersContentContainerController', ['$scope', '$state', 'Helper', function($scope, $state, Helper){
 		$scope.$emit('closeSidenav');
+
+		$scope.state = $state.current.name;
 		/*
 		 * Object for toolbar
 		 *
@@ -77,6 +79,28 @@ app
 				}, function(){
 					return;
 				});
+		}
+
+		$scope.resetPassword = function(data){
+			var dialog = {};
+			dialog.title = 'Reset Password';
+			dialog.message = 'Password will be reset to "!welcome10"';
+			dialog.ok = 'Reset Password';
+			dialog.cancel = 'Cancel';
+
+			Helper.confirm(dialog)
+				.then(function(){
+					Helper.post('/user/reset-password', data)
+						.success(function(){
+							$scope.refresh();
+							Helper.notify('Reset password succesful.');
+						})
+						.error(function(){
+							Helper.error();
+						});
+				}, function(){
+					return;
+				})
 		}
 
 		$scope.deleteModel = function(data){

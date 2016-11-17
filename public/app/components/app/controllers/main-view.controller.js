@@ -281,7 +281,7 @@ app
 				$state.go(notification.data.url);
 				
 				if(notification.type == 'App\\Notifications\\PostCreated' || notification.type == 'App\\Notifications\\RepostCreated')
-				{
+				{	
 					Helper.set(notification.data.attachment.id);
 					$scope.$broadcast('read-post');
 				}
@@ -292,8 +292,9 @@ app
 				}
 				else if(notification.type == 'App\\Notifications\\ReservationCreated')
 				{
-					Helper.set(notification.data.attachment.id);
-					$scope.$broadcast('read-approval');
+					$state.go(notification.data.url, {'reservationID':notification.data.attachment.id});
+					// Helper.set(notification.data.attachment.id);
+					// $scope.$broadcast('read-approval');
 				}
 			}
 

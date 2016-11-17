@@ -28,10 +28,16 @@
 
 			        <md-menu-content width="4">
 						<md-subheader class="md-no-sticky">{{model.asset_tag}} {{model.name}}</md-subheader>
-						 <!-- Update -->
+						<!-- Update -->
 			            <md-menu-item>
 				            <md-button aria-label="Update" ng-click="updateModel(model)" flex>
 				                Update
+				            </md-button>
+			        	</md-menu-item>
+			        	<!-- Reset Password -->
+			            <md-menu-item ng-if="state == 'main.users'">
+				            <md-button aria-label="Update" ng-click="resetPassword(model)" flex>
+				                Reset Password
 				            </md-button>
 			        	</md-menu-item>
 			        	<md-menu-item ng-if="!model.hideDelete">
