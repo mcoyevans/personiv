@@ -14,7 +14,7 @@ class LocationsTableSeeder extends Seeder
         DB::table('locations')->insert([
         	['name' => '6th Street', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
         	['name' => 'Lake Austin', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
-        	['name' => 'Lake Longhorn', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
+        	['name' => 'Longhorn', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
         	['name' => 'Manchaca', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
         	['name' => 'Pecan', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
         	['name' => 'Stevie Ray', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
