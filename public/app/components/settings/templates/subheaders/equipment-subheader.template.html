@@ -1,0 +1,40 @@
+<div class="md-toolbar-tools">
+	<md-nav-bar aria-label="navigation" md-selected-nav-item="subheader.current.label" flex>
+	    <md-nav-item  ng-repeat="nav in subheader.navs | orderBy:'label'" md-nav-click="nav.action(nav)" name="{{nav.label}}">{{nav.label}}</md-nav-item>
+	</md-nav-bar>
+</div>
+<md-subheader>
+	<md-menu>
+		<md-button aria-label="Menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+            <md-icon class="mdi mdi-dots-horizontal grey"></md-icon>
+            <md-tooltip>Menu</md-tooltip>
+        </md-button>
+		
+        <md-menu-content width="4">
+        	<md-subheader>{{subheader.current.label}}</md-subheader>
+            <!-- Update -->
+            <md-button aria-label="Update" ng-click="subheader.update()" flex>
+                <div layout="row">
+                    <md-icon class="mdi mdi-pencil grey"></md-icon>
+                    <span flex="5"></span>
+                    <span>Update</span>
+                    <span flex></span>
+                </div>
+            </md-button>
+            <!-- Delete -->
+            <md-button aria-label="Delete" ng-if="!subheader.current.equipment_count" ng-click="subheader.delete()" flex>
+                <div layout="row">
+                    <md-icon class="mdi mdi-delete grey"></md-icon>
+                    <span flex="5"></span>
+                    <span>Delete</span>
+                    <span flex></span>
+                </div>
+            </md-button>
+        </md-menu-content>
+	</md-menu>
+    <!-- Create -->
+    <md-button aria-label="Create" class="md-icon-button" ng-click="subheader.create()">
+        <md-icon class="mdi mdi-plus grey"></md-icon>
+        <md-tooltip>Create</md-tooltip>
+    </md-button>
+</md-subheader>

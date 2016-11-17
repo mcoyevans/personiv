@@ -1,0 +1,205 @@
+<div infinite-scroll='post.paginateLoad()' infinite-scroll-distance="1" infinite-scroll-disabled="post.busy" infinite-scroll-parent ng-if="post.show" layout="row" layout-align="center start">
+	<div layout="column" layout-align="center center" layout-margin flex flex-gt-sm="60" flex-gt-lg="50">
+		<md-card ng-repeat="post in post.items | filter: toolbar.searchText | orderBy:sortType:sortReverse" layout-fill>
+			<md-card-header>
+	          	<md-card-avatar>
+	            	<img ng-src="/user/avatar/{{post.user.id}}" alt="avatar" class="md-user-avatar" ng-if="post.user.avatar_path">
+	            	<img src="/img/2Color-Favicon_512x512-1.png" class="md-user-avatar" alt="" ng-if="!post.user.avatar_path">
+	          	</md-card-avatar>
+	          	<md-card-header-text layout="row">
+	            	<div layout="column" flex>            		
+		            	<span class="md-title">
+		            		<span class="primary-text">{{post.user.name}} - {{post.user.position}}</span> 
+		            		<span ng-if="post.repost_id">reposted <span ng-if="post.user_id == post.repost.post.user_id">own</span>
+			            		<span ng-if="post.user_id != post.repost.post.user_id">
+			            			<span class="primary-text">{{post.repost.post.user.name}}</span>'s
+			            		</span> post.
+		            		</span>
+		            		<md-icon class="mdi mdi-chevron-right grey" ng-if="post.group_id"></md-icon> 
+		            		<span>{{post.group.name}}</span>
+		            	</span> 
+		            	<span class="md-subhead">
+		            		<span am-time-ago="post.created_at"></span>
+		            		<span hide-xs hide-sm> | {{post.created_at | date: 'EEEE, MMM. dd, yyyy,'}} at {{post.created_at | date: 'hh:mma'}}</span>
+		            	</span>
+	            	</div>
+					<md-icon class="mdi mdi-star accent" ng-if="post.pinned"></md-icon>
+					<md-menu md-position-mode="target-right target" ng-if="user.id == post.user.id">
+						<md-button aria-label="Menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+				            <md-icon class="mdi mdi-dots-vertical grey"></md-icon>
+				            <md-tooltip>Menu</md-tooltip>
+				        </md-button>
+				        <md-menu-content width="3">
+							<!-- Edit -->
+				            <md-menu-item>
+					            <md-button aria-label="Edit" ng-click="updatePost(post)" flex>
+					                Edit
+					            </md-button>
+				        	</md-menu-item>
+				        	<md-menu-item>
+					            <!-- Delete -->
+					            <md-button aria-label="Delete" ng-click="deletePost(post)" flex>
+					                Delete
+					            </md-button>
+				        	</md-menu-item>
+				        </md-menu-content>
+					</md-menu>
+	          	</md-card-header-text>
+	        </md-card-header>
+	        <img ng-src="/post/photo/{{post.id}}?={{currentTime}}" class="md-card-image" alt="{{post.title}} Photo" ng-if="post.image_path">
+	        <md-card-title>
+	          	<md-card-title-text>
+	            	<span class="md-headline">{{post.title}}</span>
+	          	</md-card-title-text>
+	        </md-card-title>
+	        <md-card-content>
+	          	<p>
+	          		{{post.body}}
+	          	</p>
+	          	<md-card ng-if="post.repost_id">
+	          		<md-card-header>
+			          	<md-card-avatar>
+			            	<img ng-src="/user/avatar/{{post.repost.post.user.id}}" alt="avatar" class="md-user-avatar" ng-if="post.repost.post.user.avatar_path">
+			            	<img src="/img/2Color-Favicon_512x512-1.png" class="md-user-avatar" alt="" ng-if="!post.repost.post.user.avatar_path">
+			          	</md-card-avatar>
+			          	<md-card-header-text layout="row">
+			            	<div layout="column" flex>            		
+				            	<span class="md-title"><span class="primary-text">{{post.repost.post.user.name}} - {{post.repost.post.user.position}}</span> <md-icon class="mdi mdi-chevron-right grey" ng-if="post.repost.post.group_id"></md-icon> {{post.repost.post.group.name}}</span> 
+				            	<span class="md-subhead">
+				            		<span am-time-ago="post.repost.post.created_at"></span>
+				            		<span hide-xs hide-sm> | {{post.repost.post.created_at | date: 'EEEE, MMM. dd, yyyy,'}} at {{post.repost.post.created_at | date: 'hh:mma'}}</span>
+				            	</span>
+			            	</div>
+			          	</md-card-header-text>
+			        </md-card-header>
+			        <img ng-src="/post/photo/{{post.repost.post.id}}?={{currentTime}}" class="md-card-image" alt="{{post.repost.post.title}} Photo" ng-if="post.repost.post.image_path">
+			        <md-card-title>
+			          	<md-card-title-text>
+			            	<span class="md-headline">{{post.repost.post.title}}</span>
+			          	</md-card-title-text>
+			        </md-card-title>
+			        <md-card-content>
+			          	<p>
+			          		{{post.repost.post.body}}
+			          	</p>
+			          	<md-chips ng-model="post.repost.post.chips" name="hashTags" readonly="true">
+			          		<md-chip-template ng-click="searchHashTag($chip)">
+			          			{{$chip}}
+			          		</md-chip-template>
+			          	</md-chips>
+		          	</md-card-content>
+	          	</md-card>
+	          	<md-chips ng-model="post.chips" name="hashTags" readonly="true">
+	          		<md-chip-template ng-click="searchHashTag($chip)">
+	          			{{$chip}}
+	          		</md-chip-template>
+	          	</md-chips>
+	        </md-card-content>
+	        <md-card-actions layout="row" layout-align="start center">
+	        	<md-card-icon-actions>
+		          	<md-button ng-click="commentSection(post)" ng-if="user && post.allow_comments">
+		          		<md-icon class="mdi mdi-comment grey"></md-icon>
+		          		<span hide-xs>Comment</span>
+		          	</md-button>
+		          	<md-button ng-click="repost(post)" ng-if="current_user.can_post">
+		          		<md-icon class="mdi mdi-share grey"></md-icon>
+		          		<span hide-xs>Repost</span>
+		          	</md-button>
+		        </md-card-icon-actions>
+          		<md-button ng-if="post.comments_count" ng-click="fetchComments(post)">{{post.comments_count}} Comment<span ng-if="post.comments_count > 1">s</span></md-button>
+          		<md-button ng-if="post.reposts_count" ng-click="viewReposts(post)">{{post.reposts_count}} Repost<span ng-if="post.reposts_count > 1">s</span></md-button>
+	        </md-card-actions>
+	        <md-card-content ng-if="!post.allow_comments">
+		        <em class="secondary-post">Comments are disabled for this post.</em>
+	        </md-card-content>
+	        <md-card-content ng-if="post.comments">
+		    	<md-divider></md-divider>
+		    	<md-button class="md-primary" ng-if="post.comments_count > post.comments.length" ng-click="previousComments(post)">Previous comments</md-button>
+		    	<md-list>
+		    		<md-list-item ng-repeat="comment in post.comments" class="md-2-line md-long-text" ng-mouseover="comment.options = true" ng-mouseout="comment.options = false">
+		    			<img src="/img/2Color-Favicon_512x512-1.png" class="md-avatar" alt="" ng-if="!comment.user.avatar_path && !comment.edit">
+		    			<img ng-src="/user/avatar/{{comment.user_id}}" class="md-avatar" alt="" ng-if="comment.user.avatar_path && !comment.edit">
+						<div class="md-list-item-text" ng-if="!comment.edit">
+							<h3><span class="primary-text">{{comment.user.name}}</span> <span>{{comment.message}}</span></h3>
+							<p class="secondary-text">
+								<span am-time-ago="comment.created_at"></span>
+							</p>
+						</div>
+						
+						<form novalidate name="EditComment{{$index}}" ng-if="comment.edit" hide-xs flex>
+							<md-subheader class="red-text md-no-sticky" ng-if="comment.error">Oops! Something went wrong! An error occured. Please try again.</md-subheader>
+				        	<div layout="row" layout-align="start center" flex>        		
+					        	<md-list>
+					        		<md-list-item>
+					        			<img ng-src="/user/avatar/{{user.id}}" class="md-avatar" ng-if="user.avatar_path"/>
+					        			<img src="/img/2Color-Favicon_512x512-1.png" class="md-avatar" alt="" ng-if="!user.avatar_path">
+					        		</md-list-item>
+					        	</md-list>
+					        	<md-input-container md-no-float class="md-block" flex>
+								    <textarea id="comment-{{post.id}}" ng-model="comment.new_message" type="text" placeholder="Write a comment..."></textarea>
+								    <div class="hint" ng-click="comment.edit = false">Cancel</div>
+							    </md-input-container>
+								<md-button class="md-icon-button" type="submit" ng-click="updateComment(comment)" ng-if="comment.message && !busy">
+									<md-icon class="mdi mdi-send primary"></md-icon>
+								</md-button>
+								<md-progress-circular ng-if="comment.message && busy" md-mode="indeterminate" class="md-primary" md-diameter="40"></md-progress-circular>
+				        	</div>
+				        </form>
+
+						<md-menu ng-show="comment.options" ng-if="user.id == comment.user_id && !comment.edit">
+							<md-button aria-label="Menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+					            <md-icon class="mdi mdi-dots-vertical grey"></md-icon>
+					            <md-tooltip>Edit or delete this</md-tooltip>
+					        </md-button>
+
+					        <md-menu-content width="3">
+								<!-- Edit -->
+					            <md-menu-item>
+						            <md-button aria-label="Edit" ng-click="editComment(comment, post)" flex>
+						                Edit
+						            </md-button>
+					        	</md-menu-item>
+					        	<md-menu-item>
+						            <!-- Delete -->
+						            <md-button aria-label="Delete" ng-click="deleteComment(comment, post)" flex>
+						                Delete
+						            </md-button>
+					        	</md-menu-item>
+					        </md-menu-content>
+						</md-menu>
+						<md-button ng-show="comment.options" class="md-icon-button" ng-if="user.id == post.user_id && user.id != comment.user_id && !comment.edit" ng-click="deleteComment(comment, post)">
+							<md-icon class="mdi mdi-close grey"></md-icon>
+							<md-tooltip>Remove this</md-tooltip>
+						</md-button>
+		    		</md-list-item>
+		    	</md-list>
+		    </md-card-content>
+	        <form novalidate name="Comment{{$index}}" ng-if="post.allow_comments && user" hide-xs>
+				<md-subheader class="red-text md-no-sticky" ng-if="post.error">Oops! Something went wrong! An error occured. Please try again.</md-subheader>
+	        	<div layout="row" layout-align="start center" layout-padding flex>        		
+		        	<md-list>
+		        		<md-list-item>
+		        			<img ng-src="/user/avatar/{{user.id}}" class="md-avatar" ng-if="user.avatar_path"/>
+		        			<img src="/img/2Color-Favicon_512x512-1.png" class="md-avatar" alt="" ng-if="!user.avatar_path">
+		        		</md-list-item>
+		        	</md-list>
+		        	<md-input-container md-no-float class="md-block" flex>
+					    <textarea id="comment-{{post.id}}" ng-model="post.new_comment" type="text" placeholder="Write a comment..."></textarea>
+				    </md-input-container>
+					<md-button class="md-icon-button" type="submit" ng-click="submit(post)" ng-if="post.new_comment && !busy">
+						<md-icon class="mdi mdi-send primary"></md-icon>
+					</md-button>
+					<md-progress-circular ng-if="post.new_comment && busy" md-mode="indeterminate" class="md-primary" md-diameter="40"></md-progress-circular>
+	        	</div>
+	        </form>
+		    <md-divider></md-divider>
+	    </md-card>
+	</div>
+</div>
+
+<div layout="row" layout-align="center center" layout-padding layout-margin ng-if="isLoading">
+	<md-progress-circular class="md-primary" md-diameter="60"></md-progress-circular>
+</div>
+<div layout-padding layout-margin ng-if="!post.items.length && post.show && !post.no_matches">
+	Nothing to display.
+</div>

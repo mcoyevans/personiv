@@ -1,0 +1,47 @@
+<md-dialog aria-label="Post Form"  flex flex-gt-sm="40" ng-cloak>
+	<md-toolbar>
+        <div class="md-toolbar-tools">
+            <h2 class="white-text">{{reservation.title}}</h2>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="cancel()">
+                <md-icon class="mdi mdi-close" aria-label="Close dialog"></md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+    <md-dialog-content flex layout-padding layout-wrap>
+        <md-list>
+        	<md-list-item class="md-3-line">
+        		<div class="md-list-item-text">
+        			<h3>
+						{{reservation.user.name}} - {{reservation.user.position}}
+        			</h3>
+                    <h4>
+                        {{reservation.location.name}} - 
+                        {{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{reservation.start | date: 'hh:mma'}}</span> <span ng-if="reservation.allDay">- All Day</span>
+                        <span ng-if="!reservation.allDay"> to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span>
+        			</h4>
+        			<p>
+        				<strong ng-if="reservation.remarks">Remarks: </strong>
+        				<span>{{reservation.remarks}}</span>
+        				<br>
+        			</p>
+        		</div>
+        	</md-list-item>
+        </md-list>
+        <div layout="row">
+            <div flex-sm="100" flex-gt-sm ng-if="reservation.equipment_types.length">            
+                <strong>Reserved equipment:</strong>
+                <ul ng-if="reservation.equipment_types.length">
+                    <li ng-repeat="equipment_type in reservation.equipment_types">{{equipment_type.name}}</li>
+                </ul>
+            </div>
+            <div flex-sm="100" flex-gt-sm ng-if="reservation.schedule_approver || reservation.equipment_approver">            
+                <strong>Approved by:</strong>
+                <ul ng-if="reservation.schedule_approver || reservation.equipment_approver">
+                    <li>Equipment: {{reservation.equipment_approver.name}}</li>
+                    <li>Schedule: {{reservation.schedule_approver.name}}</li>
+                </ul>
+            </div>
+        </div>
+    </md-dialog-content>
+</md-dialog>

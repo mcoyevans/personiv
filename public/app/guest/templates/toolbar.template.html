@@ -1,0 +1,101 @@
+<div class="md-toolbar-tools" layout="row" flex flex-gt-md="90">
+  	<a href="/" layout="row" layout-align="center center" layout-padding class="site-logo">
+		<img src="/img/2Color-Logo_247px-1024x195.png" alt="Personiv Logo">
+	</a>
+	<div flex>	
+		<!-- Search Bar -->
+		<div layout="row" ng-if="searchBar" flex flex-gt-sm="85" layout-align="center center">
+			<md-button class="md-icon-button" ng-click="hideSearchBar()">
+				<md-icon class="mdi grey mdi-arrow-left" aria-label="Hide Search Bar"></md-icon>
+			</md-button>
+			<!-- Search Bar -->
+			<form layout="row" flex class="main-text">
+				<md-autocomplete placeholder="Search" md-selected-item="toolbar.searchItem" md-search-text="toolbar.searchText" md-items="item in toolbar.getItems(toolbar.searchText)" md-item-text="item.display" flex md-no-cache="true">
+					<md-item-template>
+						<p>
+							<md-icon class="mdi mdi-magnify grey"></md-icon>
+							<span md-highlight-text="toolbar.searchText" md-highlight-flags="^i">{{item.display}}</span>
+						</p>
+			        </md-item-template>
+					<md-not-found>
+						<p ng-if="!toolbar.searchAll">No results matching <span class="primary-text">"{{toolbar.searchText}}"</span> were found.</p>
+					    <p ng-click="searchUserInput(toolbar.searchText)" ng-if="toolbar.searchAll" flex>Click to see all results for <span class="primary-text">"{{toolbar.searchText}}"</span></p>
+					</md-not-found>
+				</md-autocomplete>
+				<md-button type="submit" class="md-icon-button" ng-click="searchUserInput(toolbar.searchText)" ng-if="toolbar.searchAll">
+					<md-icon class="mdi grey mdi-magnify" aria-label="Search"></md-icon>
+				</md-button>
+			</form>
+		</div>
+		<!-- Icon Buttons -->
+		<div flex layout="row" layout-align="end center" ng-if="!searchBar">
+			<span flex></span>
+			<!-- Search -->
+			<md-button class="md-icon-button" ng-click="showSearchBar()" ng-if="!toolbar.hideSearchIcon">
+				<md-icon class="mdi grey mdi-magnify" aria-label="Search"></md-icon>
+			</md-button>
+			<!-- Options -->
+			<md-menu md-position-mode="target-right target" hide-gt-sm>
+		        <md-button aria-label="Open filters" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+		            <md-icon class="mdi mdi-dots-vertical grey"></md-icon>
+		        </md-button>
+		        <md-menu-content width="4">
+		        	<md-subheader>Menu</md-subheader>
+	        		<!-- Reservation -->
+		            <md-menu-item>
+		        		<md-button flex ui-sref="wall.reservations">
+			                <div layout="row" flex>
+			                	<md-icon class="mdi mdi-format-list-numbers grey"></md-icon>
+			                    <span flex="5"></span>
+			                    <span flex class="left-text secondary-text">Reservation</span>
+			                </div>
+			            </md-button>
+		        	</md-menu-item>
+					<!-- Login -->
+		        	<md-menu-item>
+						<md-button flex href="/login">
+			                <div layout="row" flex>
+			                	<md-icon class="mdi mdi-login grey"></md-icon>
+			                    <span flex="5"></span>			                	
+			                    <span flex class="left-text secondary-text">Login</span>
+			                </div>
+			            </md-button>
+		        	</md-menu-item>
+		        	<md-subheader>Apps</md-subheader>
+		            <md-menu-item ng-repeat="link in menu.static | orderBy:'name'">
+		              	<md-button aria-label="{{link.name}}" flex href="{{link.link}}" target="_blank">
+		              		<div layout="row">
+			                	<span>{{link.name}}</span>
+			                	<span flex></span>
+		              		</div>
+		              	</md-button>
+		            </md-menu-item>
+		        </md-menu-content>
+		    </md-menu>
+		</div>
+	</div>
+	<div hide-xs hide-sm>
+		<!-- Other Apps -->
+		<md-menu>
+	        <md-button aria-label="Open filters" class="md-primary" ng-click="$mdOpenMenu($event)">
+	            <span>Apps</span> 
+	            <md-icon class="mdi mdi-chevron-down grey"></md-icon>
+	        </md-button>
+	        <md-menu-content width="4">
+	        	<md-subheader>Apps</md-subheader>
+	            <md-menu-item ng-repeat="link in menu.static | orderBy:'name'">
+	              	<md-button aria-label="{{link.name}}" flex href="{{link.link}}" target="_blank">
+	              		<div layout="row">
+		                	<span>{{link.name}}</span>
+		                	<span flex></span>
+	              		</div>
+	              	</md-button>
+	            </md-menu-item>
+	        </md-menu-content>
+	    </md-menu>
+	    <!-- Reservations -->
+		<md-button class="md-primary" ui-sref="wall.reservations">Reservation</md-button>
+		<!-- Login -->
+		<md-button class="md-primary" href="/login">Login</md-button>
+	</div>
+</div>

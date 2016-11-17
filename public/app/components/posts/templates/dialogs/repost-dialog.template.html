@@ -1,0 +1,79 @@
+<md-dialog aria-label="Post Form"  flex flex-gt-sm="35" ng-cloak>
+    <form name="repostForm">
+        <md-toolbar >
+            <div class="md-toolbar-tools">
+                <h2 class="white-text">Repost</h2>
+                <span flex></span>
+                <md-button class="md-icon-button" ng-click="cancel()">
+                    <md-icon class="mdi mdi-close" aria-label="Close dialog"></md-icon>
+                </md-button>
+            </div>
+        </md-toolbar>
+        <md-dialog-content flex layout-padding layout-wrap>
+            <md-subheader class="red-text" ng-if="error">Oops! Something went wrong! An error occured. Please try again.</md-subheader>
+            <div layout="row" layout-wrap flex>
+                <!-- Title -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Say something about this...</label>
+                    <textarea name="Title" ng-model="repost.title" ng-disabled="busy"></textarea>
+                </md-input-container>
+            </div>
+            <md-card layout-fill>
+                <md-card-header>
+                    <md-card-avatar>
+                        <img ng-src="/user/avatar/{{repost.post.user.id}}" alt="avatar" class="md-user-avatar" ng-if="post.user.avatar_path">
+                        <img src="/img/2Color-Favicon_512x512-1.png" class="md-user-avatar" alt="" ng-if="!post.user.avatar_path">
+                    </md-card-avatar>
+                    <md-card-header-text layout="row">
+                        <div layout="column" flex>                  
+                            <span class="md-title"><span class="primary-text">{{repost.post.user.name}} - {{repost.post.user.position}}</span> <md-icon class="mdi mdi-chevron-right grey" ng-if="repost.post.group_id"></md-icon> {{repost.post.group.name}}</span> 
+                            <span class="md-subhead">
+                                <span am-time-ago="repost.post.created_at"></span>
+                                <span hide-xs hide-sm> | {{repost.post.created_at | date: 'EEEE, MMM. dd, yyyy,'}} at {{repost.post.created_at | date: 'hh:mma'}}</span>
+                            </span>
+                        </div>
+                        <md-icon class="mdi mdi-star accent" ng-if="post.pinned"></md-icon>
+                    </md-card-header-text>
+                </md-card-header>
+                <img ng-src="/post/photo/{{repost.post.id}}" class="md-card-image" alt="{{repost.post.title}} Photo" ng-if="repost.post.image_path">
+                <md-card-title>
+                    <md-card-title-text>
+                        <span class="md-headline">{{repost.post.title}}</span>
+                    </md-card-title-text>
+                </md-card-title>
+                <md-card-content>
+                    <p>
+                        {{repost.post.body}}
+                    </p>
+                    <md-chips ng-model="repost.post.chips" name="hashTags" readonly="true"></md-chips>
+                </md-card-content>
+            </md-card>
+            <div layout="row" layout-wrap flex>
+               <md-switch class="md-primary" ng-model="repost.pinned" flex-xs="100" flex-gt-sm>
+                   Pinned Post
+               </md-switch>
+               <md-switch class="md-primary" ng-model="repost.allow_comments" flex-xs="100" flex-gt-sm>
+                   Allow comments
+               </md-switch>
+               <md-input-container flex ng-if="groups.length && !repost.post.group_id">
+                    <label>Recepient</label>
+                    <md-select name="Group" ng-model="repost.group_id" flex-xs="100" flex-gt-sm required>
+                        <md-option value="all">All</md-option>
+                        <md-option ng-repeat="group in groups" value="{{group.id}}">
+                            {{group.name}}
+                        </md-option>
+                    </md-select>
+                    <div ng-messages="repostForm.Group.$error" ng-if="repostForm.Group.$touched">
+                        <div ng-message="required">Recepient is required.</div>
+                    </div>
+               </md-input-container>
+            </div>
+        </md-dialog-content>
+    </form>
+    <div layout="row" layout-align="end center">   
+        <md-button ng-if="!busy" class="md-primary" aria-label="Submit" ng-click="submit()">
+            Repost
+        </md-button>
+        <md-progress-circular ng-if="busy" md-mode="indeterminate" class="md-primary" md-diameter="60"></md-progress-circular>
+    </div>
+</md-dialog>

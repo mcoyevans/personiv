@@ -1,0 +1,51 @@
+<md-dialog aria-label="Equipment Form"  flex flex-gt-sm="50" ng-cloak>
+    <form name="equipmentForm">
+        <md-toolbar >
+            <div class="md-toolbar-tools">
+                <h2 class="white-text">Equipment</h2>
+                <span flex></span>
+                <md-button class="md-icon-button" ng-click="cancel()">
+                    <md-icon class="mdi mdi-close mdi-24px" aria-label="Close dialog"></md-icon>
+                </md-button>
+            </div>
+        </md-toolbar>
+        <md-dialog-content flex layout-padding layout-wrap>
+            <md-subheader class="red-text" ng-if="error">Oops! Something went wrong! An error occured. Please try again.</md-subheader>
+            <div layout="row" layout-wrap flex>
+                <!-- Brand -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Brand</label>
+                    <input type="text" name="Brand" required ng-model="equipment.brand" ng-disabled="busy">
+                    <div ng-messages="equipmentForm.Brand.$error" ng-if="equipmentForm.Brand.$touched">
+                        <div ng-message="required">Brand is required.</div>
+                    </div>
+                </md-input-container>
+                <!-- Model -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Model</label>
+                    <input type="text" name="Model" required ng-model="equipment.model" ng-disabled="busy">
+                    <div ng-messages="equipmentForm.Model.$error" ng-if="equipmentForm.Model.$touched">
+                        <div ng-message="required">Model is required.</div>
+                    </div>
+                </md-input-container>
+            </div>
+            <div layout="row" flex>
+                <!-- Asset Tag -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Asset Tag</label>
+                    <input type="text" name="AssetTag" required ng-model="equipment.asset_tag" ng-disabled="busy" ng-blur="checkDuplicate()">
+                    <div class="pattern" ng-if="duplicate && equipmentForm.AssetTag.$valid">Asset tag already exists.</div>
+                    <div ng-messages="equipmentForm.AssetTag.$error" ng-if="equipmentForm.AssetTag.$touched">
+                        <div ng-message="required">Asset tag is required.</div>
+                    </div>
+                </md-input-container>
+            </div>
+        </md-dialog-content>
+    </form>
+    <div layout="row" layout-align="end center">   
+        <md-button ng-if="!busy" class="md-primary" aria-label="Submit" ng-click="submit()">
+            Save
+        </md-button>
+        <md-progress-circular ng-if="busy" md-mode="indeterminate" class="md-primary" md-diameter="60"></md-progress-circular>
+    </div>
+</md-dialog>

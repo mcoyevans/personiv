@@ -1,0 +1,89 @@
+<md-dialog aria-label="User Form"  flex flex-gt-sm="50" ng-cloak>
+    <form name="modelForm">
+        <md-toolbar >
+            <div class="md-toolbar-tools">
+                <h2 class="white-text">User</h2>
+                <span flex></span>
+                <md-button class="md-icon-button" ng-click="cancel()">
+                    <md-icon class="mdi mdi-close mdi-24px" aria-label="Close dialog"></md-icon>
+                </md-button>
+            </div>
+        </md-toolbar>
+        <md-dialog-content flex layout-padding layout-wrap>
+            <md-subheader class="red-text" ng-if="error">Oops! Something went wrong! An error occured. Please try again.</md-subheader>
+            <div layout="row" layout-wrap flex>
+                <!-- Name -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Name</label>
+                    <input type="text" name="Name" required ng-model="model.name" ng-disabled="busy">
+                    <div class="pattern" ng-if="duplicate && modelForm.Location.$valid">Location already exists.</div>
+                    <div ng-messages="modelForm.Name.$error" ng-if="modelForm.Name.$touched">
+                        <div ng-message="required">Name is required.</div>
+                    </div>
+                </md-input-container>
+                <!-- Email -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm ng-if="config.action != 'edit'">
+                    <label>Email</label>
+                    <input type="email" name="Email" required minlength="10" maxlength="100" ng-pattern="/^.+@.+\..+$/" ng-model="model.email" ng-blur="checkDuplicate()" ng-disabled="busy">
+                    <div class="pattern" ng-if="duplicate && modelForm.Email.$valid">Email already in use.</div>
+                    <div ng-messages="modelForm.Email.$error" ng-if="modelForm.Email.$touched">
+                        <div ng-message-exp="['required', 'minlength', 'maxlength', 'pattern']">
+                            Email must be between 10 and 100 characters long and look like an e-mail address.
+                        </div>
+                    </div>
+                </md-input-container>
+            </div>
+            <div layout="row" flex layout-wrap ng-if="config.action != 'edit'">            
+                <!-- Password -->
+                <md-input-container class="md-block" flex="100" flex-gt-sm="50">
+                    <label>Password</label>
+                    <input type="password" name="Password" required ng-model="model.password" ng-minlength="8" ng-disabled="busy">
+                    <div class="pattern" ng-if="model.password != model.confirm && modelForm.Password.$touched && modelForm.confirmPassword.$touched">Passwords doesn't match.</div>
+                    <div ng-messages="modelForm.Password.$error" ng-if="modelForm.Password.$touched">
+                        <div ng-message="required">Password is required.</div>
+                        <div ng-message="minlength">Password must be at least 8 characters.</div>
+                    </div>
+                </md-input-container>
+                <!-- Confirm -->
+                <md-input-container class="md-block" flex="100" flex-gt-sm="50">
+                    <label>Confirm Password</label>
+                    <input type="password" name="confirmPassword" required ng-model="model.confirm" ng-minlength="8" ng-disabled="busy">
+                    <div class="pattern" ng-if="model.password != model.confirm && modelForm.Password.$touched && modelForm.confirmPassword.$touched">Passwords doesn't match.</div>
+                    <div ng-messages="modelForm.confirmPassword.$error" ng-if="modelForm.confirmPassword.$touched">
+                        <div ng-message="required">Confirm password is required.</div>
+                        <div ng-message="minlength">Confirm password must be at least 8 characters.</div>
+                    </div>
+                </md-input-container>
+            </div>
+            <div layout="row" flex>
+                 <!-- User Group -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>User Group</label>
+                    <md-select name="Group" ng-model="model.group_id" ng-disabled="busy">
+                        <md-option ng-repeat="group in groups | orderBy:'name'" value="{{group.id}}">{{group.name}}</md-option>
+                    </md-select>
+                </md-input-container>
+                <!-- Position -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Position</label>
+                    <input type="text" name="Position" required ng-model="model.position" ng-disabled="busy">
+                    <div ng-messages="modelForm.Position.$error" ng-if="modelForm.Position.$touched">
+                        <div ng-message="required">Position is required.</div>
+                    </div>
+                </md-input-container>
+            </div>
+            <md-subheader>Role</md-subheader>
+            <div layout="column" flex ng-if="!count">
+                <md-checkbox ng-repeat="role in roles" ng-model="model.roles[$index]" aria-label="{{role.name}}" ng-true-value="{{role}}" ng-false-value="null" flex class="md-primary">
+                    {{role.description}}
+                </md-checkbox>
+            </div>
+        </md-dialog-content>
+    </form>
+    <div layout="row" layout-align="end center">   
+        <md-button ng-if="!busy" class="md-primary" aria-label="Submit" ng-click="submit()">
+            Save
+        </md-button>
+        <md-progress-circular ng-if="busy" md-mode="indeterminate" class="md-primary" md-diameter="60"></md-progress-circular>
+    </div>
+</md-dialog>

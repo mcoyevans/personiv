@@ -1,0 +1,55 @@
+<md-dialog aria-label="Approval Form"  flex flex-gt-sm="40" ng-cloak>
+    <form name="approvalForm">
+    	<md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2 class="white-text">{{reservation.title}}</h2>
+                <span flex></span>
+                <md-button class="md-icon-button" ng-click="cancel()">
+                    <md-icon class="mdi mdi-close" aria-label="Close dialog"></md-icon>
+                </md-button>
+            </div>
+        </md-toolbar>
+        <md-dialog-content flex layout-padding layout-wrap>
+            <md-subheader class="red-text" ng-if="error">Oops! Something went wrong! An error occured. Please try again.</md-subheader>
+            <md-subheader class="red-text" ng-if="duplicate">Reservation has conflict with other reservations.</md-subheader>
+            <md-list>
+            	<md-list-item class="md-3-line">
+            		<div class="md-list-item-text">
+            			<h3>
+    						{{reservation.user.name}} - {{reservation.user.email}}
+            			</h3>
+                        <h4>
+                            {{reservation.location.name}} - 
+                            {{start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{start | date: 'hh:mma'}}</span> <span ng-if="reservation.allDay">- All Day</span>
+                            <span ng-if="!reservation.allDay"> to <span ng-if="start.toDateString() != end.toDateString()">{{end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{end | date: 'hh:mma'}}</span>
+            			</h4>
+            			<p>
+            				<strong ng-if="reservation.remarks">Remarks: </strong>
+            				<span>{{reservation.remarks}}</span>
+            				<br>
+            			</p>
+            		</div>
+            	</md-list-item>
+            </md-list>
+            <md-subheader class="md-no-sticky" ng-if="reservation.equipment_types.length && approver.group_id == 1">Equipment</md-subheader>
+            <div layout="row" flex layout-wrap ng-if="approver.group_id == 1">            
+                <md-input-container class="md-block" flex-xs="100" flex-gt-xs="50" ng-repeat="equipment_type in reservation.equipment_types">
+                    <label>{{equipment_type.name}}</label>
+                    <md-select name="Equipment{{$index}}" ng-model="equipment_type.equipment_id" ng-change="checkDuplicate(equipment_type)" required>
+                        <md-option ng-repeat="item in equipment_type.equipment" value="{{item.id}}">{{item.asset_tag}}</md-option>
+                    </md-select>
+                    <div class="pattern" ng-if="equipment_type.duplicate">{{equipment_type.name}} has conflict with others reservation.</div>
+                    <div ng-messages="approvalForm['Equipment' + $index].$error" ng-if="approvalForm['Equipment' + $index].$touched">
+                        <div ng-message="required">{{equipment_type.name}} is required.</div>
+                    </div>
+                </md-input-container>
+            </div>
+        </md-dialog-content>
+    </form>
+    <div layout="row" layout-align="end center">   
+        <md-button ng-if="!busy" class="md-primary" aria-label="Submit" ng-click="submit()">
+            Approve
+        </md-button>
+        <md-progress-circular ng-if="busy" md-mode="indeterminate" class="md-primary" md-diameter="60"></md-progress-circular>
+    </div>
+</md-dialog>
