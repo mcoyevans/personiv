@@ -168,8 +168,9 @@ guest
 						angular.forEach(data, function(item){
 							pushItem(item);
 
-							if(item.schedule_approver_id && item.equipment_approver_id)
+							if(item.schedule_approver_id && item.equipment_approver_id && item.location)
 							{
+								item.title = item.title + ' - ' + item.location.name;
 								$scope.reservation.approved.push(item);
 							}
 							else{

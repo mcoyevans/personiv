@@ -14,10 +14,22 @@ app
 
 		$scope.reservation.equipment_types = [];
 
+		$scope.current = new Date();
+
+		if($scope.current.getMinutes() < 30)
+		{
+			$scope.current.setMinutes(30);
+		}
+		else if($scope.current.getMinutes() > 30)
+		{
+			$scope.current.setHours($scope.current.getHours() + 1);
+			$scope.current.setMinutes(0);
+		}
+
 		$scope.reservation.date_start = new Date();
-		$scope.reservation.time_start = new Date();
+		$scope.reservation.time_start = $scope.current;
 		$scope.reservation.date_end = new Date();
-		$scope.reservation.time_end = new Date();
+		$scope.reservation.time_end = $scope.current;
 
 		var formatDateToObject = function(){
 			$scope.fallback.date_start = new Date($scope.reservation.date_start);
@@ -244,8 +256,8 @@ app
 					$scope.reservation.date_start = new Date(data.start);
 					$scope.reservation.date_end = new Date(data.end);
 
-					$scope.reservation.time_start = new Date(data.start);
-					$scope.reservation.time_end = new Date(data.end);
+					$scope.reservation.time_start = $scope.current;
+					$scope.reservation.time_end = $scope.current;
 
 					$scope.min_start_time = new Date();
 					$scope.min_start_date = new Date();

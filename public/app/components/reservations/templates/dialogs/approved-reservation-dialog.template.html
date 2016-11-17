@@ -16,7 +16,7 @@
 						{{reservation.user.name}} - {{reservation.user.position}}
         			</h3>
                     <h4>
-                        {{reservation.location.name}} - 
+                        <strong class="primary-text">{{reservation.location.name}}</strong> - 
                         {{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{reservation.start | date: 'hh:mma'}}</span> <span ng-if="reservation.allDay">- All Day</span>
                         <span ng-if="!reservation.allDay"> to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span>
         			</h4>
