@@ -8,6 +8,14 @@ app
 		*/
 		$scope.toolbar = {};
 
+		/*
+		 * Object for fab
+		 *
+		*/
+		$scope.fab = {};
+		$scope.fab.icon = 'mdi-presentation';
+		$scope.fab.label = 'New';
+
 		$scope.init = function(){
 			var query = {};
 
@@ -18,6 +26,19 @@ app
 				}
 			]
 			query.first = true;
+
+			Helper.post('/user/check')
+				.success(function(data){
+					angular.forEach(data.roles, function(role){
+						if(role.name == 'slideshow')
+						{
+							data.can_post = true;
+							$scope.fab.show = true;
+						}
+					});
+
+					$scope.current_user = data;
+				});
 
 			Helper.post('/slideshow/enlist', query)
 				.success(function(data){

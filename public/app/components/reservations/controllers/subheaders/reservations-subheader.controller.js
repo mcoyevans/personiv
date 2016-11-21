@@ -37,6 +37,12 @@ app
 					'withTrashed': false,
 				},
 			],
+			'withCount': [
+				{
+					'relation':'equipment_types',
+					'withTrashed': false,
+				}
+			],
 		}
 
 		$scope.subheader.all.action = function(){
@@ -88,6 +94,12 @@ app
 									'relation':'equipment_approver',
 									'withTrashed': false,
 								},
+							],
+							'withCount': [
+								{
+									'relation':'equipment_types',
+									'withTrashed': false,
+								}
 							],
 							'where': [
 								{

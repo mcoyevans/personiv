@@ -118,7 +118,7 @@ app
 							'label': 'Approvals',
 						}
 
-						$scope.menu.static[2] = item;
+						$scope.menu.static.push(item);
 					}
 					else if(role.name == 'manage-groups')
 					{

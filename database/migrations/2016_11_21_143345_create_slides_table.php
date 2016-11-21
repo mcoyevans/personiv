@@ -19,6 +19,7 @@ class CreateSlidesTable extends Migration
             $table->string('title')->nullable();
             $table->text('description')->nullable();
             $table->string('path');
+            $table->integer('order');
             $table->integer('slideshow_id')->unsigned();
             $table->timestamps();
         });

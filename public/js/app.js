@@ -386,7 +386,7 @@ app
 							'label': 'Approvals',
 						}
 
-						$scope.menu.static[2] = item;
+						$scope.menu.static.push(item);
 					}
 					else if(role.name == 'manage-groups')
 					{
@@ -1301,7 +1301,7 @@ app
 								angular.forEach(data, function(item){
 									pushItem(item);
 
-									if(item.schedule_approver_id && item.equipment_approver_id && item.location)
+									if((item.schedule_approver_id && item.equipment_types_count && item.equipment_approver_id) || (item.schedule_approver_id && !item.equipment_types_count))
 									{
 										item.title = item.title + ' - ' + item.location.name;
 										$scope.reservation.approved.push(item);
@@ -2336,6 +2336,14 @@ app
 		*/
 		$scope.toolbar = {};
 
+		/*
+		 * Object for fab
+		 *
+		*/
+		$scope.fab = {};
+		$scope.fab.icon = 'mdi-presentation';
+		$scope.fab.label = 'New';
+
 		$scope.init = function(){
 			var query = {};
 
@@ -2346,6 +2354,19 @@ app
 				}
 			]
 			query.first = true;
+
+			Helper.post('/user/check')
+				.success(function(data){
+					angular.forEach(data.roles, function(role){
+						if(role.name == 'slideshow')
+						{
+							data.can_post = true;
+							$scope.fab.show = true;
+						}
+					});
+
+					$scope.current_user = data;
+				});
 
 			Helper.post('/slideshow/enlist', query)
 				.success(function(data){
@@ -3982,6 +4003,12 @@ app
 					'withTrashed': false,
 				},
 			],
+			'withCount': [
+				{
+					'relation':'equipment_types',
+					'withTrashed': false,
+				}
+			],
 		}
 
 		$scope.subheader.all.action = function(){
@@ -4033,6 +4060,12 @@ app
 									'relation':'equipment_approver',
 									'withTrashed': false,
 								},
+							],
+							'withCount': [
+								{
+									'relation':'equipment_types',
+									'withTrashed': false,
+								}
 							],
 							'where': [
 								{

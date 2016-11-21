@@ -405,7 +405,7 @@ guest
 						angular.forEach(data, function(item){
 							pushItem(item);
 
-							if(item.schedule_approver_id && item.equipment_approver_id && item.location)
+							if((item.schedule_approver_id && item.equipment_types_count && item.equipment_approver_id) || (item.schedule_approver_id && !item.equipment_types_count))
 							{
 								item.title = item.title + ' - ' + item.location.name;
 								$scope.reservation.approved.push(item);
@@ -463,6 +463,12 @@ guest
 					'withTrashed': true,
 				},
 			],
+			'withCount': [
+				{
+					'relation':'equipment_types',
+					'withTrashed': false,
+				}
+			],
 		}
 
 		$scope.subheader.all.action = function(){
@@ -514,6 +520,12 @@ guest
 									'relation':'equipment_approver',
 									'withTrashed': false,
 								},
+							],
+							'withCount': [
+								{
+									'relation':'equipment_types',
+									'withTrashed': false,
+								}
 							],
 							'where': [
 								{

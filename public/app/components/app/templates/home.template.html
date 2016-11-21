@@ -18,6 +18,12 @@
             <md-card-content>
                 <p>{{slideshow.description}}</p>
             </md-card-content>
+            <md-card-actions layout="row" layout-align="end center" ng-if="current_user.can_post">
+                <md-button class="md-icon-button">
+                    <md-icon class="mdi mdi-pencil grey"></md-icon>
+                    <md-tooltip>Edit</md-tooltip>
+                </md-button>
+            </md-card-actions>
         </md-card>
     </div>
 </div>

@@ -197,6 +197,16 @@ class ReservationController extends Controller
                 }
             }
         }
+
+        if($request->has('withCount'))
+        {
+            for ($i=0; $i < count($request->withCount); $i++) { 
+                if(!$request->input('withCount')[$i]['withTrashed'])
+                {
+                    $reservations->withCount($request->input('withCount')[$i]['relation']);
+                }
+            }
+        }
         
         if($request->has('where'))
         {
