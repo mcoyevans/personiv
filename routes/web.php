@@ -34,6 +34,8 @@ Route::resource('reservation', 'ReservationController');
 Route::resource('repost', 'RepostController');
 Route::resource('reservation-equipment', 'ReservationEquipmentController');
 Route::resource('role', 'RoleController');
+Route::resource('slideshow', 'SlideshowController');
+Route::resource('slide', 'SlideController');
 Route::resource('user', 'UserController');
 Route::resource('user-role', 'UserRoleController');
 
@@ -131,4 +133,8 @@ Route::group(['prefix' => 'reservation-equipment'], function(){
 	Route::post('enlist', 'ReservationEquipmentController@enlist');
 	Route::post('check-duplicate', 'ReservationEquipmentController@checkDuplicate');
 	Route::post('approve', 'ReservationEquipmentController@approve');
+});
+
+Route::group(['prefix' => 'slideshow'], function(){
+	Route::post('enlist', 'SlideshowController@enlist');	
 });

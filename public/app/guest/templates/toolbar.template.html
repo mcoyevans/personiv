@@ -41,6 +41,16 @@
 		        </md-button>
 		        <md-menu-content width="4">
 		        	<md-subheader>Menu</md-subheader>
+	        		<!-- Posts -->
+		            <md-menu-item>
+		        		<md-button flex ui-sref="wall.posts">
+			                <div layout="row" flex>
+			                	<md-icon class="mdi mdi-bulletin-board grey"></md-icon>
+			                    <span flex="5"></span>
+			                    <span flex class="left-text secondary-text">Posts</span>
+			                </div>
+			            </md-button>
+		        	</md-menu-item>
 	        		<!-- Reservation -->
 		            <md-menu-item>
 		        		<md-button flex ui-sref="wall.reservations">
@@ -93,6 +103,8 @@
 	            </md-menu-item>
 	        </md-menu-content>
 	    </md-menu>
+	    <!-- Posts -->
+		<md-button class="md-primary" ui-sref="wall.posts">Posts</md-button>
 	    <!-- Reservations -->
 		<md-button class="md-primary" ui-sref="wall.reservations">Room Reservation</md-button>
 		<!-- Login -->

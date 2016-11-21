@@ -19,7 +19,6 @@ class CreatePostsTable extends Migration
             $table->string('title')->nullable();
             $table->text('body')->nullable();
             $table->string('image_path')->nullable();
-            $table->boolean('pinned');
             $table->boolean('allow_comments');
             $table->integer('repost_id')->unsigned()->nullable();
             $table->integer('group_id')->nullable();

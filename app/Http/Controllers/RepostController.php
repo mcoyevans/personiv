@@ -137,7 +137,6 @@ class RepostController extends Controller
             $post = new Post();
 
             $post->title = $request->title;
-            $post->pinned = $request->pinned ? true : false;
             $post->allow_comments = $request->allow_comments ? true : false;
             $post->group_id = $request->input('post.group_id') ? $request->input('post.group_id') : ($request->group_id == 'all' ? null : $request->group_id);
             $post->user_id = $request->user()->id;
@@ -197,7 +196,6 @@ class RepostController extends Controller
 
         DB::transaction(function() use($request, $post){
             $post->title = $request->title;
-            $post->pinned = $request->pinned ? true : false;
             $post->allow_comments = $request->allow_comments ? true : false;
             $post->group_id = $request->input('post.group_id') ? $request->input('post.group_id') : ($request->group_id == 'all' ? null : $request->group_id);
            

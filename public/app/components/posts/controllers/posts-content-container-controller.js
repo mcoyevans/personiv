@@ -1,5 +1,5 @@
 app
-	.controller('postsContentContainerController', ['$scope', 'Helper', function($scope, Helper){
+	.controller('postsContentContainerController', ['$scope', '$stateParams', '$state', 'Helper', function($scope, $stateParams, $state, Helper){
 		$scope.$emit('closeSidenav');
 
 		$scope.viewReposts = function(post){
@@ -200,38 +200,6 @@ app
 			$scope.request.search = null;
 			$scope.$broadcast('close');
 			$scope.refresh();
-		});
-
-		$scope.$on('read-post', function(){
-			$scope.request.where = [
-				{
-					'label':'id',
-					'condition':'=',
-					'value': Helper.fetch()
-				}
-			];
-
-			$scope.isLoading = true;
-  			$scope.post.show = false;
-  			$scope.currentTime = Date.now();
-
-			$scope.init($scope.request);
-		});
-
-		$scope.$on('read-post-and-comments', function(){
-			$scope.request.where = [
-				{
-					'label':'id',
-					'condition':'=',
-					'value': Helper.fetch()
-				}
-			];
-
-			$scope.isLoading = true;
-  			$scope.post.show = false;
-  			$scope.currentTime = Date.now();
-
-			$scope.init($scope.request, true);
 		});
 
 		$scope.updatePost = function(data){
@@ -458,12 +426,18 @@ app
 		}
 
 		$scope.refresh = function(){
-			$scope.isLoading = true;
-  			$scope.post.show = false;
-  			$scope.currentTime = Date.now();
-			$scope.request.where = null;
+			if(!$stateParams.postID)
+			{
+				$scope.isLoading = true;
+	  			$scope.post.show = false;
+	  			$scope.currentTime = Date.now();
+				$scope.request.where = null;
 
-  			$scope.init($scope.request);
+	  			$scope.init($scope.request);
+			}
+			else{
+	  			$state.go('main.posts', {'postID':null});
+			}
 		};
 
 		$scope.request = {};
@@ -503,14 +477,21 @@ app
 
 		$scope.request.orderBy = [
 			{
-				'column':'pinned',
-				'order':'desc',
-			},
-			{
 				'column':'updated_at',
 				'order':'desc',
 			},
 		]
+
+		if($stateParams.postID)
+		{		
+			$scope.request.where = [
+				{
+					'label': 'id',
+					'condition': '=',
+					'value': $stateParams.postID,
+				}
+			];
+		}
 
 		$scope.isLoading = true;
 		$scope.$broadcast('close');

@@ -1,1 +1,921 @@
-var guest=angular.module("guest",["shared"]);guest.config(["$stateProvider",function(e){e.state("wall",{url:"/",views:{"":{templateUrl:"/app/guest/views/guest.view.html",controller:"wallViewController"},"content-container@wall":{templateUrl:"/app/shared/views/content-container.view.html",controller:"wallContentContainerController"},"toolbar@wall":{templateUrl:"/app/guest/templates/toolbar.template.html",controller:"wallToolbarController"},"content@wall":{templateUrl:"/app/components/posts/templates/content/posts.template.html"}}}).state("wall.reservations",{url:"reservations",views:{"content-container":{templateUrl:"/app/shared/views/content-container.view.html",controller:"reservationsContentContainerController"},"toolbar@wall.reservations":{templateUrl:"/app/guest/templates/toolbar.template.html",controller:"reservationsToolbarController"},"subheader@wall.reservations":{templateUrl:"/app/components/reservations/templates/subheaders/reservations-subheader.template.html",controller:"reservationsSubheaderController"},"content@wall.reservations":{templateUrl:"/app/components/reservations/templates/content/reservations-content.template.html"}}})}]),guest.controller("approvedReservationDialogController",["$scope","Helper",function(e,t){var r=t.fetch();e.cancel=function(){t.cancel()};var a={"with":[{relation:"location",withTrashed:!0},{relation:"user",withTrashed:!0},{relation:"equipment_types",withTrashed:!1},{relation:"equipment",withTrashed:!0},{relation:"schedule_approver",withTrashed:!0},{relation:"equipment_approver",withTrashed:!0}],where:[{label:"id",condition:"=",value:r.id}],first:!0};t.post("/reservation/enlist",a).success(function(t){t.start=new Date(t.start),t.end=t.end?new Date(t.end):null,e.reservation=t}).error(function(){t.error()})}]),guest.controller("reservationsContentContainerController",["$scope","$compile","Helper","uiCalendarConfig",function(e,t,r,a){e.$emit("closeSidenav"),e.toolbar={},e.toolbar.sortBy=function(t){t.sortReverse=!t.sortReverse,e.sortType=t.type,e.sortReverse=t.sortReverse},e.subheader={},e.subheader.show=!0,e.subheader.current={},e.viewReservation=function(e){r.set(e);var t={template:"/app/components/reservations/templates/dialogs/approved-reservation-dialog.template.html",controller:"approvedReservationDialogController"};r.customDialog(t)},e.editReservation=function(t){t.action="edit",r.set(t);var a={template:"/app/components/reservations/templates/dialogs/reservation-dialog.template.html",controller:"reservationDialogController"};r.customDialog(a).then(function(){r.notify("Reservation updated."),e.refresh()},function(){})},e.deleteReservation=function(t){var a={};a.title="Delete",a.message="Delete this reservation?",a.ok="Delete",a.cancel="Cancel",r.confirm(a).then(function(){r["delete"]("/reservation/"+t.id).success(function(){e.refresh(),r.notify("Reservation deleted.")}).error(function(){r.error()})},function(){})},e.uiConfig={calendar:{height:500,editable:!1,header:{left:"title",center:"",right:"today prev,next"},eventClick:e.viewReservation,eventDrop:e.alertOnDrop,eventResize:e.alertOnResize,viewRender:function(t){e.dateRange={},e.dateRange.start=new Date(t.start._d).toDateString(),e.dateRange.end=new Date(t.end._d).toDateString(),r.set(e.dateRange),e.$broadcast("dateRange"),e.init(e.subheader.current)}}},e.eventSources=[],e.changeView=function(e){a.calendars.reservationCalendar.fullCalendar("changeView",e)},e.calendarType="month",e.$on("setInit",function(){e.isLoading=!0,e.$broadcast("close");var t=r.fetch();e.subheader.current=t,e.init(t)}),e.$on("search",function(){e.subheader.current.request.search=e.toolbar.searchText,e.refresh()}),e.$on("refresh",function(){e.subheader.current.request.search=null,e.$broadcast("close"),e.refresh()});var o=function(t){t.deleted_at=t.deleted_at?new Date(t.deleted_at):null,t.created_at=new Date(t.created_at),t.start=new Date(t.start),t.end=new Date(t.end);var r={};r.display=t.title,e.toolbar.items.push(r)};e.init=function(t){e.reservation={},e.toolbar.items=[],r.post("/reservation/enlist",t.request).success(function(t){e.eventSources.splice(0,1),e.reservation.approved=[],e.reservation.pending=[],t.length&&(angular.forEach(t,function(t){o(t),t.schedule_approver_id&&t.equipment_approver_id&&t.location?(t.title=t.title+" - "+t.location.name,e.reservation.approved.push(t)):e.reservation.pending.push(t)}),e.eventSources.push(e.reservation.approved)),e.refresh=function(){e.isLoading=!0,r.set(e.dateRange),e.$broadcast("dateRange"),e.init(e.subheader.current)}})}}]),guest.controller("reservationsSubheaderController",["$scope","Helper",function(e,t){var r=function(r){t.set(r),e.current_tab=r,e.$emit("setInit")};e.subheader.all={},e.subheader.all.label="All",e.subheader.all.request={"with":[{relation:"location",withTrashed:!1},{relation:"user",withTrashed:!0},{relation:"schedule_approver",withTrashed:!0},{relation:"equipment_approver",withTrashed:!0}]},e.subheader.all.action=function(){r(e.subheader.all)},e.$on("dateRange",function(){var r=t.fetch(),a={label:"start",start:r.start,end:r.end};e.subheader.all.request.whereBetween=a,angular.forEach(e.subheader.navs,function(e){e.request.whereBetween=a})}),e.init=function(){t.get("/location").success(function(t){e.locations=t,e.subheader.navs=[],angular.forEach(e.locations,function(t){var a={};a.id=t.id,a.label=t.name,a.request={"with":[{relation:"location",withTrashed:!1},{relation:"user",withTrashed:!1},{relation:"schedule_approver",withTrashed:!1},{relation:"equipment_approver",withTrashed:!1}],where:[{label:"location_id",condition:"=",value:t.id}]},a.action=function(e){r(e)},e.subheader.navs.push(a)}),r(e.subheader.all)})},e.init()}]),guest.controller("reservationsToolbarController",["$scope","$filter",function(e,t){e.toolbar.childState="Reservations",e.$on("close",function(){e.hideSearchBar()}),e.toolbar.getItems=function(r){var a=r?t("filter")(e.toolbar.items,r):e.toolbar.items;return a},e.toolbar.searchAll=!0,e.showSearchBar=function(){e.reservation.busy=!0,e.searchBar=!0},e.hideSearchBar=function(){e.searchBar=!1,e.toolbar.searchText="",e.toolbar.searchItem="",e.searched&&(e.searched=!1,e.$emit("refresh"))},e.searchUserInput=function(){e.$emit("search"),e.searched=!0},e.toolbar.options=!0,e.toolbar.refresh=function(){e.$emit("refresh")}}]),guest.controller("wallContentContainerController",["$scope","Helper",function(e,t){e.$emit("closeSidenav"),e.fetchComments=function(e){if(!e.comments){var r={};r.where=[{label:"post_id",condition:"=",value:e.id}],r["with"]=[{relation:"user",withTrashed:!0}],r.paginate=10,t.post("/comment/enlist",r).success(function(t){e.comment_details=t,e.comments=[],angular.forEach(t.data,function(t){t.created_at=new Date(t.created_at),t.updated_at=new Date(t.updated_at),e.comments.unshift(t)})})}},e.previousComments=function(e){var r=e.comment_details.current_page+1;if(r<=e.comment_details.last_page){var a={};a.where=[{label:"post_id",condition:"=",value:e.id}],a["with"]=[{relation:"user",withTrashed:!0}],a.paginate=10,t.post("/comment/enlist?page="+r,a).success(function(t){e.comment_details=t,angular.forEach(t.data,function(t){t.created_at=new Date(t.created_at),t.updated_at=new Date(t.updated_at),e.comments.unshift(t)})})}},e.toolbar={},e.$on("search",function(){e.request.search=e.toolbar.searchText,e.refresh()}),e.$on("refresh",function(){e.request.search=null,e.$broadcast("close"),e.refresh()});var r=function(t){t.created_at=new Date(t.created_at),t.repost_id&&(t.repost.post.created_at=new Date(t.repost.post.created_at),t.repost.post.chips=[],angular.forEach(t.repost.post.hashtags,function(e){t.repost.post.chips.push(e.tag)})),t.chips=[],angular.forEach(t.hashtags,function(e){t.chips.push(e.tag)});var r={};r.display=t.title,e.toolbar.items.push(r)};e.searchHashTag=function(t){e.toolbar.searchText=t,e.$broadcast("open")},e.init=function(a){e.post={},e.post.items=[],e.toolbar.items=[],e.currentTime=Date.now(),e.post.page=2,t.post("/post/enlist",a).success(function(o){e.post.details=o,e.post.items=o.data,e.post.show=!0,o.data.length&&angular.forEach(o.data,function(e){r(e)}),e.post.paginateLoad=function(){return e.post.busy||e.post.page>e.post.details.last_page?void(e.isLoading=!1):(e.post.busy=!0,e.isLoading=!0,void t.post("/post/enlist?page="+e.post.page,a).success(function(t){e.post.page++,angular.forEach(t.data,function(t,a){r(t),e.post.items.push(t)}),e.post.busy=!1,e.isLoading=!1}))}})},e.refresh=function(){e.isLoading=!0,e.post.show=!1,e.init(e.request)},e.request={},e.request.withTrashed=!1,e.request.paginate=10,e.request["with"]=[{relation:"user",withTrashed:!1},{relation:"hashtags",withTrashed:!1},{relation:"repost.post",withTrashed:!1}],e.request.withCount=[{relation:"comments",withTrashed:!1}],e.request.whereNull=["group_id"],e.request.orderBy=[{column:"pinned",order:"desc"},{column:"created_at",order:"desc"}],e.isLoading=!0,e.$broadcast("close"),e.init(e.request)}]),guest.controller("wallToolbarController",["$scope","$filter",function(e,t){e.toolbar.childState="Posts",e.$on("close",function(){e.hideSearchBar()}),e.$on("open",function(){e.showSearchBar(),e.searchUserInput()}),e.toolbar.getItems=function(r){var a=r?t("filter")(e.toolbar.items,r):e.toolbar.items;return a},e.toolbar.searchAll=!0,e.showSearchBar=function(){e.searchBar=!0},e.hideSearchBar=function(){e.searchBar=!1,e.toolbar.searchText="",e.toolbar.searchItem="",e.searched&&(e.searched=!1,e.$emit("refresh"))},e.searchUserInput=function(){e.$emit("search"),e.searched=!0},e.toolbar.options=!0,e.toolbar.refresh=function(){e.$emit("refresh")}}]),guest.controller("wallViewController",["$scope","$mdMedia","$mdDialog","$mdSidenav","$mdToast","Helper",function(e,t,r,a,o,n){e.toggleSidenav=function(e){a(e).toggle()},e.menu={},n.get("/link").success(function(t){e.menu["static"]=t})}]);
+var guest = angular.module('guest', ['shared']);
+guest
+	.config(['$stateProvider', function($stateProvider){
+		$stateProvider
+			.state('wall', {
+				url: '/',
+				views: {
+					'': {
+						templateUrl: '/app/guest/views/guest.view.html',
+						controller: 'wallViewController',
+					},
+					'content-container@wall': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'homeContentContainerController',
+					},
+					'toolbar@wall': {
+						templateUrl: '/app/guest/templates/toolbar.template.html',
+						controller: 'homeToolbarController',
+					},
+					'content@wall':{
+						templateUrl: '/app/components/app/templates/home.template.html',
+					}
+				}
+			})
+			.state('wall.posts', {
+				url: 'posts/{postID}',
+				params: {'postID':null},
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'wallContentContainerController',
+					},
+					'toolbar@wall.posts': {
+						templateUrl: '/app/guest/templates/toolbar.template.html',
+						controller: 'wallToolbarController',
+					},
+					'content@wall.posts':{
+						templateUrl: '/app/components/posts/templates/content/posts.template.html',
+					}
+				}
+			})
+			.state('wall.reservations', {
+				url: 'reservations',
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'reservationsContentContainerController',
+					},
+					'toolbar@wall.reservations': {
+						templateUrl: '/app/guest/templates/toolbar.template.html',
+						controller: 'reservationsToolbarController',
+					},
+					'subheader@wall.reservations': {
+						templateUrl: '/app/components/reservations/templates/subheaders/reservations-subheader.template.html',
+						controller: 'reservationsSubheaderController',
+					},
+					'content@wall.reservations':{
+						templateUrl: '/app/components/reservations/templates/content/reservations-content.template.html',
+					}
+				}
+			})
+	}]);
+guest
+	.controller('approvedReservationDialogController', ['$scope', 'Helper', function($scope, Helper){
+		var reservation = Helper.fetch();
+
+		$scope.cancel = function(){
+			Helper.cancel();
+		}
+
+		var request = {
+			'with': [
+				{
+					'relation': 'location',
+					'withTrashed': true,
+				},
+				{
+					'relation': 'user',
+					'withTrashed': true,
+				},
+				{
+					'relation': 'equipment_types',
+					'withTrashed': false,
+				},
+				{
+					'relation': 'equipment',
+					'withTrashed': true,
+				},
+				{
+					'relation':'schedule_approver',
+					'withTrashed': true,
+				},
+				{
+					'relation':'equipment_approver',
+					'withTrashed': true,
+				},
+			],
+			'where': [
+				{
+					'label': 'id',
+					'condition': '=',
+					'value': reservation.id,
+				},
+			],
+			'first' : true,
+		}
+
+		Helper.post('/reservation/enlist', request)
+			.success(function(data){
+				data.start = new Date(data.start);
+				data.end = data.end ? new Date(data.end) : null;
+
+				$scope.reservation = data;
+			})
+			.error(function(){
+				Helper.error();
+			})
+	}]);
+guest
+	.controller('homeContentContainerController', ['$scope', 'Helper', function($scope, Helper){
+		$scope.$emit('closeSidenav');
+
+		/*
+		 * Object for toolbar
+		 *
+		*/
+		$scope.toolbar = {};
+
+		$scope.init = function(){
+			var query = {};
+
+			query.with = [
+				{
+					'relation': 'slides',
+					'withTrashed': false,
+				}
+			]
+			query.first = true;
+
+			Helper.post('/slideshow/enlist', query)
+				.success(function(data){
+					$scope.slideshow = data;
+				});
+		}();
+	}]);
+guest
+	.controller('homeToolbarController', ['$scope', 'Helper', function($scope, Helper){
+		$scope.toolbar.childState = 'Home';
+
+		$scope.toolbar.hideSearchIcon = true;
+	}]);
+guest
+	.controller('repostsDialogController', ['$scope', 'Helper', function($scope, Helper){
+		$scope.cancel = function(){
+			Helper.cancel();
+		}
+
+		var post = Helper.fetch();
+
+		var query = {};
+
+		query.with = [
+			{
+				'relation': 'post',
+				'withTrashed': false,
+			}
+		];
+
+		query.where = [
+			{
+				'label': 'post_id',
+				'condition' : '=',
+				'value': post.id
+			}
+		];
+
+		query.orderBy = [
+			{
+				'column':'created_at',
+				'order':'desc',
+			},
+		];
+
+		query.paginate = 10;
+
+		$scope.repost = {};
+		$scope.repost.items = [];
+		$scope.repost.page = 2;
+
+		var pushItem = function(data){
+			data.created_at = new Date(data.created_at);
+		}
+
+		Helper.post('/repost/enlist', query)
+			.success(function(data){
+				$scope.repost.details = data;
+				$scope.repost.items = data.data;
+				$scope.repost.show = true;
+
+				if(data.data.length){
+					angular.forEach(data.data, function(item){
+						pushItem(item);
+					})
+				}
+
+				$scope.repost.paginateLoad = function(){
+					// kills the function if ajax is busy or pagination reaches last page
+					if($scope.repost.busy || ($scope.repost.page > $scope.repost.details.last_page)){
+						$scope.isLoading = false;
+						return;
+					}
+					/**
+					 * Executes pagination call
+					 *
+					*/
+					// sets to true to disable pagination call if still busy.
+					$scope.repost.busy = true;
+					$scope.isLoading = true;
+					// Calls the next page of pagination.
+					Helper.post('/repost/enlist' + '?page=' + $scope.repost.page, query)
+						.success(function(data){
+							// increment the page to set up next page for next AJAX Call
+							$scope.repost.page++;
+
+							// iterate over each data then splice it to the data array
+							angular.forEach(data.data, function(item, key){
+								pushItem(item);
+								$scope.repost.items.push(item);
+							});
+
+							// Enables again the pagination call for next call.
+							$scope.repost.busy = false;
+							$scope.isLoading = false;
+						});
+				}
+			});
+	}]);
+guest
+	.controller('reservationsContentContainerController', ['$scope', '$compile', 'Helper', 'uiCalendarConfig', function($scope, $compile, Helper, uiCalendarConfig){
+		$scope.$emit('closeSidenav');
+
+		/*
+		 * Object for toolbar
+		 *
+		*/
+		$scope.toolbar = {};
+
+		$scope.toolbar.sortBy = function(filter){
+			filter.sortReverse = !filter.sortReverse;			
+			$scope.sortType = filter.type;
+			$scope.sortReverse = filter.sortReverse;
+		}
+
+		/*
+		 * Object for subheader
+		 *
+		*/
+		$scope.subheader = {};
+		$scope.subheader.show = true;
+		$scope.subheader.current = {};
+
+	    $scope.viewReservation = function(data){
+	    	Helper.set(data);
+
+	    	var dialog = {
+	    		'template':'/app/components/reservations/templates/dialogs/approved-reservation-dialog.template.html',
+				'controller': 'approvedReservationDialogController',
+	    	}
+
+	    	Helper.customDialog(dialog);
+	    }
+
+	    $scope.editReservation = function(data){
+	    	data.action = 'edit';
+
+	    	Helper.set(data);
+
+	    	var dialog = {
+	    		'template':'/app/components/reservations/templates/dialogs/reservation-dialog.template.html',
+				'controller': 'reservationDialogController',
+	    	}
+
+			Helper.customDialog(dialog)
+				.then(function(){
+					Helper.notify('Reservation updated.');
+					$scope.refresh();
+				}, function(){
+					return;
+				});
+	    }
+
+	    $scope.deleteReservation = function(data){
+	    	var dialog = {};
+			dialog.title = 'Delete';
+			dialog.message = 'Delete this reservation?'
+			dialog.ok = 'Delete';
+			dialog.cancel = 'Cancel';
+
+			Helper.confirm(dialog)
+				.then(function(){
+					Helper.delete('/reservation/' + data.id)
+						.success(function(){
+							$scope.refresh();
+							Helper.notify('Reservation deleted.');
+						})
+						.error(function(){
+							Helper.error();
+						});
+				}, function(){
+					return;
+				})
+	    }
+
+		/*
+		 *
+		 * Object for calendar
+		*/
+		$scope.uiConfig = {
+		    calendar: {
+		    	height: 500,
+		        editable: false,
+		        header:{
+		          	left: 'title',
+		          	center: '',
+		          	right: 'today prev,next'
+		        },
+		        eventClick: $scope.viewReservation,
+		        eventDrop: $scope.alertOnDrop,
+		        eventResize: $scope.alertOnResize,
+		        viewRender: function(date) {
+		            $scope.dateRange = {};
+
+		            $scope.dateRange.start = new Date(date.start._d).toDateString();
+		            $scope.dateRange.end = new Date(date.end._d).toDateString();
+
+		            Helper.set($scope.dateRange);
+
+		            $scope.$broadcast('dateRange');
+
+		            $scope.init($scope.subheader.current);
+		        }
+		    }
+	    };
+
+
+	    $scope.eventSources = [];
+
+	    $scope.changeView = function(view){
+	    	uiCalendarConfig.calendars.reservationCalendar.fullCalendar('changeView', view);
+	    }
+
+	    $scope.calendarType = 'month';
+
+		/* Action originates from subheader */
+		$scope.$on('setInit', function(){
+			$scope.isLoading = true;
+			$scope.$broadcast('close');
+			
+			var current = Helper.fetch();
+
+			$scope.subheader.current = current;
+			$scope.init(current);
+		});
+
+		/* Action originates from toolbar */
+		$scope.$on('search', function(){
+			$scope.subheader.current.request.search = $scope.toolbar.searchText;
+			$scope.refresh();
+		});
+
+		/* Listens for any request for refresh */
+		$scope.$on('refresh', function(){
+			$scope.subheader.current.request.search = null;
+			$scope.$broadcast('close');
+			$scope.refresh();
+		});
+
+		/* Formats every data in the paginated call */
+		var pushItem = function(data){
+			data.deleted_at =  data.deleted_at ? new Date(data.deleted_at) : null;
+			data.created_at = new Date(data.created_at);
+			data.start = new Date(data.start);
+			data.end = new Date(data.end);
+
+			var item = {};
+
+			item.display = data.title;
+			
+			$scope.toolbar.items.push(item);
+		}
+
+		$scope.init = function(query){
+			$scope.reservation = {};
+			$scope.toolbar.items = [];
+
+			Helper.post('/reservation/enlist', query.request)
+				.success(function(data){
+					$scope.eventSources.splice(0,1);
+
+					$scope.reservation.approved = [];
+					$scope.reservation.pending = [];
+
+					if(data.length){
+						// iterate over each record and set the format
+						angular.forEach(data, function(item){
+							pushItem(item);
+
+							if(item.schedule_approver_id && item.equipment_approver_id && item.location)
+							{
+								item.title = item.title + ' - ' + item.location.name;
+								$scope.reservation.approved.push(item);
+							}
+							else{
+								$scope.reservation.pending.push(item);
+							}
+						});
+
+						$scope.eventSources.push($scope.reservation.approved);					
+					}
+
+					$scope.refresh = function(){
+						$scope.isLoading = true;
+
+						Helper.set($scope.dateRange);
+
+			            $scope.$broadcast('dateRange');
+
+			  			$scope.init($scope.subheader.current);
+					};
+				});
+		}
+	}]);
+guest
+	.controller('reservationsSubheaderController', ['$scope', 'Helper', function($scope, Helper){
+		var setInit = function(data){
+			Helper.set(data);
+
+			$scope.current_tab = data;
+
+			$scope.$emit('setInit');
+		}
+
+		$scope.subheader.all = {};
+
+		$scope.subheader.all.label = 'All';
+
+		$scope.subheader.all.request = {
+			'with': [
+				{
+					'relation':'location',
+					'withTrashed': false,
+				},
+				{
+					'relation':'user',
+					'withTrashed': true,
+				},
+				{
+					'relation':'schedule_approver',
+					'withTrashed': true,
+				},
+				{
+					'relation':'equipment_approver',
+					'withTrashed': true,
+				},
+			],
+		}
+
+		$scope.subheader.all.action = function(){
+			setInit($scope.subheader.all);
+		}
+
+		$scope.$on('dateRange', function(){
+			var dateRange = Helper.fetch();
+
+			var whereBetween = {
+				'label': 'start',
+				'start': dateRange.start,
+				'end': dateRange.end,
+			}
+
+			$scope.subheader.all.request.whereBetween = whereBetween;
+			
+			angular.forEach($scope.subheader.navs, function(item){
+				item.request.whereBetween = whereBetween;
+			});
+		});
+
+		$scope.init = function(){
+			Helper.get('/location')
+				.success(function(data){
+					$scope.locations = data;
+					$scope.subheader.navs = [];
+					
+					angular.forEach($scope.locations, function(location){
+						var item = {};
+
+						item.id = location.id;
+						item.label = location.name;
+						item.request = {
+							'with': [
+								{
+									'relation':'location',
+									'withTrashed': false,
+								},
+								{
+									'relation':'user',
+									'withTrashed': false,
+								},
+								{
+									'relation':'schedule_approver',
+									'withTrashed': false,
+								},
+								{
+									'relation':'equipment_approver',
+									'withTrashed': false,
+								},
+							],
+							'where': [
+								{
+									'label':'location_id',
+									'condition':'=',
+									'value': location.id,
+								},
+							],
+						}
+						item.action = function(current){
+							setInit(current);
+						}
+
+						$scope.subheader.navs.push(item);
+					});
+
+					setInit($scope.subheader.all);
+				})
+		}
+
+		$scope.init();
+	}]);
+guest
+	.controller('reservationsToolbarController', ['$scope', '$filter', function($scope, $filter){
+		$scope.toolbar.childState = 'Reservations';
+
+		$scope.$on('close', function(){
+			$scope.hideSearchBar();
+		});
+
+		$scope.toolbar.getItems = function(query){
+			var results = query ? $filter('filter')($scope.toolbar.items, query) : $scope.toolbar.items;
+			return results;
+		}
+
+		$scope.toolbar.searchAll = true;
+		/**
+		 * Reveals the search bar.
+		 *
+		*/
+		$scope.showSearchBar = function(){
+			$scope.reservation.busy = true;
+			$scope.searchBar = true;
+		};
+
+		/**
+		 * Hides the search bar.
+		 *
+		*/
+		$scope.hideSearchBar = function(){
+			$scope.searchBar = false;
+			$scope.toolbar.searchText = '';
+			$scope.toolbar.searchItem = '';
+			/* Cancels the paginate when the user sent a query */
+			if($scope.searched){
+				$scope.searched = false;
+				$scope.$emit('refresh');
+			}
+		};
+
+		$scope.searchUserInput = function(){
+			$scope.$emit('search');
+			$scope.searched = true;
+		};
+
+		$scope.toolbar.options = true;
+
+		$scope.toolbar.refresh = function(){
+			$scope.$emit('refresh');
+		}
+	}]);
+guest
+	.controller('wallContentContainerController', ['$scope', '$stateParams', '$state', 'Helper', function($scope, $stateParams, $state, Helper){
+		$scope.$emit('closeSidenav');
+
+		$scope.viewReposts = function(post){
+			var dialog = {
+				'template':'/app/components/posts/templates/dialogs/reposts-dialog.template.html',
+				'controller': 'repostsDialogController',
+			}
+
+			Helper.set(post);
+
+			Helper.customDialog(dialog);
+		}
+
+		$scope.fetchComments = function(post){
+			if(!post.comments)
+			{
+				var query= {};
+
+				query.where = [
+					{
+						'label':'post_id',
+						'condition': '=',
+						'value': post.id
+					}
+				];
+
+				query.with = [
+					{
+						'relation':'user',
+						'withTrashed':true,
+					}
+				]
+				query.paginate = 10;
+
+				Helper.post('/comment/enlist', query)
+					.success(function(data){
+						post.comment_details = data;
+
+						post.comments = [];
+
+						angular.forEach(data.data, function(item){
+							item.created_at = new Date(item.created_at);
+							item.updated_at = new Date(item.updated_at);
+							post.comments.unshift(item);
+						});
+					})
+			}
+		}
+
+		$scope.previousComments = function(post)
+		{
+			var next_page = post.comment_details.current_page + 1;
+			
+			if(next_page <= post.comment_details.last_page)
+			{
+				var query= {};
+
+				query.where = [
+					{
+						'label':'post_id',
+						'condition': '=',
+						'value': post.id
+					}
+				];
+
+				query.with = [
+					{
+						'relation':'user',
+						'withTrashed':true,
+					}
+				]
+				query.paginate = 10;
+
+				Helper.post('/comment/enlist?page=' + next_page, query)
+					.success(function(data){
+						post.comment_details = data;
+
+						angular.forEach(data.data, function(item){
+							item.created_at = new Date(item.created_at);
+							item.updated_at = new Date(item.updated_at);
+							post.comments.unshift(item);
+						});
+					})
+			}
+
+		}
+
+		/*
+		 * Object for toolbar
+		 *
+		*/
+		$scope.toolbar = {};
+
+		/* Action originates from toolbar */
+		$scope.$on('search', function(){
+			$scope.request.search = $scope.toolbar.searchText;
+			$scope.refresh();
+		});
+
+		/* Listens for any request for refresh */
+		$scope.$on('refresh', function(){
+			$scope.request.search = null;
+			$scope.$broadcast('close');
+			$scope.refresh();
+		});
+
+		/* Formats every data in the paginated call */
+		var pushItem = function(data){
+			data.created_at = new Date(data.created_at);
+
+			if(data.repost_id)
+			{
+				data.repost.post.created_at = new Date(data.repost.post.created_at);
+
+				data.repost.post.chips = [];
+
+				angular.forEach(data.repost.post.hashtags, function(hashtag){
+					data.repost.post.chips.push(hashtag.tag);
+				});
+			}
+			
+			data.chips = [];
+
+			angular.forEach(data.hashtags, function(hashtag){
+				data.chips.push(hashtag.tag);
+			});
+			
+			var item = {};
+
+			item.display = data.title;
+
+			$scope.toolbar.items.push(item);
+		}
+
+		$scope.searchHashTag = function(chip){
+			$scope.toolbar.searchText = chip;
+			$scope.$broadcast('open');
+		}
+
+		$scope.init = function(query){
+			$scope.post = {};
+			$scope.post.items = [];
+			$scope.toolbar.items = [];
+			$scope.currentTime = Date.now();
+
+			// 2 is default so the next page to be loaded will be page 2 
+			$scope.post.page = 2;
+
+			Helper.post('/post/enlist', query)
+				.success(function(data){
+					$scope.post.details = data;
+					$scope.post.items = data.data;
+					$scope.post.show = true;
+
+					if(data.data.length){
+						// iterate over each record and set the format
+						angular.forEach(data.data, function(item){
+							pushItem(item);
+						});
+					}
+
+					$scope.post.paginateLoad = function(){
+						// kills the function if ajax is busy or pagination reaches last page
+						if($scope.post.busy || ($scope.post.page > $scope.post.details.last_page)){
+							$scope.isLoading = false;
+							return;
+						}
+						/**
+						 * Executes pagination call
+						 *
+						*/
+						// sets to true to disable pagination call if still busy.
+						$scope.post.busy = true;
+						$scope.isLoading = true;
+						// Calls the next page of pagination.
+						Helper.post('/post/enlist' + '?page=' + $scope.post.page, query)
+							.success(function(data){
+								// increment the page to set up next page for next AJAX Call
+								$scope.post.page++;
+
+								// iterate over each data then splice it to the data array
+								angular.forEach(data.data, function(item, key){
+									pushItem(item);
+									$scope.post.items.push(item);
+								});
+
+								// Enables again the pagination call for next call.
+								$scope.post.busy = false;
+								$scope.isLoading = false;
+							});
+					}
+				});
+		}
+
+		$scope.refresh = function(){
+			if(!$stateParams.postID)
+			{
+				$scope.isLoading = true;
+	  			$scope.post.show = false;
+	  			$scope.currentTime = Date.now();
+				$scope.request.where = null;
+
+	  			$scope.init($scope.request);
+			}
+			else{
+	  			$state.go('main.posts', {'postID':null});
+			}
+		};
+
+		$scope.request = {};
+
+		$scope.request.withTrashed = false;
+		$scope.request.paginate = 10;
+
+		$scope.request.with = [
+			{
+				'relation':'user',
+				'withTrashed': false,
+			},
+			{
+				'relation':'hashtags',
+				'withTrashed': false,	
+			},
+			{
+				'relation':'repost.post',
+				'withTrashed': false,	
+			},
+		];
+		
+		$scope.request.withCount = [
+			{
+				'relation':'comments',
+				'withTrashed': false,
+			}
+		]
+
+		$scope.request.whereNull = ['group_id'];
+
+		$scope.request.orderBy = [
+			{
+				'column':'created_at',
+				'order':'desc',
+			},	
+		]
+
+		if($stateParams.postID)
+		{		
+			$scope.request.where = [
+				{
+					'label': 'id',
+					'condition': '=',
+					'value': $stateParams.postID,
+				}
+			];
+		}
+
+		$scope.isLoading = true;
+		$scope.$broadcast('close');
+
+		$scope.init($scope.request);
+	}]);
+guest
+	.controller('wallToolbarController', ['$scope', '$filter', function($scope, $filter){
+		$scope.toolbar.childState = 'Posts';
+
+		$scope.$on('close', function(){
+			$scope.hideSearchBar();
+		});
+
+		$scope.$on('open', function(){
+			$scope.showSearchBar();
+			$scope.searchUserInput();
+		});
+
+		$scope.toolbar.getItems = function(query){
+			var results = query ? $filter('filter')($scope.toolbar.items, query) : $scope.toolbar.items;
+			return results;
+		}
+
+		$scope.toolbar.searchAll = true;
+		/**
+		 * Reveals the search bar.
+		 *
+		*/
+		$scope.showSearchBar = function(){
+			// $scope.post.busy = true;
+			$scope.searchBar = true;
+		};
+
+		/**
+		 * Hides the search bar.
+		 *
+		*/
+		$scope.hideSearchBar = function(){
+			$scope.searchBar = false;
+			$scope.toolbar.searchText = '';
+			$scope.toolbar.searchItem = '';
+			/* Cancels the paginate when the user sent a query */
+			if($scope.searched){
+				// $scope.post.page = 1;
+				// $scope.post.no_matches = false;
+				// $scope.post.items = [];
+				$scope.searched = false;
+				$scope.$emit('refresh');
+			}
+		};
+
+		$scope.searchUserInput = function(){
+			$scope.$emit('search');
+			$scope.searched = true;
+		};
+
+		$scope.toolbar.options = true;
+		
+		$scope.toolbar.refresh = function(){
+			$scope.$emit('refresh');
+		}
+	}]);
+guest
+	.controller('wallViewController', ['$scope', '$mdMedia', '$mdDialog', '$mdSidenav', '$mdToast', 'Helper', function($scope, $mdMedia, $mdDialog, $mdSidenav, $mdToast, Helper){
+		$scope.toggleSidenav = function(menuID){
+			$mdSidenav(menuID).toggle();
+		}
+
+		$scope.menu = {};
+
+		Helper.get('/link')
+			.success(function(data){
+				$scope.menu.static = data;
+			})
+	}]);
+//# sourceMappingURL=guest.js.map

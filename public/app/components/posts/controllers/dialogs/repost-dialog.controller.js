@@ -53,7 +53,6 @@ app
 					});
 
 					$scope.repost.post = data;
-					$scope.repost.post.pinned = data.pinned ? true : false;
 					$scope.repost.post.allow_comments = data.allow_comments ? true : false;
 
 					$scope.repost.group_id = data.group_id ? data.group_id : 'all';
@@ -94,7 +93,6 @@ app
 					});
 
 					$scope.repost.post = data.post;
-					$scope.repost.post.pinned = data.post.pinned ? true : false;
 					$scope.repost.post.allow_comments = data.post.allow_comments ? true : false;
 
 					$scope.repost.group_id = data.post.group_id ? data.post.group_id : 'all';
@@ -103,7 +101,6 @@ app
 						.success(function(data){
 							$scope.repost.id = data.repost_id;
 							$scope.repost.title = data.title;
-							$scope.repost.pinned = data.pinned ? true : false;
 							$scope.repost.allow_comments = data.allow_comments ? true : false;
 							$scope.repost.group_id = data.group_id ? data.group_id : 'all';
 						});
