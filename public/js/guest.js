@@ -95,6 +95,12 @@ guest
 					'withTrashed': true,
 				},
 			],
+			'withCount': [
+				{
+					'relation': 'equipment_types',
+					'withTrashed': false,
+				}
+			],
 			'where': [
 				{
 					'label': 'id',

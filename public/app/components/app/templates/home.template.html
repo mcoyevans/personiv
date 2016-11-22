@@ -1,21 +1,20 @@
 <div layout="row" layout-align="center start">
-    <div layout="column" layout-align="center center" layout-margin flex flex-gt-md="70" ng-if="slideshow">
+    <div layout="column" layout-align="center center" layout-margin flex flex-gt-md="80" ng-if="slideshow">
         <md-card>
             <div uib-carousel active="0" interval="5000" no-wrap="false">
                 <div uib-slide ng-repeat="slide in slideshow.slides" index="$index">
                     <img ng-src="/slide/{{slide.id}}" style="margin:auto; max-width:1080px">
                     <div class="carousel-caption">
-                        <h4>{{slide.title}}</h4>
                         <p>{{slide.description}}</p>
                     </div>
                 </div>
             </div>
-            <md-card-title>
+            <md-card-title ng-if="slideshow.title">
                 <md-card-title-text>
                     <span class="md-headline">{{slideshow.title}}</span>
                 </md-card-title-text>
             </md-card-title>
-            <md-card-content>
+            <md-card-content ng-if="slideshow.description">
                 <p>{{slideshow.description}}</p>
             </md-card-content>
             <md-card-actions layout="row" layout-align="end center" ng-if="current_user.can_post">

@@ -295,6 +295,18 @@ md-content.dirty-white {
 .fc-event-container {
   cursor: pointer; }
 
+.drop-zone {
+  height: 100%; }
+  .drop-zone img {
+    width: 150px; }
+
+.gallery {
+  height: 400px !important; }
+  .gallery img {
+    height: 250px !important;
+    -o-object-fit: contain !important;
+    object-fit: contain !important; }
+
 /* transition duration */
 .transition, .fade-transition, .main-view {
   -webkit-transition: all 0.3s cubic-bezier(0.55, 0, 0.55, 0.2);

@@ -85,15 +85,6 @@ class PostController extends Controller
             }
         }
 
-        if(Auth::check())
-        {
-            if(!$request->user()->super_admin)
-            {
-                $posts->where('group_id', $request->user()->group_id)->orWhereNull('group_id');
-            }
-        }
-
-
         if($request->has('where'))
         {
             for ($i=0; $i < count($request->where); $i++) { 
@@ -120,6 +111,14 @@ class PostController extends Controller
             $posts->where('title', 'like', '%'. $request->search .'%')->orWhere('body', 'like', '%'. $request->search .'%')->orWhereHas('hashtags', function($query) use ($request){
                 $query->where('tag', $request->search);
             });
+        }
+
+        if(Auth::check())
+        {
+            if(!$request->user()->super_admin)
+            {
+                $posts->where('group_id', $request->user()->group_id)->orWhereNull('group_id');
+            }
         }
 
         if($request->has('first'))

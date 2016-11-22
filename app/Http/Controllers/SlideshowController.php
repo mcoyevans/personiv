@@ -7,12 +7,17 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 
 use App\Slideshow;
+use App\Slide;
+use App\User;
+
+use App\Notifications\SlideshowCreated;
 
 use Auth;
 use Carbon\Carbon;
 use DB;
 use Gate;
 use Notification;
+use Storage;
 
 class SlideshowController extends Controller
 {
@@ -86,7 +91,52 @@ class SlideshowController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if(Gate::forUser($request->user())->denies('slideshow'))
+        {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $this->validate($request, [
+            'slides' => 'required'
+        ]);
+
+        $current = Slideshow::whereNull('deleted_at');
+
+        $current->delete();
+
+        DB::transaction(function() use($request){        
+
+            $slideshow = new Slideshow;
+
+            $slideshow->title = $request->title;
+            $slideshow->description = $request->description;
+
+            $slideshow->save();
+
+            $slides = array();
+
+            for ($i=0; $i < count($request->slides); $i++) { 
+                $this->validate($request, [
+                    'slides.'.$i.'.path' => 'required',
+                    'slides.'.$i.'.order' => 'required',
+                ]);
+
+                $slide = new Slide([
+                    'title' => isset($request->input('slides')[$i]['title']) ? $request->input('slides')[$i]['title'] : null,
+                    'description' => isset($request->input('slides')[$i]['description']) ? $request->input('slides')[$i]['description'] : null,
+                    'order' => $request->input('slides')[$i]['order'],
+                    'path' => 'slides/'. Carbon::now()->toDateString(). '-'. $slideshow->id . '-'. str_random(16) . '.jpg',
+                ]);
+
+                Storage::copy($request->input('slides')[$i]['path'], $slide->path);
+
+                array_push($slides, $slide);
+            }
+
+            $slideshow->slides()->saveMany($slides);
+
+            Notification::send(User::where('super_admin', 1)->get(), new SlideshowCreated($slideshow, $request->user()));
+        });
     }
 
     /**

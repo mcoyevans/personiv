@@ -24,6 +24,26 @@ app
 					}
 				}
 			})
+			.state('main.slideshow', {
+				url: 'slideshow/{slideshowID}',
+				params: {'slideshowID':null},
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'slideshowContentContainerController',
+					},
+					'toolbar@main.slideshow': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'slideshowToolbarController',
+					},
+					'left-sidenav@main.slideshow': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.slideshow':{
+						templateUrl: '/app/components/app/templates/content/slideshow-content.template.html',
+					}
+				}
+			})
 			.state('main.posts', {
 				url: 'posts/{postID}',
 				params: {'postID':null},

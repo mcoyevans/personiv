@@ -1,5 +1,5 @@
 app
-	.controller('homeContentContainerController', ['$scope', 'Helper', function($scope, Helper){
+	.controller('homeContentContainerController', ['$scope', '$state', 'Helper', function($scope, $state, Helper){
 		$scope.$emit('closeSidenav');
 
 		/*
@@ -15,6 +15,10 @@ app
 		$scope.fab = {};
 		$scope.fab.icon = 'mdi-presentation';
 		$scope.fab.label = 'New';
+
+		$scope.fab.action = function(){
+			$state.go('main.slideshow', {'slideshowID': null});
+		}
 
 		$scope.init = function(){
 			var query = {};
