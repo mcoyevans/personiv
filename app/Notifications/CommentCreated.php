@@ -60,8 +60,7 @@ class CommentCreated extends Notification
             'attachment' => $this->comment,
             'sender' => $this->comment->user,
             'message' => 'commented on your post.',
-            'url' => 'main',
-            'withParams' => false,
+            'url' => 'main.posts',
         ];
     }
 }

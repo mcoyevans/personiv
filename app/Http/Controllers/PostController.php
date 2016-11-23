@@ -23,7 +23,7 @@ use Storage;
 class PostController extends Controller
 {
     /**
-     * Display a listing of the resource with parameters.
+     * Repond the image of the post.
      *
      * @return \Illuminate\Http\Response
      */
@@ -85,15 +85,6 @@ class PostController extends Controller
             }
         }
 
-        if(Auth::check())
-        {
-            if(!$request->user()->super_admin)
-            {
-                $posts->where('group_id', $request->user()->group_id)->orWhereNull('group_id');
-            }
-        }
-
-
         if($request->has('where'))
         {
             for ($i=0; $i < count($request->where); $i++) { 
@@ -120,6 +111,14 @@ class PostController extends Controller
             $posts->where('title', 'like', '%'. $request->search .'%')->orWhere('body', 'like', '%'. $request->search .'%')->orWhereHas('hashtags', function($query) use ($request){
                 $query->where('tag', $request->search);
             });
+        }
+
+        if(Auth::check())
+        {
+            if(!$request->user()->super_admin)
+            {
+                $posts->where('group_id', $request->user()->group_id)->orWhereNull('group_id');
+            }
         }
 
         if($request->has('first'))
@@ -180,7 +179,6 @@ class PostController extends Controller
 
             $post->title = $request->title;
             $post->body = $request->body;
-            $post->pinned = $request->pinned ? true : false;
             $post->allow_comments = $request->allow_comments ? true : false;
             $post->group_id = $request->group_id == 'all' ? null : $request->group_id;
             $post->user_id = $request->user()->id;
@@ -264,7 +262,6 @@ class PostController extends Controller
 
             $post->title = $request->title;
             $post->body = $request->body;
-            $post->pinned = $request->pinned ? true : false;
             $post->allow_comments = $request->allow_comments ? true : false;
             $post->group_id = $request->group_id == 'all' ? null : $request->group_id;
 

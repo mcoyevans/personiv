@@ -15,7 +15,6 @@ class PostsTableSeeder extends Seeder
         	'title' => 'Action buttons',
         	'body' => 'The titles of Washed Out\'s breakthrough song and the first single from Paracosm share the two most important words in Ernest Greene\'s musical language: feel it. It\'s a simple request, as well...',
         	'image_path' => 'sample/washedout',
-        	'pinned' => true,
         	'allow_comments' => true,
         	'user_id' => 1,
         	'created_at' => Carbon\Carbon::now(),

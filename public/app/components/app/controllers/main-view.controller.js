@@ -10,6 +10,11 @@ app
 		$scope.menu.static = [
 			{
 				'state': 'main',
+				'icon': 'mdi-home',
+				'label': 'Home',
+			},
+			{
+				'state': 'main.posts',
 				'icon': 'mdi-bulletin-board',
 				'label': 'Posts',
 			},
@@ -113,7 +118,7 @@ app
 							'label': 'Approvals',
 						}
 
-						$scope.menu.static[2] = item;
+						$scope.menu.static.push(item);
 					}
 					else if(role.name == 'manage-groups')
 					{
@@ -272,30 +277,29 @@ app
 				});
 		}
 
-		$scope.read = function(notification){
-			if(notification.data.withParams)
-			{
-				$state.go(notification.data.url, {'id':notification.data.attachment.id});
+		$scope.read = function(notification){			
+			if(notification.type == 'App\\Notifications\\PostCreated' || notification.type == 'App\\Notifications\\RepostCreated')
+			{	
+				$state.go(notification.data.url, {'postID':notification.data.attachment.id});
+				// Helper.set(notification.data.attachment.id);
+				// $scope.$broadcast('read-post');
 			}
-			else{
+			else if(notification.type == 'App\\Notifications\\CommentCreated')
+			{
+				$state.go(notification.data.url, {'postID':notification.data.attachment.post_id});
+				// Helper.set(notification.data.attachment.post_id);
+				// $scope.$broadcast('read-post-and-comments');
+			}
+
+			else if(notification.type == 'App\\Notifications\\ReservationCreated')
+			{
+				$state.go(notification.data.url, {'reservationID':notification.data.attachment.id});
+				// Helper.set(notification.data.attachment.id);
+				// $scope.$broadcast('read-approval');
+			}
+			else if(notification.type == 'App\\Notifications\\SlideshowCreated' || notification.type == 'App\\Notifications\\UpdatedCreated')
+			{
 				$state.go(notification.data.url);
-				
-				if(notification.type == 'App\\Notifications\\PostCreated' || notification.type == 'App\\Notifications\\RepostCreated')
-				{	
-					Helper.set(notification.data.attachment.id);
-					$scope.$broadcast('read-post');
-				}
-				else if(notification.type == 'App\\Notifications\\CommentCreated')
-				{
-					Helper.set(notification.data.attachment.post_id);
-					$scope.$broadcast('read-post-and-comments');
-				}
-				else if(notification.type == 'App\\Notifications\\ReservationCreated')
-				{
-					$state.go(notification.data.url, {'reservationID':notification.data.attachment.id});
-					// Helper.set(notification.data.attachment.id);
-					// $scope.$broadcast('read-approval');
-				}
 			}
 
 			$scope.markAsRead(notification);

@@ -1,6 +1,17 @@
 guest
-	.controller('wallContentContainerController', ['$scope', 'Helper', function($scope, Helper){
+	.controller('wallContentContainerController', ['$scope', '$stateParams', '$state', 'Helper', function($scope, $stateParams, $state, Helper){
 		$scope.$emit('closeSidenav');
+
+		$scope.viewReposts = function(post){
+			var dialog = {
+				'template':'/app/components/posts/templates/dialogs/reposts-dialog.template.html',
+				'controller': 'repostsDialogController',
+			}
+
+			Helper.set(post);
+
+			Helper.customDialog(dialog);
+		}
 
 		$scope.fetchComments = function(post){
 			if(!post.comments)
@@ -184,10 +195,18 @@ guest
 		}
 
 		$scope.refresh = function(){
-			$scope.isLoading = true;
-  			$scope.post.show = false;
+			if(!$stateParams.postID)
+			{
+				$scope.isLoading = true;
+	  			$scope.post.show = false;
+	  			$scope.currentTime = Date.now();
+				$scope.request.where = null;
 
-  			$scope.init($scope.request);
+	  			$scope.init($scope.request);
+			}
+			else{
+	  			$state.go('main.posts', {'postID':null});
+			}
 		};
 
 		$scope.request = {};
@@ -221,14 +240,21 @@ guest
 
 		$scope.request.orderBy = [
 			{
-				'column':'pinned',
-				'order':'desc',
-			},
-			{
 				'column':'created_at',
 				'order':'desc',
 			},	
 		]
+
+		if($stateParams.postID)
+		{		
+			$scope.request.where = [
+				{
+					'label': 'id',
+					'condition': '=',
+					'value': $stateParams.postID,
+				}
+			];
+		}
 
 		$scope.isLoading = true;
 		$scope.$broadcast('close');

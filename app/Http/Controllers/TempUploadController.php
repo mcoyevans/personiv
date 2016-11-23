@@ -17,6 +17,23 @@ use Storage;
 class TempUploadController extends Controller
 {
     /**
+     * Delete slide photo.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function deleteSlide(Request $request)
+    {
+        if(Gate::forUser($request->user())->denies('slideshow'))
+        {
+            abort(403, 'Unauthorized action');
+        }
+
+        TempUpload::where('path', $request->path)->delete();
+
+        Storage::delete($request->path);
+    }
+
+    /**
      * Cancel upload photo.
      *
      * @return \Illuminate\Http\Response

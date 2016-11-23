@@ -61,8 +61,7 @@ class RepostCreated extends Notification
             'attachment' => $this->post,
             'sender' => $this->post->user,
             'message' => 'reposted '. $this->repost->user->name .' post.',
-            'url' => 'main',
-            'withParams' => false,
+            'url' => 'main.posts',
         ];
     }
 }

@@ -32,7 +32,6 @@
                                 <span hide-xs hide-sm> | {{repost.post.created_at | date: 'EEEE, MMM. dd, yyyy,'}} at {{repost.post.created_at | date: 'hh:mma'}}</span>
                             </span>
                         </div>
-                        <md-icon class="mdi mdi-star accent" ng-if="post.pinned"></md-icon>
                     </md-card-header-text>
                 </md-card-header>
                 <img ng-src="/post/photo/{{repost.post.id}}" class="md-card-image" alt="{{repost.post.title}} Photo" ng-if="repost.post.image_path">
@@ -49,9 +48,6 @@
                 </md-card-content>
             </md-card>
             <div layout="row" layout-wrap flex>
-               <md-switch class="md-primary" ng-model="repost.pinned" flex-xs="100" flex-gt-sm>
-                   Pinned Post
-               </md-switch>
                <md-switch class="md-primary" ng-model="repost.allow_comments" flex-xs="100" flex-gt-sm>
                    Allow comments
                </md-switch>

@@ -1,0 +1,79 @@
+<div layout="column" flex layout-align="center center" class="drop-zone" nv-file-drop uploader="photoUploader" ng-show="!slideshow.slides.length">
+	<div layout="column" layout-align="center center" layout-padding>
+		<img src="/img/gallery.png" alt="Drop Zone">
+		<input type="file" nv-file-select uploader="photoUploader" multiple hide id="slides">
+		<md-button ng-click="slideUploader()">
+            <div layout="row" flex>                
+                <md-icon class="mdi mdi-camera grey"></md-icon>
+                <span flex="5"></span>
+                <span flex class="fade-transition">Choose Files</span>
+            </div>
+        </md-button>
+		<h2 class="md-subhead">Drop image(s) here.</h2>
+		<h2 class="md-subhead red-text" ng-if="fileError">Files must be .jpg, .png, .jpeg, .bmp, or .gif only</h2>
+	</div>
+	<div class="container">
+		<h2 class="md-headline">Before uploading:</h2>
+		<ul>
+			<li>Files must be .jpg, .png, .jpeg, .bmp, or .gif only.</li>
+			<li>File must not be larger than 10MB.</li>
+		</ul>
+	</div>
+</div>
+<div layout="column" flex layout-align="center center" class="drop-zone" ng-if="photoUploader.queue.length && !show">
+	<div layout="column">
+		<md-progress-circular md-diameter="96"></md-progress-circular>
+	</div>
+</div>
+<form name="form.slidesForm" ng-if="show" layout="column">
+	<div flex layout-padding>
+		<!-- Title -->
+		<md-input-container class="md-block" flex>
+			<label>Title</label>
+			<input type="text" name="Title" ng-model="slideshow.title" md-maxlength="150">
+			<div ng-messages="form.slidesForm.Title.$error" ng-if="form.slidesForm.Title.$touched">
+				<div ng-message="md-maxlength">Title can only be 150 characters long.</div>
+			</div>
+		</md-input-container>
+		<!-- Description -->
+		<md-input-container class="md-block" flex>
+			<label>Say something about this slide</label>
+			<input type="text" name="Description" ng-model="slideshow.description">
+		</md-input-container>
+	</div>
+ 	<div layout="row" layout-wrap flex layout-margin>
+		<md-card ng-repeat="slide in slideshow.slides" flex flex-gt-sm="45" flex-gt-md="30" class="gallery">
+			<img ng-src="/temp-upload/{{slide.id}}" class="md-card-image" alt="{{slide.title}}" ng-if="slide.new">
+			<img ng-src="/slide/{{slide.id}}" class="md-card-image" alt="{{slide.title}}" ng-if="action == 'edit' && !slide.new">
+			<md-card-actions layout="row" layout-align="end center">
+				<md-button class="md-icon-button" ng-if="!$first" ng-click="moveUp(slide)">
+					<md-icon class="mdi mdi-arrow-up grey"></md-icon>
+					<md-tooltip>Move up</md-tooltip>
+				</md-button>
+		        <md-button class="md-icon-button" ng-if="!$last" ng-click="moveDown(slide)">
+					<md-icon class="mdi mdi-arrow-down grey"></md-icon>
+					<md-tooltip>Move down</md-tooltip>
+		        </md-button>
+		        <md-button class="md-icon-button" ng-click="delete(slide)">
+					<md-icon class="mdi mdi-delete grey"></md-icon>
+					<md-tooltip>Delete</md-tooltip>
+		        </md-button>
+			</md-card-actions>
+			<md-card-content>
+				<!-- Description -->
+				<md-input-container class="md-block" flex>
+					<label>Say something about this photo</label>
+					<input type="text" name="Description{{$index}}" ng-model="slide.description">
+				</md-input-container>
+			</md-card-content>
+		</md-card>
+		<md-card flex flex-gt-sm="45" flex-gt-md="30" class="gallery" ng-if="slideshow.slides.length" ng-click="slideUploader()">
+			<img src="/img/gallery.png" alt="Add more">
+			<md-card-title>
+				<md-card-title-text>
+		            <span class="md-headline">Add More Photos</span>
+		          </md-card-title-text>
+			</md-card-title>
+		</md-card>
+ 	</div>
+</form>

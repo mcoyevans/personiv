@@ -319,3 +319,19 @@ md-content.dirty-white{
 .fc-event-container{
 	cursor:pointer;
 }
+
+.drop-zone{
+	height: 100%;
+	img{
+		width:150px;
+	}
+}
+
+.gallery{
+	height:400px !important;
+
+	img{
+		height:250px !important;
+		object-fit: contain !important;
+	}
+}

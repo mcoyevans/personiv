@@ -31,6 +31,12 @@ guest
 					'withTrashed': true,
 				},
 			],
+			'withCount': [
+				{
+					'relation':'equipment_types',
+					'withTrashed': false,
+				}
+			],
 		}
 
 		$scope.subheader.all.action = function(){
@@ -82,6 +88,12 @@ guest
 									'relation':'equipment_approver',
 									'withTrashed': false,
 								},
+							],
+							'withCount': [
+								{
+									'relation':'equipment_types',
+									'withTrashed': false,
+								}
 							],
 							'where': [
 								{

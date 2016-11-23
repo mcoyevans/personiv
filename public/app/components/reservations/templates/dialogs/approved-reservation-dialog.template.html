@@ -38,8 +38,8 @@
             <div flex-sm="100" flex-gt-sm ng-if="reservation.schedule_approver || reservation.equipment_approver">            
                 <strong>Approved by:</strong>
                 <ul ng-if="reservation.schedule_approver || reservation.equipment_approver">
-                    <li>Equipment: {{reservation.equipment_approver.name}}</li>
-                    <li>Schedule: {{reservation.schedule_approver.name}}</li>
+                    <li ng-if="reservation.equipment_types">Equipment: <span ng-if="!reservation.equipment_approver.name">N/A</span>{{reservation.equipment_approver.name}}</li>
+                    <li>Schedule: <span ng-if="!reservation.schedule_approver.name">N/A</span>{{reservation.schedule_approver.name}}</li>
                 </ul>
             </div>
         </div>

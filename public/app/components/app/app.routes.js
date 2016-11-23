@@ -10,16 +10,67 @@ app
 					},
 					'content-container@main': {
 						templateUrl: '/app/shared/views/content-container.view.html',
-						controller: 'postsContentContainerController',
+						controller: 'homeContentContainerController',
 					},
 					'toolbar@main': {
 						templateUrl: '/app/shared/templates/toolbar.template.html',
-						controller: 'postsToolbarController',
+						controller: 'homeToolbarController',
 					},
 					'left-sidenav@main': {
 						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
 					},
 					'content@main':{
+						templateUrl: '/app/components/app/templates/home.template.html',
+					}
+				}
+			})
+			.state('main.slideshow', {
+				url: 'slideshow/{slideshowID}',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/slideshow/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
+				params: {'slideshowID':null},
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'slideshowContentContainerController',
+					},
+					'toolbar@main.slideshow': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'slideshowToolbarController',
+					},
+					'left-sidenav@main.slideshow': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.slideshow':{
+						templateUrl: '/app/components/app/templates/content/slideshow-content.template.html',
+					}
+				}
+			})
+			.state('main.posts', {
+				url: 'posts/{postID}',
+				params: {'postID':null},
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'postsContentContainerController',
+					},
+					'toolbar@main.posts': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'postsToolbarController',
+					},
+					'left-sidenav@main.posts': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.posts':{
 						templateUrl: '/app/components/posts/templates/content/posts.template.html',
 					}
 				}

@@ -14,7 +14,8 @@ class RolesTableSeeder extends Seeder
         DB::table('roles')->insert([
         	['name' => 'posts', 'description' => 'Create a post.', 'super_admin_action' => false],
             ['name' => 'reservations', 'description' => 'Make a room reservation.', 'super_admin_action' => false],
-        	['name' => 'approvals', 'description' => 'Manage approvals for reservations.', 'super_admin_action' => true],
+            ['name' => 'approvals', 'description' => 'Manage approvals for reservations.', 'super_admin_action' => true],
+        	['name' => 'slideshow', 'description' => 'Manage slideshow for home page.', 'super_admin_action' => true],
             ['name' => 'manage-groups', 'description' => 'Manage user groups.', 'super_admin_action' => true],
         	['name' => 'manage-users', 'description' => 'Manage own group users.', 'super_admin_action' => true],
         	['name' => 'manage-locations', 'description' => 'Manage locations for reservations.', 'super_admin_action' => true],
