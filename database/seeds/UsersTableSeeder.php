@@ -22,16 +22,16 @@ class UsersTableSeeder extends Seeder
                 'created_at' => Carbon\Carbon::now(), 
                 'updated_at' => Carbon\Carbon::now()
             ],
-            [
-                'name' => 'John Doe',
-                'email' => 'john.doe@personiv.com',
-                'password' => bcrypt('!welcome10'),
-                'group_id' => 2,
-                'super_admin' => true, 
-                'position' => 'Admin Staff', 
-                'created_at' => Carbon\Carbon::now(), 
-                'updated_at' => Carbon\Carbon::now()
-            ]
+            // [
+            //     'name' => 'John Doe',
+            //     'email' => 'john.doe@personiv.com',
+            //     'password' => bcrypt('!welcome10'),
+            //     'group_id' => 2,
+            //     'super_admin' => true, 
+            //     'position' => 'Admin Staff', 
+            //     'created_at' => Carbon\Carbon::now(), 
+            //     'updated_at' => Carbon\Carbon::now()
+            // ]
         ]);
     }
 }

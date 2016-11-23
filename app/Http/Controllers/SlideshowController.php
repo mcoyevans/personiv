@@ -126,7 +126,6 @@ class SlideshowController extends Controller
                 ]);
 
                 $slide = new Slide([
-                    'title' => isset($request->input('slides')[$i]['title']) ? $request->input('slides')[$i]['title'] : null,
                     'description' => isset($request->input('slides')[$i]['description']) ? $request->input('slides')[$i]['description'] : null,
                     'order' => $request->input('slides')[$i]['order'],
                     'path' => 'slides/'. Carbon::now()->toDateString(). '-'. $slideshow->id . '-'. str_random(16) . '.jpg',
@@ -198,7 +197,6 @@ class SlideshowController extends Controller
                 if(!isset($request->input('slides')[$i]['id']))
                 {
                     $slide = new Slide([
-                        'title' => isset($request->input('slides')[$i]['title']) ? $request->input('slides')[$i]['title'] : null,
                         'description' => isset($request->input('slides')[$i]['description']) ? $request->input('slides')[$i]['description'] : null,
                         'order' => $request->input('slides')[$i]['order'],
                         'path' => 'slides/'. Carbon::now()->toDateString(). '-'. $slideshow->id . '-'. str_random(16) . '.jpg',
