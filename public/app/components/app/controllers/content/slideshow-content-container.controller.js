@@ -7,9 +7,50 @@ app
 		*/
 		$scope.toolbar = {};
 
+		$scope.action = 'create';
+
+		$scope.form = {};
+
+		/*
+		 *
+		 * Object for slideshow
+		 *
+		*/
 		$scope.slideshow = {}
 
 		$scope.slideshow.slides = [];
+
+		if($stateParams.slideshowID)
+		{
+			$scope.action = 'edit';
+
+			var request = {
+				'with': [
+					{
+						'relation': 'slides',
+						'withTrashed': false,
+					},
+				],
+				'where': [
+					{
+						'label': 'id',
+						'condition': '=',
+						'value': $stateParams.slideshowID,
+					}
+				],
+				'first': true,
+			}
+
+			Helper.post('/slideshow/enlist', request)
+				.success(function(data){
+					$scope.slideshow = data;
+					$scope.show = true;
+
+					$scope.fab.show = true;
+					$scope.fab.icon = 'mdi-check';
+					$scope.fab.label = 'Save Changes';
+				})
+		}
 
 		/*
 		 *
@@ -21,6 +62,16 @@ app
 		$scope.fab.icon = 'mdi-upload';
 		$scope.fab.label = 'Upload';
 		$scope.fab.action = function(){
+			if($scope.form.slidesForm.$invalid){
+				angular.forEach($scope.form.slidesForm.$error, function(field){
+					angular.forEach(field, function(errorField){
+						errorField.$setTouched();
+					});
+				});
+
+				return;
+			}
+
 			Helper.preload();
 
 			angular.forEach($scope.slideshow.slides, function(item, key){
@@ -38,6 +89,17 @@ app
 					.error(function(){
 						Helper.error();
 					})
+			}
+			else{
+				Helper.put('/slideshow/' + $stateParams.slideshowID, $scope.slideshow)
+					.success(function(){
+						Helper.stop();
+						Helper.notify('Changes saved.');
+						$state.go('main');
+					})
+					.error(function(){
+						Helper.error();
+					})	
 			}
 		}
 
@@ -91,6 +153,7 @@ app
 		};
 
 		$scope.photoUploader.onCompleteItem  = function(data, response){
+			response.new = true;
 			$scope.slideshow.slides.push(response);
 		}
 
@@ -127,9 +190,31 @@ app
 				'cancel': 'Cancel',
 			}
 
+			var idx = $scope.slideshow.slides.indexOf(slide);
+
 			Helper.confirm(dialog)
 				.then(function(){
-
+					if(slide.new)
+					{
+						Helper.post('/temp-upload/delete-slide', slide)
+							.success(function(){
+								Helper.notify('Photo deleted.');
+								$scope.slideshow.slides.splice(idx, 1);
+							})
+							.error(function(){
+								Helper.error();
+							})
+					}
+					else{
+						Helper.delete('/slide/' + slide.id)
+							.success(function(){
+								Helper.notify('Photo deleted.');
+								$scope.slideshow.slides.splice(idx, 1);
+							})
+							.error(function(){
+								Helper.error();
+							})
+					}
 				}, function(){
 					return;
 				});

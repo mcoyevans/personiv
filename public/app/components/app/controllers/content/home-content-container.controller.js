@@ -20,6 +20,10 @@ app
 			$state.go('main.slideshow', {'slideshowID': null});
 		}
 
+		$scope.edit = function(id){
+			$state.go('main.slideshow', {'slideshowID':id});
+		}
+
 		$scope.init = function(){
 			var query = {};
 

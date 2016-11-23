@@ -2,7 +2,7 @@
     <div layout="column" layout-align="center center" layout-margin flex flex-gt-md="80" ng-if="slideshow">
         <md-card>
             <div uib-carousel active="0" interval="5000" no-wrap="false">
-                <div uib-slide ng-repeat="slide in slideshow.slides" index="$index">
+                <div uib-slide ng-repeat="slide in slideshow.slides | orderBy: 'order'" index="$index">
                     <img ng-src="/slide/{{slide.id}}" style="margin:auto; max-width:1080px">
                     <div class="carousel-caption">
                         <p>{{slide.description}}</p>
@@ -18,7 +18,7 @@
                 <p>{{slideshow.description}}</p>
             </md-card-content>
             <md-card-actions layout="row" layout-align="end center" ng-if="current_user.can_post">
-                <md-button class="md-icon-button">
+                <md-button class="md-icon-button" ng-click="edit(slideshow.id)">
                     <md-icon class="mdi mdi-pencil grey"></md-icon>
                     <md-tooltip>Edit</md-tooltip>
                 </md-button>

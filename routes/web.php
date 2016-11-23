@@ -113,6 +113,7 @@ Route::group(['prefix' => 'comment'], function(){
 Route::group(['prefix' => 'temp-upload'], function(){
 	Route::post('upload-photo', 'TempUploadController@uploadPhoto');
 	Route::post('cancel-upload', 'TempUploadController@cancelUpload');
+	Route::post('delete-slide', 'TempUploadController@deleteSlide');
 });
 
 /* Repost */

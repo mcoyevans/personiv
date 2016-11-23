@@ -297,6 +297,10 @@ app
 				// Helper.set(notification.data.attachment.id);
 				// $scope.$broadcast('read-approval');
 			}
+			else if(notification.type == 'App\\Notifications\\SlideshowCreated' || notification.type == 'App\\Notifications\\UpdatedCreated')
+			{
+				$state.go(notification.data.url);
+			}
 
 			$scope.markAsRead(notification);
 		}

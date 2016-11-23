@@ -12,6 +12,7 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Gate;
+use Storage;
 
 class SlideController extends Controller
 {
@@ -79,7 +80,7 @@ class SlideController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        // 
     }
 
     /**
@@ -90,6 +91,10 @@ class SlideController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $slide = Slide::find($id);
+
+        Storage::delete($slide->path);
+
+        $slide->delete();
     }
 }

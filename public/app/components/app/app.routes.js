@@ -26,6 +26,17 @@ app
 			})
 			.state('main.slideshow', {
 				url: 'slideshow/{slideshowID}',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/slideshow/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
 				params: {'slideshowID':null},
 				views: {
 					'content-container': {
