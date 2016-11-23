@@ -10,20 +10,43 @@ app
 					},
 					'content-container@main': {
 						templateUrl: '/app/shared/views/content-container.view.html',
-						controller: 'homeContentContainerController',
+						controller: 'postsContentContainerController',
 					},
 					'toolbar@main': {
 						templateUrl: '/app/shared/templates/toolbar.template.html',
-						controller: 'homeToolbarController',
+						controller: 'postsToolbarController',
 					},
 					'left-sidenav@main': {
 						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
 					},
 					'content@main':{
-						templateUrl: '/app/components/app/templates/home.template.html',
+						templateUrl: '/app/components/posts/templates/content/posts.template.html',
 					}
 				}
 			})
+			// .state('main', {
+			// 	url: '/',
+			// 	views: {
+			// 		'': {
+			// 			templateUrl: '/app/shared/views/main.view.html',
+			// 			controller: 'mainViewController',
+			// 		},
+			// 		'content-container@main': {
+			// 			templateUrl: '/app/shared/views/content-container.view.html',
+			// 			controller: 'homeContentContainerController',
+			// 		},
+			// 		'toolbar@main': {
+			// 			templateUrl: '/app/shared/templates/toolbar.template.html',
+			// 			controller: 'homeToolbarController',
+			// 		},
+			// 		'left-sidenav@main': {
+			// 			templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+			// 		},
+			// 		'content@main':{
+			// 			templateUrl: '/app/components/app/templates/home.template.html',
+			// 		}
+			// 	}
+			// })
 			.state('main.slideshow', {
 				url: 'slideshow/{slideshowID}',
 				resolve:{
@@ -55,26 +78,26 @@ app
 					}
 				}
 			})
-			.state('main.posts', {
-				url: 'posts/{postID}',
-				params: {'postID':null},
-				views: {
-					'content-container': {
-						templateUrl: '/app/shared/views/content-container.view.html',
-						controller: 'postsContentContainerController',
-					},
-					'toolbar@main.posts': {
-						templateUrl: '/app/shared/templates/toolbar.template.html',
-						controller: 'postsToolbarController',
-					},
-					'left-sidenav@main.posts': {
-						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
-					},
-					'content@main.posts':{
-						templateUrl: '/app/components/posts/templates/content/posts.template.html',
-					}
-				}
-			})
+			// .state('main.posts', {
+			// 	url: 'posts/{postID}',
+			// 	params: {'postID':null},
+			// 	views: {
+			// 		'content-container': {
+			// 			templateUrl: '/app/shared/views/content-container.view.html',
+			// 			controller: 'postsContentContainerController',
+			// 		},
+			// 		'toolbar@main.posts': {
+			// 			templateUrl: '/app/shared/templates/toolbar.template.html',
+			// 			controller: 'postsToolbarController',
+			// 		},
+			// 		'left-sidenav@main.posts': {
+			// 			templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+			// 		},
+			// 		'content@main.posts':{
+			// 			templateUrl: '/app/components/posts/templates/content/posts.template.html',
+			// 		}
+			// 	}
+			// })
 			.state('main.approvals', {
 				url: 'approvals/{reservationID}',
 				params: {'reservationID':null},

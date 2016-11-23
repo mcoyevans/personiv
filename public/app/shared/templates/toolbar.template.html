@@ -1,4 +1,4 @@
-<div class="md-toolbar-tools" layout="row" flex flex-gt-lg="90">
+<div class="md-toolbar-tools" layout="row" flex>
 	<md-button class="md-icon-button" ng-click="toggleSidenav('left')" hide-gt-md ng-if="!searchBar">
 		<md-icon class="mdi grey mdi-menu" aria-label="Toogle Sidenav"></md-icon>
 	</md-button>
@@ -106,6 +106,52 @@
 		              	</md-button>
 		            </md-menu-item>
 		        </md-menu-content>
+			</md-menu>
+			<!-- Account -->
+            <input id="upload" type="file" nv-file-select uploader="photoUploader" style="display: none;" ng-if="user">
+			<md-menu md-position-mode="target-right target">
+				<md-button flex aria-label="User" ng-click="$mdOpenMenu($event)">
+					<div layout="row" flex layout-align="center center">
+						<img ng-if="user.avatar_path" ng-src="/user/avatar/{{user.id}}?={{currentTime}}" class="avatar-icon" alt="avatar">
+			            <img ng-if="user && !user.avatar_path" src="/img/2Color-Favicon_512x512-1.png" class="avatar-icon" alt="">
+			            <span flex="5"></span>
+			            <span class="secondary-text">{{user.name}}</span>
+			            <span flex></span>
+					</div>
+				</md-button>
+				<md-menu-content width="4">
+					<md-subheader>Account</md-subheader>
+					<md-menu-item>
+						<md-button flex ng-click="clickUpload()">
+			                <div layout="row" flex>
+			                    <md-icon class="mdi mdi-camera grey"></md-icon>
+			                    <span flex="5"></span>
+			                    <span class="secondary-text">Update Photo</span>
+			                    <span flex></span>
+			                </div>
+			            </md-button>
+					</md-menu-item>
+					<md-menu-item>
+						<md-button flex ng-click="changePassword()">
+			                <div layout="row" flex>
+			                    <md-icon class="mdi mdi-key-change grey"></md-icon>
+			                    <span flex="5"></span>
+			                    <span class="secondary-text">Change Password</span>
+			                    <span flex></span>
+			                </div>
+			            </md-button>
+					</md-menu-item>
+					<md-menu-item>
+						<md-button flex ng-click="logout()">
+			                <div layout="row" flex>
+			                    <md-icon class="mdi mdi-logout grey"></md-icon>
+			                    <span flex="5"></span>
+			                    <span class="secondary-text">Logout</span>
+			                    <span flex></span>
+			                </div>
+			            </md-button>
+					</md-menu-item>
+				</md-menu-content>
 			</md-menu>
 		</div>
 	</div>

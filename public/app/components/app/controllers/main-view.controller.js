@@ -13,11 +13,11 @@ app
 				'icon': 'mdi-home',
 				'label': 'Home',
 			},
-			{
-				'state': 'main.posts',
-				'icon': 'mdi-bulletin-board',
-				'label': 'Posts',
-			},
+			// {
+			// 	'state': 'main.posts',
+			// 	'icon': 'mdi-bulletin-board',
+			// 	'label': 'Posts',
+			// },
 			{
 				'state': 'main.reservations',
 				'icon': 'mdi-format-list-numbers',
@@ -280,22 +280,22 @@ app
 		$scope.read = function(notification){			
 			if(notification.type == 'App\\Notifications\\PostCreated' || notification.type == 'App\\Notifications\\RepostCreated')
 			{	
-				$state.go(notification.data.url, {'postID':notification.data.attachment.id});
-				// Helper.set(notification.data.attachment.id);
-				// $scope.$broadcast('read-post');
+				// $state.go(notification.data.url, {'postID':notification.data.attachment.id});
+				Helper.set(notification.data.attachment.id);
+				$scope.$broadcast('read-post');
 			}
 			else if(notification.type == 'App\\Notifications\\CommentCreated')
 			{
-				$state.go(notification.data.url, {'postID':notification.data.attachment.post_id});
-				// Helper.set(notification.data.attachment.post_id);
-				// $scope.$broadcast('read-post-and-comments');
+				// $state.go(notification.data.url, {'postID':notification.data.attachment.post_id});
+				Helper.set(notification.data.attachment.post_id);
+				$scope.$broadcast('read-post-and-comments');
 			}
 
 			else if(notification.type == 'App\\Notifications\\ReservationCreated')
 			{
-				$state.go(notification.data.url, {'reservationID':notification.data.attachment.id});
-				// Helper.set(notification.data.attachment.id);
-				// $scope.$broadcast('read-approval');
+				// $state.go(notification.data.url, {'reservationID':notification.data.attachment.id});
+				Helper.set(notification.data.attachment.id);
+				$scope.$broadcast('read-approval');
 			}
 			else if(notification.type == 'App\\Notifications\\SlideshowCreated' || notification.type == 'App\\Notifications\\UpdatedCreated')
 			{

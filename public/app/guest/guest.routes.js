@@ -10,34 +10,54 @@ guest
 					},
 					'content-container@wall': {
 						templateUrl: '/app/shared/views/content-container.view.html',
-						controller: 'homeContentContainerController',
+						controller: 'wallContentContainerController',
 					},
 					'toolbar@wall': {
 						templateUrl: '/app/guest/templates/toolbar.template.html',
-						controller: 'homeToolbarController',
-					},
-					'content@wall':{
-						templateUrl: '/app/components/app/templates/home.template.html',
-					}
-				}
-			})
-			.state('wall.posts', {
-				url: 'posts/{postID}',
-				params: {'postID':null},
-				views: {
-					'content-container': {
-						templateUrl: '/app/shared/views/content-container.view.html',
-						controller: 'wallContentContainerController',
-					},
-					'toolbar@wall.posts': {
-						templateUrl: '/app/guest/templates/toolbar.template.html',
 						controller: 'wallToolbarController',
 					},
-					'content@wall.posts':{
+					'content@wall':{
 						templateUrl: '/app/components/posts/templates/content/posts.template.html',
 					}
 				}
 			})
+			// .state('wall', {
+			// 	url: '/',
+			// 	views: {
+			// 		'': {
+			// 			templateUrl: '/app/guest/views/guest.view.html',
+			// 			controller: 'wallViewController',
+			// 		},
+			// 		'content-container@wall': {
+			// 			templateUrl: '/app/shared/views/content-container.view.html',
+			// 			controller: 'homeContentContainerController',
+			// 		},
+			// 		'toolbar@wall': {
+			// 			templateUrl: '/app/guest/templates/toolbar.template.html',
+			// 			controller: 'homeToolbarController',
+			// 		},
+			// 		'content@wall':{
+			// 			templateUrl: '/app/components/app/templates/home.template.html',
+			// 		}
+			// 	}
+			// })
+			// .state('wall.posts', {
+			// 	url: 'posts/{postID}',
+			// 	params: {'postID':null},
+			// 	views: {
+			// 		'content-container': {
+			// 			templateUrl: '/app/shared/views/content-container.view.html',
+			// 			controller: 'wallContentContainerController',
+			// 		},
+			// 		'toolbar@wall.posts': {
+			// 			templateUrl: '/app/guest/templates/toolbar.template.html',
+			// 			controller: 'wallToolbarController',
+			// 		},
+			// 		'content@wall.posts':{
+			// 			templateUrl: '/app/components/posts/templates/content/posts.template.html',
+			// 		}
+			// 	}
+			// })
 			.state('wall.reservations', {
 				url: 'reservations',
 				views: {

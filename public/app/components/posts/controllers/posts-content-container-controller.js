@@ -202,6 +202,38 @@ app
 			$scope.refresh();
 		});
 
+		$scope.$on('read-post', function(){
+			$scope.request.where = [
+				{
+					'label':'id',
+					'condition':'=',
+					'value': Helper.fetch()
+				}
+			];
+
+			$scope.isLoading = true;
+  			$scope.post.show = false;
+  			$scope.currentTime = Date.now();
+
+			$scope.init($scope.request);
+		});
+
+		$scope.$on('read-post-and-comments', function(){
+			$scope.request.where = [
+				{
+					'label':'id',
+					'condition':'=',
+					'value': Helper.fetch()
+				}
+			];
+
+			$scope.isLoading = true;
+  			$scope.post.show = false;
+  			$scope.currentTime = Date.now();
+
+			$scope.init($scope.request, true);
+		});
+
 		$scope.updatePost = function(data){
 			if(!data.repost_id)
 			{			

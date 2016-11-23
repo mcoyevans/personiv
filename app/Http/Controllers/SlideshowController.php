@@ -186,6 +186,11 @@ class SlideshowController extends Controller
 
             $slideshow->save();
 
+            foreach ($slideshow->slides as $slide) {
+                Storage::delete($slide->path);
+                $slide->delete();
+            }
+
             $slides = array();
 
             for ($i=0; $i < count($request->slides); $i++) { 
@@ -194,27 +199,15 @@ class SlideshowController extends Controller
                     'slides.'.$i.'.order' => 'required',
                 ]);
 
-                if(!isset($request->input('slides')[$i]['id']))
-                {
-                    $slide = new Slide([
-                        'description' => isset($request->input('slides')[$i]['description']) ? $request->input('slides')[$i]['description'] : null,
-                        'order' => $request->input('slides')[$i]['order'],
-                        'path' => 'slides/'. Carbon::now()->toDateString(). '-'. $slideshow->id . '-'. str_random(16) . '.jpg',
-                    ]);
+                $slide = new Slide([
+                    'description' => isset($request->input('slides')[$i]['description']) ? $request->input('slides')[$i]['description'] : null,
+                    'order' => $request->input('slides')[$i]['order'],
+                    'path' => 'slides/'. Carbon::now()->toDateString(). '-'. $slideshow->id . '-'. str_random(16) . '.jpg',
+                ]);
 
-                    Storage::copy($request->input('slides')[$i]['path'], $slide->path);
+                Storage::copy($request->input('slides')[$i]['path'], $slide->path);
 
-                    array_push($slides, $slide);
-                }
-                else{
-                    $slide = Slide::find($request->input('slides')[$i]['id']);
-
-                    $slide->description = isset($request->input('slides')[$i]['description']) ? $request->input('slides')[$i]['description'] : null;
-                    $slide->order = $request->input('slides')[$i]['order'];
-
-                    $slide->save();
-                }
-
+                array_push($slides, $slide);
             }
 
             if(count($slides))

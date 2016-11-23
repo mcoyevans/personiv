@@ -1,6 +1,6 @@
 app
 	.controller('postsToolbarController', ['$scope', '$filter', function($scope, $filter){
-		$scope.toolbar.childState = 'Posts';
+		$scope.toolbar.childState = 'Home';
 
 		$scope.$on('close', function(){
 			$scope.hideSearchBar();

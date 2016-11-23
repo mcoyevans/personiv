@@ -1,3 +1,44 @@
+<div layout="row" layout-align="center center" ng-if="fab.show">
+	<md-card flex flex-gt-sm="60" flex-gt-lg="50" ng-click="fab.action()">
+		<div layout="row" layout-align="start center" flex>        		
+        	<md-list>
+        		<md-list-item>
+        			<img ng-src="/user/avatar/{{user.id}}" class="md-avatar" ng-if="user.avatar_path"/>
+        			<img src="/img/2Color-Favicon_512x512-1.png" class="md-avatar" alt="" ng-if="!user.avatar_path">
+        		</md-list-item>
+        	</md-list>
+        	<md-input-container md-no-float class="md-block" flex>
+			    <textarea ng-model="fake_post" type="text" placeholder="What's on your mind?"></textarea>
+		    </md-input-container>
+    	</div>
+	</md-card>
+</div>
+<div layout="row" layout-align="center center" ng-controller="homeContentContainerController">
+    <md-card flex flex-gt-sm="60" flex-gt-lg="50" ng-if="slideshow" ng-mouseover='hovered=true' ng-mouseout='hovered=false'>
+        <div uib-carousel active="0" interval="5000" no-wrap="false">
+            <div uib-slide ng-repeat="slide in slideshow.slides | orderBy: 'order'" index="$index">
+                <img ng-src="/slide/{{slide.id}}" style="margin:auto; max-height:360px">
+                <div class="carousel-caption">
+                    <p>{{slide.description}}</p>
+                </div>
+            </div>
+        </div>
+        <md-card-title ng-if="slideshow.title">
+            <md-card-title-text>
+                <span class="md-headline">{{slideshow.title}}</span>
+            </md-card-title-text>
+        </md-card-title>
+        <md-card-content ng-if="slideshow.description">
+            <p>{{slideshow.description}}</p>
+        </md-card-content>
+        <md-card-actions layout="row" layout-align="end center" ng-if="current_user.can_slide" ng-show="hovered">
+            <md-button class="md-icon-button" ng-click="edit(slideshow.id)">
+                <md-icon class="mdi mdi-pencil grey"></md-icon>
+                <md-tooltip>Edit</md-tooltip>
+            </md-button>
+        </md-card-actions>
+    </md-card>
+</div>
 <div infinite-scroll='post.paginateLoad()' infinite-scroll-distance="1" infinite-scroll-disabled="post.busy" infinite-scroll-parent ng-if="post.show" layout="row" layout-align="center start">
 	<div layout="column" layout-align="center center" layout-margin flex flex-gt-sm="60" flex-gt-lg="50">
 		<md-card ng-repeat="post in post.items | filter: toolbar.searchText | orderBy:sortType:sortReverse" layout-fill>

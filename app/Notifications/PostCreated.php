@@ -62,7 +62,7 @@ class PostCreated extends Notification
             'attachment' => $this->post,
             'sender' => $this->post->user,
             'message' => 'created a new post.',
-            'url' => 'main.posts',
+            'url' => 'main',
         ];
     }
 }
