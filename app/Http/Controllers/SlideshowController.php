@@ -209,7 +209,6 @@ class SlideshowController extends Controller
                 else{
                     $slide = Slide::find($request->input('slides')[$i]['id']);
 
-                    $slide->title = isset($request->input('slides')[$i]['title']) ? $request->input('slides')[$i]['title'] : null;
                     $slide->description = isset($request->input('slides')[$i]['description']) ? $request->input('slides')[$i]['description'] : null;
                     $slide->order = $request->input('slides')[$i]['order'];
 
