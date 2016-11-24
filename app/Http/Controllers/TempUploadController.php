@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use DB;
 use Gate;
 use Storage;
+use Image;
 
 class TempUploadController extends Controller
 {
@@ -62,6 +63,11 @@ class TempUploadController extends Controller
 
         $path = Storage::putFile('temp', $request->file('file'));
 
+        Image::make(Storage::get($path))->resize(null, 360, function($constraint){
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        })->save(storage_path() .'/app/'. $path);
+
         $temp_upload = new TempUpload;
 
         $temp_upload->path = $path;
@@ -78,7 +84,7 @@ class TempUploadController extends Controller
      */
     public function index()
     {
-        //
+        // 
     }
 
     /**
