@@ -229,7 +229,7 @@ app
 					$scope.photoUploader.queue = [];
 				}
 
-				var pusher = new Pusher('17a18a226b9ef5997bd1', {
+				var pusher = new Pusher('0521fe41d7482726355c', {
 			      	encrypted: true,
 			      	auth: {
 					    headers: {

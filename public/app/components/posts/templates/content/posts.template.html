@@ -241,6 +241,6 @@
 <div layout="row" layout-align="center center" layout-padding layout-margin ng-if="isLoading">
 	<md-progress-circular class="md-primary" md-diameter="60"></md-progress-circular>
 </div>
-<div layout-padding layout-margin ng-if="!post.items.length && post.show && !post.no_matches">
-	Nothing to display.
+<div layout="row" layout-align="center center" layout-padding layout-margin ng-if="!post.items.length && post.show && !post.no_matches">
+	No posts to display.
 </div>
