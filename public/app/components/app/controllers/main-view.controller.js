@@ -21,7 +21,7 @@ app
 			{
 				'state': 'main.reservations',
 				'icon': 'mdi-format-list-numbers',
-				'label': 'Reservations',
+				'label': 'Room Reservations',
 			},
 		];
 
@@ -151,7 +151,7 @@ app
 						settings = true;
 
 						var item = {
-							'label': 'Locations',
+							'label': 'Rooms',
 							action: function(){
 								$state.go('main.locations');
 							},

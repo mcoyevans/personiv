@@ -240,7 +240,7 @@ app
 				}
 			})
 			.state('main.locations', {
-				url: 'settings/locations',
+				url: 'settings/rooms',
 				resolve:{
 					authorization: ['Helper', '$state', function(Helper, $state){
 						Helper.get('/location/create')

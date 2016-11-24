@@ -211,8 +211,9 @@ app
 
 								$scope.eventSources.push($scope.reservation.approved);
 							
-								$scope.fab.show = $scope.current_user.can_reserve ? true : false;
 							}
+							
+							$scope.fab.show = $scope.current_user.can_reserve ? true : false;
 
 							$scope.refresh = function(){
 								$scope.isLoading = true;
