@@ -65,11 +65,7 @@
 		            	</span>
 	            	</div>
 					<md-icon class="mdi mdi-star accent" ng-if="post.pinned"></md-icon>
-<<<<<<< HEAD
-					<md-menu md-position-mode="target-right target" ng-if="user.id == post.user.id || user.super_admin">
-=======
-					<md-menu md-position-mode="target-right target" ng-if="user.id == post.user.id || post.super_admin">
->>>>>>> origin/1.2
+					<md-menu md-position-mode="target-right target" ng-if="user.id == post.user.id || current_user.super_admin">
 						<md-button aria-label="Menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
 				            <md-icon class="mdi mdi-dots-vertical grey"></md-icon>
 				            <md-tooltip>Menu</md-tooltip>
@@ -191,7 +187,7 @@
 				        	</div>
 				        </form>
 
-						<md-menu ng-show="comment.options" ng-if="user.id == comment.user_id && !comment.edit">
+						<md-menu ng-show="comment.options" ng-if="(user.id == comment.user_id || current_user.super_admin) && !comment.edit">
 							<md-button aria-label="Menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
 					            <md-icon class="mdi mdi-dots-vertical grey"></md-icon>
 					            <md-tooltip>Edit or delete this</md-tooltip>
@@ -199,7 +195,7 @@
 
 					        <md-menu-content width="3">
 								<!-- Edit -->
-					            <md-menu-item>
+					            <md-menu-item ng-if="user.id == comment.user_id">
 						            <md-button aria-label="Edit" ng-click="editComment(comment, post)" flex>
 						                Edit
 						            </md-button>
