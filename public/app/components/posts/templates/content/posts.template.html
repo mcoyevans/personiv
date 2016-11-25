@@ -65,7 +65,7 @@
 		            	</span>
 	            	</div>
 					<md-icon class="mdi mdi-star accent" ng-if="post.pinned"></md-icon>
-					<md-menu md-position-mode="target-right target" ng-if="user.id == post.user.id">
+					<md-menu md-position-mode="target-right target" ng-if="user.id == post.user.id || user.super_admin">
 						<md-button aria-label="Menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
 				            <md-icon class="mdi mdi-dots-vertical grey"></md-icon>
 				            <md-tooltip>Menu</md-tooltip>
