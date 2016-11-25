@@ -1,5 +1,5 @@
 <div layout="row" layout-align="center center" ng-if="fab.show">
-	<md-card flex flex-gt-sm="60" flex-gt-lg="50" ng-click="fab.action()">
+	<md-card flex flex-gt-sm="45" flex-gt-lg="40" ng-click="fab.action()">
 		<div layout="row" layout-align="start center" flex>        		
         	<md-list>
         		<md-list-item>
@@ -14,7 +14,7 @@
 	</md-card>
 </div>
 <div layout="row" layout-align="center center" ng-controller="homeContentContainerController">
-    <md-card flex flex-gt-sm="60" flex-gt-lg="50" ng-if="slideshow" ng-mouseover='hovered=true' ng-mouseout='hovered=false'>
+    <md-card flex flex-gt-sm="45" flex-gt-lg="40" ng-if="slideshow" ng-mouseover='hovered=true' ng-mouseout='hovered=false'>
         <div uib-carousel active="0" interval="5000" no-wrap="false">
             <div uib-slide ng-repeat="slide in slideshow.slides | orderBy: 'order'" index="$index">
                 <img ng-src="/slide/{{slide.id}}" style="margin:auto; max-height:360px">
@@ -40,7 +40,7 @@
     </md-card>
 </div>
 <div infinite-scroll='post.paginateLoad()' infinite-scroll-distance="1" infinite-scroll-disabled="post.busy" infinite-scroll-parent ng-if="post.show" layout="row" layout-align="center start">
-	<div layout="column" layout-align="center center" layout-margin flex flex-gt-sm="60" flex-gt-lg="50">
+	<div layout="column" layout-align="center center" layout-margin flex flex-gt-sm="45" flex-gt-lg="40">
 		<md-card ng-repeat="post in post.items | filter: toolbar.searchText | orderBy:sortType:sortReverse" layout-fill>
 			<md-card-header>
 	          	<md-card-avatar>
@@ -65,7 +65,11 @@
 		            	</span>
 	            	</div>
 					<md-icon class="mdi mdi-star accent" ng-if="post.pinned"></md-icon>
+<<<<<<< HEAD
 					<md-menu md-position-mode="target-right target" ng-if="user.id == post.user.id || user.super_admin">
+=======
+					<md-menu md-position-mode="target-right target" ng-if="user.id == post.user.id || post.super_admin">
+>>>>>>> origin/1.2
 						<md-button aria-label="Menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
 				            <md-icon class="mdi mdi-dots-vertical grey"></md-icon>
 				            <md-tooltip>Menu</md-tooltip>
