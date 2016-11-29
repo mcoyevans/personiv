@@ -179,6 +179,7 @@ class PostController extends Controller
 
             $post->title = $request->title;
             $post->body = $request->body;
+            $post->url = $request->url;
             $post->allow_comments = $request->allow_comments ? true : false;
             $post->group_id = $request->group_id == 'all' ? null : $request->group_id;
             $post->user_id = $request->user()->id;
@@ -262,6 +263,7 @@ class PostController extends Controller
 
             $post->title = $request->title;
             $post->body = $request->body;
+            $post->url = $request->url;
             $post->allow_comments = $request->allow_comments ? true : false;
             $post->group_id = $request->group_id == 'all' ? null : $request->group_id;
 

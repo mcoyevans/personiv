@@ -44,6 +44,14 @@
                     </div>
                 </md-input-container>
             </div>
+            <div layout="row" layout-wrap flex>
+                <!-- Link -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Link</label>
+                    <input type="url" name="Link" ng-model="post.url" ng-disabled="busy">
+                    <div class="pattern" ng-if="postForm.Link.$error.url">Please give a valid URL.</div>
+                </md-input-container>
+            </div>
             <div layout="column" flex>
                 <h2 class="md-title">Hashtags</h2>
                 <md-chips ng-model="post.chips" name="hashTag" md-removable="true" placeholder="Enter a hashtag." delete-button-label="Remove Hashtag" delete-hint="Press delete to remove hashtag" secondary-placeholder="+Hashtag" md-enable-chip-edit="true">

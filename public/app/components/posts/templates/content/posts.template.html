@@ -97,6 +97,7 @@
 	          	<p>
 	          		{{post.body}}
 	          	</p>
+	          	<a ng-if="post.url" href="{{post.url}}" target="_blank">Open link in new tab</a>
 	          	<md-card ng-if="post.repost_id">
 	          		<md-card-header>
 			          	<md-card-avatar>

@@ -225,8 +225,14 @@ app
 				};
 
 				$scope.photoUploader.onCompleteItem  = function(data, response){
-					$scope.currentTime = Date.now();
-					$scope.photoUploader.queue = [];
+					if($scope.user.avatar_path)
+					{
+						$scope.currentTime = Date.now();
+						$scope.photoUploader.queue = [];
+					}
+					else{
+						$state.go($state.current, {}, {reload:true});
+					}
 				}
 
 				var pusher = new Pusher('0521fe41d7482726355c', {
@@ -261,6 +267,11 @@ app
 
 				 		// notify the user with a toast message
 				 		Helper.notify(data.sender.name + ' ' + data.message);
+
+				 		if($state.current.name == data.data.url)
+						{
+							$state.go($state.current, {}, {reload:true});
+						}
 				    }),
 				];
 			})
@@ -278,6 +289,8 @@ app
 		}
 
 		$scope.read = function(notification){			
+			$state.go(notification.data.url);
+
 			if(notification.type == 'App\\Notifications\\PostCreated' || notification.type == 'App\\Notifications\\RepostCreated')
 			{	
 				// $state.go(notification.data.url, {'postID':notification.data.attachment.id});
@@ -297,10 +310,7 @@ app
 				Helper.set(notification.data.attachment.id);
 				$scope.$broadcast('read-approval');
 			}
-			else if(notification.type == 'App\\Notifications\\SlideshowCreated' || notification.type == 'App\\Notifications\\UpdatedCreated')
-			{
-				$state.go(notification.data.url);
-			}
+			
 
 			$scope.markAsRead(notification);
 		}
