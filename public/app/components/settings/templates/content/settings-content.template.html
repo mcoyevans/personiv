@@ -3,11 +3,11 @@
 		<md-list>
 			<md-list-item class="md-3-line" ng-repeat="model in model.items | filter: toolbar.searchText | orderBy:sortType:sortReverse" ng-if="showInactive || !model.deleted_at">
 				<h2 class="md-avatar" ng-class="model.deleted_at ? 'red-bg': 'primary-bg'" layout="row" layout-align="center center">
-					<span class="md-headline white-text">{{model.brand.charAt(0).toUpperCase()}} {{model.name.charAt(0).toUpperCase()}}</span>
+					<span class="md-headline white-text">{{model.brand.charAt(0).toUpperCase()}} {{model.name.charAt(0).toUpperCase()}} {{model.last_name.charAt(0).toUpperCase()}}</span>
 				</h2>
 				<div class="md-list-item-text">
-					<h3>{{model.brand}} {{model.name}}</h3>
-					<h4>{{model.model}} <span ng-if="model.users_count">Users: {{model.users_count}}</span> {{model.email}}</h4>
+					<h3>{{model.brand}} {{model.name}} {{model.last_name + ','}} {{model.first_name}} {{model.middle_name.charAt(0) + '.'}}</h3>
+					<h4>{{model.model}} <span ng-if="model.users_count">Users: {{model.users_count}}</span> {{model.email}} {{model.lob}}</h4>
 					<p>
 						<a href="{{model.link}}" target="_blank">{{model.link}}</a>
 						{{model.asset_tag}} <span ng-if="model.deleted_at">| Deleted at: {{model.deleted_at | date: 'EEEE, MMM. dd, yyyy, hh:mma'}}</span>
@@ -18,16 +18,17 @@
 							Roles : 
 							<span ng-repeat="role in model.roles">{{role.description}} <span ng-if="!$last">|</span> </span>
 						</span>
+						{{model.birthdate | date: 'MMMM dd'}}
 					</p>
 				</div>
 				<md-menu ng-show="!model.deleted_at">
 					<md-button aria-label="Menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
 			            <md-icon class="mdi mdi-dots-vertical grey"></md-icon>
-			            <md-tooltip>{{model.brand}} {{model.name}}</md-tooltip>
+			            <md-tooltip>{{model.brand}} {{model.name}} {{model.last_name + ','}} {{model.first_name}} {{model.middle_name.charAt(0) + '.'}}</md-tooltip>
 			        </md-button>
 
 			        <md-menu-content width="4">
-						<md-subheader class="md-no-sticky">{{model.asset_tag}} {{model.name}}</md-subheader>
+						<md-subheader class="md-no-sticky">{{model.asset_tag}} {{model.name}} {{model.last_name + ','}} {{model.first_name}} {{model.middle_name.charAt(0) + '.'}}</md-subheader>
 						<!-- Update -->
 			            <md-menu-item>
 				            <md-button aria-label="Update" ng-click="updateModel(model)" flex>

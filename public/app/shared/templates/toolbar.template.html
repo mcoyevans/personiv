@@ -85,6 +85,14 @@
 				        	Refresh
 				    	</md-button>
 			        </md-menu-item>
+	                <md-menu-item ng-repeat="item in toolbar.others">
+						<md-button aria-label="{{item.label}}" ng-click="item.action()" flex>
+		                    <div layout="row">
+		                        <span>{{item.label}}</span>
+		                        <span flex></span>
+		                    </div>
+		                </md-button>
+					</md-menu-item>
 					<md-menu-item ng-if="toolbar.showInactive">
 						<md-button aria-label="show inactive" ng-click="toolbar.toggleActive()" flex>
 		                    <div layout="row">

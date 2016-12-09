@@ -145,6 +145,36 @@ app
 					}
 				}
 			})
+			.state('main.birthdays', {
+				url: 'settings/birthdays',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/birthday/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'birthdaysContentContainerController',
+					},
+					'toolbar@main.birthdays': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'birthdaysToolbarController',
+					},
+					'left-sidenav@main.birthdays': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.birthdays':{
+						templateUrl: '/app/components/settings/templates/content/settings-content.template.html',
+					}
+				}
+			})
 			.state('main.equipment', {
 				url: 'settings/equipment',
 				resolve:{
