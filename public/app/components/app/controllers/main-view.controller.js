@@ -21,7 +21,7 @@ app
 			{
 				'state': 'main.reservations',
 				'icon': 'mdi-format-list-numbers',
-				'label': 'Room Reservations',
+				'label': 'Training Room Reservations',
 			},
 		];
 
@@ -180,6 +180,19 @@ app
 							'label': 'Links',
 							action: function(){
 								$state.go('main.links');
+							},
+						}
+
+						settings_menu.push(item); 
+					}
+					else if(role.name == 'manage-birthdays')
+					{
+						settings = true;
+
+						var item = {
+							'label': 'Birthdays',
+							action: function(){
+								$state.go('main.birthdays');
 							},
 						}
 
