@@ -1,6 +1,6 @@
 app
-	.controller('birthdaysToolbarController', ['$scope', '$state', '$filter', function($scope, $state, $filter){
-		$scope.toolbar.parentState = 'Settings';
+	.controller('uploadToolbarController', ['$scope', '$state', '$filter', function($scope, $state, $filter){
+		$scope.toolbar.parentState = 'Upload';
 		$scope.toolbar.childState = 'Birthdays';
 
 		$scope.$on('close', function(){
@@ -44,51 +44,6 @@ app
 			$scope.$emit('search');
 			$scope.searched = true;
 		};
-
-		$scope.toolbar.options = true;
-		$scope.toolbar.showInactive = true;
-
-		$scope.toolbar.sort = [
-			{
-				'label': 'First Name',
-				'type': 'first_name',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Middle Name',
-				'type': 'middle_name',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Last Name',
-				'type': 'last_name',
-				'sortReverse': false,
-			},
-			{
-				'label': 'LOB',
-				'type': 'lob',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Birthdate',
-				'type': 'birthdate',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Recently added',
-				'type': 'created_at',
-				'sortReverse': false,
-			},
-		];
-
-		$scope.toolbar.others = [
-			{
-				'label': 'Upload',
-				'action': function(){
-					$state.go('main.upload');
-				},
-			}
-		];
 
 		$scope.toolbar.refresh = function(){
 			$scope.$emit('refresh');

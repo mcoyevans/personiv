@@ -16,6 +16,70 @@ use Gate;
 class BirthdayController extends Controller
 {
     /**
+     * Store multiple tasks.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function storeMultiple(Request $request)
+    {
+        for ($i=0; $i < count($request->all()); $i++) { 
+            $this->validate($request, [
+                $i.'.employee_number' => 'required',
+                $i.'.first_name' => 'required',
+                $i.'.last_name' => 'required',
+                $i.'.birthdate' => 'required',
+            ]);
+
+            DB::transaction(function() use($request, $i) {
+                $birthday = new Birthday;
+
+                $birthday->employee_number = $request->input($i.'.employee_number');
+                $birthday->last_name = $request->input($i.'.last_name');
+                $birthday->first_name = $request->input($i.'.first_name');
+                $birthday->middle_name = $request->input($i.'.middle_name');
+                $birthday->lob = $request->input($i.'.lob');
+                $birthday->birthdate = Carbon::parse($request->input($i.'.birthdate'));
+                $birthday->save();
+            });
+        }
+    }
+
+    /**
+     * Checks the requests for duplicates and returns it back with a duplicate property.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function checkDuplicateMultiple(Request $request)
+    {
+        $birthdays = array();
+
+        for ($i=0; $i < count($request->all()); $i++) {
+
+            if(!$request->input($i.'.employee_number') && !$request->input($i.'.first_name') && !$request->input($i.'.middle_name') && !$request->input($i.'.last_name') && !$request->input($i.'.lob') && !$request->input($i.'.birthdate'))
+            {
+                continue;         
+            }
+
+            $birthdate = new Birthday;
+            
+            $birthdate->employee_number = $request->input($i.'.employee_number');
+            $birthdate->last_name = $request->input($i.'.last_name');
+            $birthdate->first_name = $request->input($i.'.first_name');
+            $birthdate->middle_name = $request->input($i.'.middle_name');
+            $birthdate->lob = $request->input($i.'.lob');
+            $birthdate->birthdate = Carbon::parse($request->input($i.'.birthdate'))->toFormattedDateString();
+            
+            $birthdate->duplicate = Birthday::where('employee_number', $request->input($i.'.employee_number'))->first() ? true : false;
+
+            array_push($birthdays, $birthdate);
+        }
+
+        return $birthdays;
+    }
+
+    /**
      * Checks for duplicate bank account number entry.
      *
      * @return bool

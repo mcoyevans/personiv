@@ -175,6 +175,36 @@ app
 					}
 				}
 			})
+			.state('main.upload', {
+				url: 'settings/birthdays/upload',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/birthday/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'uploadContentContainerController',
+					},
+					'toolbar@main.upload': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'uploadToolbarController',
+					},
+					'left-sidenav@main.upload': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.upload':{
+						templateUrl: '/app/components/settings/templates/content/upload-content.template.html',
+					}
+				}
+			})
 			.state('main.equipment', {
 				url: 'settings/equipment',
 				resolve:{

@@ -39,6 +39,7 @@ Route::resource('slide', 'SlideController');
 Route::resource('user', 'UserController');
 Route::resource('user-role', 'UserRoleController');
 Route::resource('birthday', 'BirthdayController');
+Route::resource('upload', 'UploadController');
 
 Route::post('/pusher/auth', 'PusherController@auth');
 
@@ -143,5 +144,7 @@ Route::group(['prefix' => 'slideshow'], function(){
 
 Route::group(['prefix' => 'birthday'], function(){
 	Route::post('check-duplicate', 'BirthdayController@checkDuplicate');	
+	Route::post('check-duplicate-multiple', 'BirthdayController@checkDuplicateMultiple');	
+	Route::post('store-multiple', 'BirthdayController@storeMultiple');	
 	Route::post('enlist', 'BirthdayController@enlist');	
 });

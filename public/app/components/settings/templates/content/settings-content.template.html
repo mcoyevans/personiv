@@ -18,7 +18,7 @@
 							Roles : 
 							<span ng-repeat="role in model.roles">{{role.description}} <span ng-if="!$last">|</span> </span>
 						</span>
-						{{model.birthdate | date: 'MMMM dd'}}
+						{{model.birthdate | date: 'MMMM dd, yyyy'}}
 					</p>
 				</div>
 				<md-menu ng-show="!model.deleted_at">
