@@ -190,6 +190,7 @@ app
 				if(item.duplicate){
 					Helper.alert('Duplicate Employee', item.employee_number +' already exists.');
 					duplicate = true;
+					return;
 				}
 				// else{
 				// 	item.delivery_date = item.delivery_date.toDateString();
@@ -201,6 +202,10 @@ app
 				busy = true;
 				Helper.preload();
 
+				angular.forEach($scope.employees, function(item){
+					item.birthdate = item.birthdate.toLocaleDateString();
+				});
+
 				Helper.post('/birthday/store-multiple', $scope.employees)
 					.success(function(data){
 						busy = false;
@@ -208,7 +213,10 @@ app
 						$state.go('main.birthdays');
 					})
 					.error(function(){
-						Helper.error()
+						angular.forEach($scope.employees, function(item){
+							item.birthdate = new Date(item.birthdate);
+						});
+						Helper.error();
 						busy = false;
 					});
 			}

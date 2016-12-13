@@ -1128,6 +1128,21 @@ app
 			$scope.$broadcast('open');
 		}
 
+		var birthday_query = {
+			'where': [
+				{
+					'label': 'birthdate',
+					'condition': '=',
+					'value' : new Date().toLocaleDateString(),
+				}
+			]
+		}
+
+		Helper.post('/birthday/enlist', birthday_query)
+			.success(function(data){
+				$scope.birthdays = data;
+			})
+
 		$scope.init = function(query, withComments){
 			$scope.post = {};
 			$scope.post.items = [];
@@ -2656,6 +2671,7 @@ app
 				if(item.duplicate){
 					Helper.alert('Duplicate Employee', item.employee_number +' already exists.');
 					duplicate = true;
+					return;
 				}
 				// else{
 				// 	item.delivery_date = item.delivery_date.toDateString();
@@ -2667,6 +2683,10 @@ app
 				busy = true;
 				Helper.preload();
 
+				angular.forEach($scope.employees, function(item){
+					item.birthdate = item.birthdate.toLocaleDateString();
+				});
+
 				Helper.post('/birthday/store-multiple', $scope.employees)
 					.success(function(data){
 						busy = false;
@@ -2674,7 +2694,10 @@ app
 						$state.go('main.birthdays');
 					})
 					.error(function(){
-						Helper.error()
+						angular.forEach($scope.employees, function(item){
+							item.birthdate = new Date(item.birthdate);
+						});
+						Helper.error();
 						busy = false;
 					});
 			}

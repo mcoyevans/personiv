@@ -145,6 +145,21 @@ guest
 			$scope.toolbar.items = [];
 			$scope.currentTime = Date.now();
 
+			var birthday_query = {
+				'where': [
+					{
+						'label': 'birthdate',
+						'condition': '=',
+						'value' : new Date().toLocaleDateString(),
+					}
+				]
+			}
+
+			Helper.post('/birthday/enlist', birthday_query)
+				.success(function(data){
+					$scope.birthdays = data;
+				})
+
 			// 2 is default so the next page to be loaded will be page 2 
 			$scope.post.page = 2;
 

@@ -385,6 +385,21 @@ app
 			$scope.$broadcast('open');
 		}
 
+		var birthday_query = {
+			'where': [
+				{
+					'label': 'birthdate',
+					'condition': '=',
+					'value' : new Date().toLocaleDateString(),
+				}
+			]
+		}
+
+		Helper.post('/birthday/enlist', birthday_query)
+			.success(function(data){
+				$scope.birthdays = data;
+			})
+
 		$scope.init = function(query, withComments){
 			$scope.post = {};
 			$scope.post.items = [];

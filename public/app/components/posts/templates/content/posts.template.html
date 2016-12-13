@@ -39,6 +39,21 @@
         </md-card-actions>
     </md-card>
 </div>
+<div layout="row" layout-align="center start" ng-if="birthdays.length">
+	<md-card flex flex-gt-sm="45" flex-gt-lg="40">
+		<img ng-src="/img/StockSnap_NC84P7ONUL.jpg" class="md-card-image" alt="Washed Out">
+		<md-card-title>
+          	<md-card-title-text>
+            	<span class="md-headline">Happy Birthday</span>
+          	</md-card-title-text>
+        </md-card-title>
+        <md-card-content>
+        	<ul>
+        		<li ng-repeat="item in birthdays">{{item.first_name}} {{item.middle_name.charAt(0)}}. {{item.last_name}}</li>
+        	</ul>
+        </md-card-content>
+	</md-card>
+</div>
 <div infinite-scroll='post.paginateLoad()' infinite-scroll-distance="1" infinite-scroll-disabled="post.busy" infinite-scroll-parent ng-if="post.show" layout="row" layout-align="center start">
 	<div layout="column" layout-align="center center" layout-margin flex flex-gt-sm="45" flex-gt-lg="40">
 		<md-card ng-repeat="post in post.items | filter: toolbar.searchText | orderBy:sortType:sortReverse" layout-fill>
