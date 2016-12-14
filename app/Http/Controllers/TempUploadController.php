@@ -50,6 +50,23 @@ class TempUploadController extends Controller
     }
 
     /**
+     * Upload form file.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function uploadFile(Request $request)
+    {
+        if(Gate::forUser($request->user())->denies('manage-forms'))
+        {
+            abort(403, 'Unauthorized action');
+        }
+
+        $path = Storage::putFile('temp', $request->file('file'));
+
+        return response()->json($path);
+    }
+
+    /**
      * Upload post photo.
      *
      * @return \Illuminate\Http\Response

@@ -30,6 +30,10 @@ app
 				'name':'Apps',
 				'icon':'mdi-application',
 			},
+			{
+				'name':'Forms',
+				'icon':'mdi-file-document',
+			},
 		];
 
 		// set section as active
@@ -198,17 +202,29 @@ app
 
 						settings_menu.push(item); 
 					}
+					else if(role.name == 'manage-forms')
+					{
+						settings = true;
 
+						var item = {
+							'label': 'Forms',
+							action: function(){
+								$state.go('main.forms');
+							},
+						}
+
+						settings_menu.push(item); 
+					}
 				});
 
 				if(settings)
 				{
-					$scope.menu.section[1] = {
+					$scope.menu.section[2] = {
 						'name':'Settings',
 						'icon':'mdi-settings',
 					}
 
-					$scope.menu.pages[1] = settings_menu;
+					$scope.menu.pages[2] = settings_menu;
 				}
 
 				$scope.user = data;

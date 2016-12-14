@@ -6,7 +6,7 @@
 					<span class="md-headline white-text">{{model.brand.charAt(0).toUpperCase()}} {{model.name.charAt(0).toUpperCase()}} {{model.last_name.charAt(0).toUpperCase()}}</span>
 				</h2>
 				<div class="md-list-item-text">
-					<h3>{{model.brand}} {{model.name}} {{model.last_name + ','}} {{model.first_name}} {{model.middle_name.charAt(0) + '.'}}</h3>
+					<h3>{{model.brand}} {{model.name}} {{model.last_name}}<span ng-if="model.last_name">,</span> {{model.first_name}} {{model.middle_name.charAt(0)}}<span ng-if="model.middle_name">.</span></h3>
 					<h4>{{model.model}} <span ng-if="model.users_count">Users: {{model.users_count}}</span> {{model.email}} {{model.lob}}</h4>
 					<p>
 						<a href="{{model.link}}" target="_blank">{{model.link}}</a>

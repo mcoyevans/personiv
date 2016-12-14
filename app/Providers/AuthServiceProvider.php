@@ -170,6 +170,19 @@ class AuthServiceProvider extends ServiceProvider
             return false;
         });
 
+        Gate::define('manage-forms', function($user){
+            $user = User::with('roles')->where('id', $user->id)->first();
+
+            foreach ($user->roles as $role) {
+                if($role->name == 'manage-forms')
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+
         Gate::define('upload-avatar', function($user, $id){
             return $user->id == $id;
         });

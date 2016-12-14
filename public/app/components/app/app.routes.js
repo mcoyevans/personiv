@@ -299,6 +299,36 @@ app
 					}
 				}
 			})
+			.state('main.forms', {
+				url: 'settings/forms',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/form/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'formsContentContainerController',
+					},
+					'toolbar@main.forms': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'formsToolbarController',
+					},
+					'left-sidenav@main.forms': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.forms':{
+						templateUrl: '/app/components/settings/templates/content/settings-content.template.html',
+					}
+				}
+			})
 			.state('main.locations', {
 				url: 'settings/rooms',
 				resolve:{
