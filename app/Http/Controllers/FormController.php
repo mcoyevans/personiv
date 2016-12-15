@@ -10,9 +10,22 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Gate;
+use Storage;
 
 class FormController extends Controller
 {
+    /**
+     * Checks for duplicate bank account number entry.
+     *
+     * @return bool
+     */
+    public function checkDuplicate(Request $request)
+    {
+        $duplicate = $request->has('id') ? Form::where('name', $request->name)->whereNotIn('id', [$request->id])->first() : Form::where('name', $request->name)->first();
+
+        return response()->json($duplicate ? true : false);
+    }
+
     /**
      * Display a listing of the resource with parameters.
      *
@@ -59,7 +72,7 @@ class FormController extends Controller
      */
     public function index()
     {
-        //
+        return Form::all();
     }
 
     /**
@@ -80,7 +93,37 @@ class FormController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if(Gate::forUser($request->user())->denies('manage-forms'))
+        {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $duplicate = Form::where('name', $request->name)->first();
+
+        if($duplicate)
+        {
+            return response()->json(true);
+        }
+
+        $this->validate($request, [
+            'name' => 'required',
+            'path' => 'required',
+        ]);
+
+        DB::transaction(function() use($request){
+            $form = new Form;
+
+            $form->name = $request->name;
+            $form->description = $request->description;
+
+            $form->path = 'forms/'. Carbon::now()->toDateString(). '-'. str_random(16) . '.pdf';
+
+            Storage::copy($request->path, $form->path);
+
+            Storage::delete($request->path);
+
+            $form->save();
+        });
     }
 
     /**
@@ -91,7 +134,9 @@ class FormController extends Controller
      */
     public function show($id)
     {
-        //
+        $form = Form::findOrFail($id);
+
+        return response()->file(storage_path() .'/app/'. $form->path);
     }
 
     /**

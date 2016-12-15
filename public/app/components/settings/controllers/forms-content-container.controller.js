@@ -173,7 +173,7 @@ app
   			$scope.model.show = false;
 
   			$scope.init($scope.request);
-  			// $scope.$emit('fetchForms');
+  			$scope.$emit('fetchForms');
 		};
 
 		$scope.request = {};

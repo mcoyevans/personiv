@@ -365,7 +365,28 @@ app
 				})
 		}
 
+		$scope.fetchForms = function(){		
+			Helper.get('/form')
+				.success(function(data){
+					var forms = [];
+
+					angular.forEach(data, function(form){
+						var item = {};
+
+						item.label = form.name;	
+						item.action = function(){
+							window.open('/form/' + form.id);
+						}
+
+						forms.push(item);
+					});
+					
+					$scope.menu.pages[1] = forms;
+				})
+		}
+
 		$scope.fetchLinks();
+		$scope.fetchForms();
 
 		$scope.$on('closeSidenav', function(){
 			$mdSidenav('left').close();
@@ -373,5 +394,9 @@ app
 
 		$scope.$on('fetchLinks', function(){
 			$scope.fetchLinks();
+		});
+
+		$scope.$on('fetchForms', function(){
+			$scope.fetchForms();
 		});
 	}]);

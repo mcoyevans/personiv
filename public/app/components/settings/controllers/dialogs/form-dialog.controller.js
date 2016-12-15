@@ -1,6 +1,29 @@
 app
 	.controller('formDialogController', ['$scope', 'Helper', 'FileUploader', function($scope, Helper, FileUploader){
+		$scope.config = Helper.fetch();
+
 		$scope.document = {};
+		$scope.duplicate = false;
+
+		if($scope.config.action == 'edit')
+		{
+			var query = {};
+
+			query.where = [
+				{
+					'label': 'id',
+					'condition': '=',
+					'value': $scope.config.id,
+				}
+			];
+
+			query.first = true;
+
+			Helper.post('/form/enlist', query)
+				.success(function(data){
+					$scope.document
+				})
+		}
 
 		var busy = false;
 
@@ -56,6 +79,60 @@ app
 			$scope.error = true;
 		}
 
+		$scope.checkDuplicate = function(){
+			Helper.post('/form/check-duplicate', 'FormController@checkDuplicate')
+				.success(function(data){
+					$scope.duplicate = data;
+				});
+		}
 
+		$scope.submit = function(){
+			if($scope.documentForm.$invalid){
+				angular.forEach($scope.documentForm.$error, function(field){
+					angular.forEach(field, function(errorField){
+						errorField.$setTouched();
+					});
+				});
 
+				return;
+			}
+
+			if(!$scope.duplicate)
+			{
+				$scope.busy = true;
+
+				if($scope.config.action == 'create')
+				{
+					Helper.post('/form', $scope.document)
+						.success(function(duplicate){
+							if(duplicate){
+								$scope.busy = false;
+								return;
+							}
+
+							Helper.stop();
+						})
+						.error(function(){
+							$scope.busy = false;
+							$scope.error = true;
+						});
+				}
+				else if($scope.config.action == 'edit')
+				{
+					Helper.put('/form' + '/' + $scope.config.id, $scope.document)
+						.success(function(duplicate){
+							if(duplicate){
+								$scope.busy = false;
+								return;
+							}
+
+							Helper.stop();
+						})
+						.error(function(){
+							$scope.busy = false;
+							$scope.error = true;
+						});
+				}
+			}
+		}
 	}]);

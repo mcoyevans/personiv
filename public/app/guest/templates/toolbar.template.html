@@ -80,6 +80,15 @@
 		              		</div>
 		              	</md-button>
 		            </md-menu-item>
+		            <md-subheader>Forms</md-subheader>
+		            <md-menu-item ng-repeat="form in menu.forms | orderBy:'name'">
+		              	<md-button aria-label="{{form.name}}" flex href="/form/{{form.id}}" target="_blank">
+		              		<div layout="row">
+			                	<span>{{form.name}}</span>
+			                	<span flex></span>
+		              		</div>
+		              	</md-button>
+		            </md-menu-item>
 		        </md-menu-content>
 		    </md-menu>
 		</div>
@@ -97,6 +106,23 @@
 	              	<md-button aria-label="{{link.name}}" flex href="{{link.link}}" target="_blank">
 	              		<div layout="row">
 		                	<span>{{link.name}}</span>
+		                	<span flex></span>
+	              		</div>
+	              	</md-button>
+	            </md-menu-item>
+	        </md-menu-content>
+	    </md-menu>
+	    <!-- Forms -->
+		<md-menu>
+	        <md-button aria-label="Open filters" class="md-primary" ng-click="$mdOpenMenu($event)">
+	            <span>Forms</span> 
+	            <md-icon class="mdi mdi-chevron-down grey"></md-icon>
+	        </md-button>
+	        <md-menu-content width="4">
+	            <md-menu-item ng-repeat="form in menu.forms | orderBy:'name'">
+	              	<md-button aria-label="{{form.name}}" flex href="/form/{{form.id}}" target="_blank">
+	              		<div layout="row">
+		                	<span>{{form.name}}</span>
 		                	<span flex></span>
 	              		</div>
 	              	</md-button>

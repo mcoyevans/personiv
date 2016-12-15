@@ -970,5 +970,10 @@ guest
 			.success(function(data){
 				$scope.menu.static = data;
 			})
+
+		Helper.get('/form')
+			.success(function(data){
+				$scope.menu.forms = data;
+			})
 	}]);
 //# sourceMappingURL=guest.js.map
