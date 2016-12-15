@@ -80,7 +80,7 @@
 		              		</div>
 		              	</md-button>
 		            </md-menu-item>
-		            <md-subheader>Forms</md-subheader>
+		            <md-subheader ng-if="menu.forms.length">Forms</md-subheader>
 		            <md-menu-item ng-repeat="form in menu.forms | orderBy:'name'">
 		              	<md-button aria-label="{{form.name}}" flex href="/form/{{form.id}}" target="_blank">
 		              		<div layout="row">
@@ -113,7 +113,7 @@
 	        </md-menu-content>
 	    </md-menu>
 	    <!-- Forms -->
-		<md-menu>
+		<md-menu ng-if="menu.forms.length">
 	        <md-button aria-label="Open filters" class="md-primary" ng-click="$mdOpenMenu($event)">
 	            <span>Forms</span> 
 	            <md-icon class="mdi mdi-chevron-down grey"></md-icon>

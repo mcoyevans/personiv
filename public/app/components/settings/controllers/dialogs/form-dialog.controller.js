@@ -21,7 +21,7 @@ app
 
 			Helper.post('/form/enlist', query)
 				.success(function(data){
-					$scope.document
+					$scope.document = data;
 				})
 		}
 

@@ -159,7 +159,37 @@ class FormController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        if(Gate::forUser($request->user())->denies('manage-forms'))
+        {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $duplicate = Form::where('name', $request->name)->whereNotIn('id', [$id])->first();
+
+        if($duplicate)
+        {
+            return response()->json(true);
+        }
+
+        $this->validate($request, [
+            'name' => 'required',
+            'path' => 'required',
+        ]);
+
+        DB::transaction(function() use($request, $id){
+            $form = Form::find($id);
+
+            $form->name = $request->name;
+            $form->description = $request->description;
+
+            $form->path = 'forms/'. Carbon::now()->toDateString(). '-'. str_random(16) . '.pdf';
+
+            Storage::copy($request->path, $form->path);
+
+            Storage::delete($request->path);
+
+            $form->save();
+        });
     }
 
     /**
@@ -170,6 +200,15 @@ class FormController extends Controller
      */
     public function destroy($id)
     {
-        //
+        if(Gate::forUser(Auth::user())->denies('manage-forms'))
+        {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $form = Form::find($id);
+
+        Storage::delete($form->path);
+
+        $form->delete();
     }
 }
