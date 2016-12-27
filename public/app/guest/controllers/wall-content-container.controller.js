@@ -2,6 +2,8 @@ guest
 	.controller('wallContentContainerController', ['$scope', '$stateParams', '$state', 'Helper', function($scope, $stateParams, $state, Helper){
 		$scope.$emit('closeSidenav');
 
+		$scope.today = new Date();
+
 		$scope.viewReposts = function(post){
 			var dialog = {
 				'template':'/app/components/posts/templates/dialogs/reposts-dialog.template.html',
@@ -146,13 +148,16 @@ guest
 			$scope.currentTime = Date.now();
 
 			var birthday_query = {
-				'where': [
-					{
-						'label': 'birthdate',
-						'condition': '=',
-						'value' : new Date().toLocaleDateString(),
-					}
-				]
+				'whereMonth': 
+				{
+					'label': 'birthdate',
+					'value' : new Date().getMonth() + 1,
+				},
+				'whereDay': 
+				{
+					'label': 'birthdate',
+					'value' : new Date().getDate(),
+				},
 			}
 
 			Helper.post('/birthday/enlist', birthday_query)

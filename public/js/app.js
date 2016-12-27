@@ -816,6 +816,8 @@ app
 	.controller('postsContentContainerController', ['$scope', '$stateParams', '$state', 'Helper', function($scope, $stateParams, $state, Helper){
 		$scope.$emit('closeSidenav');
 
+		$scope.today = new Date();
+
 		$scope.viewReposts = function(post){
 			var dialog = {
 				'template':'/app/components/posts/templates/dialogs/reposts-dialog.template.html',
@@ -1200,13 +1202,16 @@ app
 		}
 
 		var birthday_query = {
-			'where': [
-				{
-					'label': 'birthdate',
-					'condition': '=',
-					'value' : new Date().toLocaleDateString(),
-				}
-			]
+			'whereMonth': 
+			{
+				'label': 'birthdate',
+				'value' : new Date().getMonth() + 1,
+			},
+			'whereDay': 
+			{
+				'label': 'birthdate',
+				'value' : new Date().getDate(),
+			},
 		}
 
 		Helper.post('/birthday/enlist', birthday_query)
@@ -3490,518 +3495,6 @@ app
 		$scope.toolbar.hideSearchIcon = true;
 	}]);
 app
-	.controller('approvalsContentContainerController', ['$scope', '$state', '$stateParams', 'Helper', function($scope, $state, $stateParams, Helper){
-		$scope.$emit('closeSidenav');
-
-		/*
-		 * Object for toolbar
-		 *
-		*/
-		$scope.toolbar = {};
-
-		$scope.toolbar.sortBy = function(filter){
-			filter.sortReverse = !filter.sortReverse;			
-			$scope.sortType = filter.type;
-			$scope.sortReverse = filter.sortReverse;
-		}
-
-		/*
-		 * Object for subheader
-		 *
-		*/
-		$scope.subheader = {};
-		$scope.subheader.show = true;
-		$scope.subheader.current = {};
-
-		$scope.subheader.mark = {};
-
-		$scope.subheader.toggleMark = function(){
-			$scope.subheader.mark.all = !$scope.subheader.mark.all;
-			$scope.subheader.mark.icon = $scope.subheader.mark.all ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline';
-			$scope.subheader.mark.label = $scope.subheader.mark.all ? 'Uncheck all' : 'Check all';
-			angular.forEach($scope.reservation.items, function(item){
-				item.include = $scope.subheader.mark.all;
-			});
-		}
-
-		$scope.subheader.cancelSelectMultiple = function(){
-			$scope.selectMultiple = false;
-			$scope.fab.show = false;
-			$scope.subheader.mark.all = false;
-			$scope.subheader.mark.icon = 'mdi-checkbox-blank-outline';
-			$scope.subheader.mark.label = 'Check all';
-
-			angular.forEach($scope.reservation.items, function(item){
-				item.include = false;
-			});
-		}
-
-		/**
-		 * Object for fab
-		 *
-		*/
-		$scope.fab = {};
-		$scope.fab.icon = 'mdi-check';
-
-		$scope.viewReservation = function(data){
-	    	Helper.set(data);
-
-	    	var dialog = {
-	    		'template':'/app/components/approvals/templates/dialogs/approval-dialog.template.html',
-				'controller': 'approvalDialogController',
-	    	}
-
-	    	Helper.customDialog(dialog)
-	    		.then(function(){
-	    			Helper.notify('Reservation approved.');
-	    			$scope.refresh();
-	    		}, function(){
-	    			return;
-	    		});
-	    }
-
-	    /* Action originates from subheader */
-		$scope.$on('setInit', function(){
-			$scope.isLoading = true;
-			$scope.$broadcast('close');
-			
-			var current = Helper.fetch();
-
-			$scope.subheader.current = current;
-
-			$scope.init(current);
-		});
-
-		/* Action originates from toolbar */
-		$scope.$on('search', function(){
-			$scope.subheader.current.request.search = $scope.toolbar.searchText;
-			$scope.refresh();
-		});
-
-		/* Listens for any request for refresh */
-		$scope.$on('refresh', function(){
-			$scope.subheader.current.request.search = null;
-			$scope.$broadcast('close');
-			$scope.refresh();
-		});
-
-		$scope.$on('selectMultiple', function(){
-			$scope.selectMultiple = true;
-		});
-
-		$scope.$on('cancelSelectMultiple', function(){
-			$scope.subheader.cancelSelectMultiple();
-		});
-
-		$scope.$on('read-approval', function(){
-			$scope.subheader.current.request.where.push(
-				{
-					'label':'id',
-					'condition':'=',
-					'value': Helper.fetch()
-				}
-			);
-
-			$scope.isLoading = true;
-  			$scope.reservation.show = false;
-
-			$scope.init($scope.subheader.current);
-		});
-
-		/* Formats every data in the paginated call */
-		var pushItem = function(data){
-			data.deleted_at =  data.deleted_at ? new Date(data.deleted_at) : null;
-			data.created_at = new Date(data.created_at);
-			data.start = new Date(data.start);
-			data.end = new Date(data.end);
-
-			var item = {};
-
-			item.display = data.title;
-			
-			$scope.toolbar.items.push(item);
-		}
-
-		$scope.init = function(query){
-			if($stateParams.reservationID)
-			{
-				query.request.where.push(
-					{
-						'label':'id',
-						'condition':'=',
-						'value': $stateParams.reservationID,	
-					}
-				);
-			}
-
-			$scope.subheader.mark.all = false;
-			$scope.subheader.mark.icon = 'mdi-checkbox-blank-outline';
-			$scope.subheader.mark.label = 'Check all';
-
-			$scope.toolbar.items = [];
-
-			$scope.reservation = {};
-			$scope.reservation.items = [];
-			$scope.reservation.show = true;
-
-			// 2 is default so the next page to be loaded will be page 2 
-			$scope.reservation.page = 2;
-
-			Helper.post('/reservation/enlist', query.request)
-				.success(function(data){
-					$scope.reservation.details = data;
-					$scope.reservation.items = [];
-					
-					if(data.data.length){
-						// iterate over each record and set the format
-						angular.forEach(data.data, function(item){
-							pushItem(item);
-							$scope.reservation.items.push(item);
-						});
-					}
-
-					$scope.isLoading = false;
-
-					$scope.reservation.paginateLoad = function(){
-						// kills the function if ajax is busy or pagination reaches last page
-						if($scope.reservation.busy || ($scope.reservation.page > $scope.reservation.details.last_page)){
-							$scope.isLoading = false;
-							return;
-						}
-						/**
-						 * Executes pagination call
-						 *
-						*/
-						// sets to true to disable pagination call if still busy.
-						$scope.reservation.busy = true;
-						$scope.isLoading = true;
-						// Calls the next page of pagination.
-						Helper.post('/reservation/enlist', $scope.reservation.page)
-							.success(function(data){
-								// increment the page to set up next page for next AJAX Call
-								$scope.reservation.page++;
-
-								// iterate over each data then splice it to the data array
-								angular.forEach(data.data, function(item, key){
-									pushItem(item);
-									$scope.reservation.items.push(item);
-								});
-
-								// Enables again the pagination call for next call.
-								$scope.reservation.busy = false;
-								$scope.isLoading = false;
-							});
-					}
-				});
-		}
-
-		$scope.refresh = function(){
-			$scope.isLoading = true;
-  			$scope.reservation.show = false;
-
-  			$scope.init($scope.subheader.current);
-
-  			$state.go('main.approvals', {'reservationID':null});
-		};
-	}]);
-app
-	.controller('approvalDialogController', ['$scope', 'Helper', function($scope, Helper){
-		var reservation = Helper.fetch();
-
-		Helper.post('/user/check')
-			.success(function(data){
-				$scope.approver = data;
-			});
-
-		$scope.cancel = function(){
-			Helper.cancel();
-		}
-
-		$scope.checkDuplicate = function(equipment){
-			Helper.post('/reservation-equipment/check-duplicate', equipment)
-				.success(function(data){
-					$scope.duplicate = data;
-					equipment.duplicate = data;
-				});
-		}
-
-		var request = {
-			'with': [
-				{
-					'relation': 'location',
-					'withTrashed': true,
-				},
-				{
-					'relation': 'user',
-					'withTrashed': true,
-				},
-				{
-					'relation': 'equipment_types',
-					'withTrashed': false,
-					'available_units': true,
-				},
-				{
-					'relation':'schedule_approver',
-					'withTrashed': true,
-				},
-				{
-					'relation':'equipment_approver',
-					'withTrashed': true,
-				},
-			],
-			'where': [
-				{
-					'label': 'id',
-					'condition': '=',
-					'value': reservation.id,
-				},
-			],
-			'first' : true,
-		}
-
-		Helper.post('/reservation/enlist', request)
-			.success(function(data){
-				$scope.start = new Date(data.start);
-				$scope.end = data.end ? new Date(data.end) : null;
-
-				$scope.reservation = data;
-			})
-			.error(function(){
-				Helper.error();
-			})
-
-		$scope.submit = function(){
-			if($scope.approvalForm.$invalid){
-				angular.forEach($scope.approvalForm.$error, function(field){
-					angular.forEach(field, function(errorField){
-						errorField.$setTouched();
-					});
-				});
-
-				return;
-			}
-
-			if(!$scope.duplicate)
-			{
-				$scope.busy = true;
-				// IT
-				if($scope.approver.group_id == 1){
-					Helper.post('/reservation-equipment/approve', $scope.reservation.equipment_types)
-						.success(function(data){
-							if(!data){
-								Helper.stop();
-							}
-							else{
-								$scope.duplicate = true;
-								$scope.busy = false;
-							}
-						})
-						.error(function(){
-							$scope.busy = false;
-							$scope.error = true;
-						})
-				}
-			}
-
-			if($scope.approver.group_id == 2){
-				Helper.post('/reservation/approve', $scope.reservation)
-					.success(function(data){
-						if(!data){
-							Helper.stop();
-						}
-						else{
-							$scope.duplicate = true;
-							$scope.busy = false;
-						}
-					})
-					.error(function(){
-						$scope.busy = false;
-						$scope.error = true;
-					})
-			}
-		}
-	}]);
-app
-	.controller('approvalsSubheaderController', ['$scope', 'Helper', function($scope, Helper){
-		var setInit = function(data){
-			Helper.set(data);
-
-			$scope.current_tab = data;
-
-			$scope.$emit('setInit');
-		}
-
-		var today = new Date().toDateString();
-
-		$scope.subheader.all = {};
-
-		$scope.subheader.all.label = 'All';
-
-		$scope.subheader.all.request = {
-			'with': [
-				{
-					'relation':'location',
-					'withTrashed': true,
-				},
-				{
-					'relation':'user',
-					'withTrashed': true,
-				},
-				{
-					'relation':'schedule_approver',
-					'withTrashed': true,
-				},
-				{
-					'relation':'equipment_approver',
-					'withTrashed': true,
-				},
-			],
-			'where': [],
-			'approvals': true,
-			'paginate': 10,
-		}
-
-		$scope.subheader.all.action = function(){
-			setInit($scope.subheader.all);
-		}
-
-		$scope.init = function(){
-			Helper.get('/location')
-				.success(function(data){
-					$scope.locations = data;
-					$scope.subheader.navs = [];
-					
-					angular.forEach($scope.locations, function(location){
-						var item = {};
-
-						item.id = location.id;
-						item.label = location.name;
-						item.request = {
-							'with': [
-								{
-									'relation':'location',
-									'withTrashed': true,
-								},
-								{
-									'relation':'user',
-									'withTrashed': true,
-								},
-								{
-									'relation':'schedule_approver',
-									'withTrashed': true,
-								},
-								{
-									'relation':'equipment_approver',
-									'withTrashed': true,
-								},
-							],
-							'where': [
-								{
-									'label':'location_id',
-									'condition':'=',
-									'value': location.id,
-								},
-							],
-							'approvals': true,
-							'paginate': 10,
-						}
-						item.menu = $scope.subheader.all.menu,
-						item.action = function(current){
-							setInit(current);
-						}
-
-						$scope.subheader.navs.push(item);
-					});
-
-					setInit($scope.subheader.all);
-				})
-		}
-
-		$scope.init();
-	}]);
-app
-	.controller('approvalsToolbarController', ['$scope', '$filter', function($scope, $filter){
-		$scope.toolbar.childState = 'Approvals';
-
-		$scope.$on('close', function(){
-			$scope.hideSearchBar();
-		});
-
-		$scope.$on('open', function(){
-			$scope.showSearchBar();
-			$scope.searchUserInput();
-		});
-
-		$scope.toolbar.getItems = function(query){
-			var results = query ? $filter('filter')($scope.toolbar.items, query) : $scope.toolbar.items;
-			return results;
-		}
-
-		$scope.toolbar.searchAll = true;
-		/**
-		 * Reveals the search bar.
-		 *
-		*/
-		$scope.showSearchBar = function(){
-			$scope.reservation.busy = true;
-			$scope.searchBar = true;
-		};
-
-		/**
-		 * Hides the search bar.
-		 *
-		*/
-		$scope.hideSearchBar = function(){
-			$scope.searchBar = false;
-			$scope.toolbar.searchText = '';
-			$scope.toolbar.searchItem = '';
-			/* Cancels the paginate when the user sent a query */
-			if($scope.searched){
-				$scope.searched = false;
-				$scope.$emit('refresh');
-			}
-		};
-
-		$scope.searchUserInput = function(){
-			$scope.$emit('search');
-			$scope.searched = true;
-		};
-
-		$scope.toolbar.options = true;
-		
-		$scope.toolbar.sort = [
-			{
-				'label': 'Title',
-				'type': 'title',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Remarks',
-				'type': 'remarks',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Date Start',
-				'type': 'start',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Date End',
-				'type': 'end',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Recently added',
-				'type': 'created_at',
-				'sortReverse': false,
-			},
-		];
-		
-		$scope.toolbar.refresh = function(){
-			$scope.$emit('refresh');
-		}
-	}]);
-app
 	.controller('notificationsContentContainerController', ['$scope', '$state', 'Helper', function($scope, $state, Helper){
 		$scope.$emit('closeSidenav');
 
@@ -4670,6 +4163,518 @@ app
 		};
 
 		$scope.toolbar.options = true;
+		
+		$scope.toolbar.refresh = function(){
+			$scope.$emit('refresh');
+		}
+	}]);
+app
+	.controller('approvalsContentContainerController', ['$scope', '$state', '$stateParams', 'Helper', function($scope, $state, $stateParams, Helper){
+		$scope.$emit('closeSidenav');
+
+		/*
+		 * Object for toolbar
+		 *
+		*/
+		$scope.toolbar = {};
+
+		$scope.toolbar.sortBy = function(filter){
+			filter.sortReverse = !filter.sortReverse;			
+			$scope.sortType = filter.type;
+			$scope.sortReverse = filter.sortReverse;
+		}
+
+		/*
+		 * Object for subheader
+		 *
+		*/
+		$scope.subheader = {};
+		$scope.subheader.show = true;
+		$scope.subheader.current = {};
+
+		$scope.subheader.mark = {};
+
+		$scope.subheader.toggleMark = function(){
+			$scope.subheader.mark.all = !$scope.subheader.mark.all;
+			$scope.subheader.mark.icon = $scope.subheader.mark.all ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline';
+			$scope.subheader.mark.label = $scope.subheader.mark.all ? 'Uncheck all' : 'Check all';
+			angular.forEach($scope.reservation.items, function(item){
+				item.include = $scope.subheader.mark.all;
+			});
+		}
+
+		$scope.subheader.cancelSelectMultiple = function(){
+			$scope.selectMultiple = false;
+			$scope.fab.show = false;
+			$scope.subheader.mark.all = false;
+			$scope.subheader.mark.icon = 'mdi-checkbox-blank-outline';
+			$scope.subheader.mark.label = 'Check all';
+
+			angular.forEach($scope.reservation.items, function(item){
+				item.include = false;
+			});
+		}
+
+		/**
+		 * Object for fab
+		 *
+		*/
+		$scope.fab = {};
+		$scope.fab.icon = 'mdi-check';
+
+		$scope.viewReservation = function(data){
+	    	Helper.set(data);
+
+	    	var dialog = {
+	    		'template':'/app/components/approvals/templates/dialogs/approval-dialog.template.html',
+				'controller': 'approvalDialogController',
+	    	}
+
+	    	Helper.customDialog(dialog)
+	    		.then(function(){
+	    			Helper.notify('Reservation approved.');
+	    			$scope.refresh();
+	    		}, function(){
+	    			return;
+	    		});
+	    }
+
+	    /* Action originates from subheader */
+		$scope.$on('setInit', function(){
+			$scope.isLoading = true;
+			$scope.$broadcast('close');
+			
+			var current = Helper.fetch();
+
+			$scope.subheader.current = current;
+
+			$scope.init(current);
+		});
+
+		/* Action originates from toolbar */
+		$scope.$on('search', function(){
+			$scope.subheader.current.request.search = $scope.toolbar.searchText;
+			$scope.refresh();
+		});
+
+		/* Listens for any request for refresh */
+		$scope.$on('refresh', function(){
+			$scope.subheader.current.request.search = null;
+			$scope.$broadcast('close');
+			$scope.refresh();
+		});
+
+		$scope.$on('selectMultiple', function(){
+			$scope.selectMultiple = true;
+		});
+
+		$scope.$on('cancelSelectMultiple', function(){
+			$scope.subheader.cancelSelectMultiple();
+		});
+
+		$scope.$on('read-approval', function(){
+			$scope.subheader.current.request.where.push(
+				{
+					'label':'id',
+					'condition':'=',
+					'value': Helper.fetch()
+				}
+			);
+
+			$scope.isLoading = true;
+  			$scope.reservation.show = false;
+
+			$scope.init($scope.subheader.current);
+		});
+
+		/* Formats every data in the paginated call */
+		var pushItem = function(data){
+			data.deleted_at =  data.deleted_at ? new Date(data.deleted_at) : null;
+			data.created_at = new Date(data.created_at);
+			data.start = new Date(data.start);
+			data.end = new Date(data.end);
+
+			var item = {};
+
+			item.display = data.title;
+			
+			$scope.toolbar.items.push(item);
+		}
+
+		$scope.init = function(query){
+			if($stateParams.reservationID)
+			{
+				query.request.where.push(
+					{
+						'label':'id',
+						'condition':'=',
+						'value': $stateParams.reservationID,	
+					}
+				);
+			}
+
+			$scope.subheader.mark.all = false;
+			$scope.subheader.mark.icon = 'mdi-checkbox-blank-outline';
+			$scope.subheader.mark.label = 'Check all';
+
+			$scope.toolbar.items = [];
+
+			$scope.reservation = {};
+			$scope.reservation.items = [];
+			$scope.reservation.show = true;
+
+			// 2 is default so the next page to be loaded will be page 2 
+			$scope.reservation.page = 2;
+
+			Helper.post('/reservation/enlist', query.request)
+				.success(function(data){
+					$scope.reservation.details = data;
+					$scope.reservation.items = [];
+					
+					if(data.data.length){
+						// iterate over each record and set the format
+						angular.forEach(data.data, function(item){
+							pushItem(item);
+							$scope.reservation.items.push(item);
+						});
+					}
+
+					$scope.isLoading = false;
+
+					$scope.reservation.paginateLoad = function(){
+						// kills the function if ajax is busy or pagination reaches last page
+						if($scope.reservation.busy || ($scope.reservation.page > $scope.reservation.details.last_page)){
+							$scope.isLoading = false;
+							return;
+						}
+						/**
+						 * Executes pagination call
+						 *
+						*/
+						// sets to true to disable pagination call if still busy.
+						$scope.reservation.busy = true;
+						$scope.isLoading = true;
+						// Calls the next page of pagination.
+						Helper.post('/reservation/enlist', $scope.reservation.page)
+							.success(function(data){
+								// increment the page to set up next page for next AJAX Call
+								$scope.reservation.page++;
+
+								// iterate over each data then splice it to the data array
+								angular.forEach(data.data, function(item, key){
+									pushItem(item);
+									$scope.reservation.items.push(item);
+								});
+
+								// Enables again the pagination call for next call.
+								$scope.reservation.busy = false;
+								$scope.isLoading = false;
+							});
+					}
+				});
+		}
+
+		$scope.refresh = function(){
+			$scope.isLoading = true;
+  			$scope.reservation.show = false;
+
+  			$scope.init($scope.subheader.current);
+
+  			$state.go('main.approvals', {'reservationID':null});
+		};
+	}]);
+app
+	.controller('approvalDialogController', ['$scope', 'Helper', function($scope, Helper){
+		var reservation = Helper.fetch();
+
+		Helper.post('/user/check')
+			.success(function(data){
+				$scope.approver = data;
+			});
+
+		$scope.cancel = function(){
+			Helper.cancel();
+		}
+
+		$scope.checkDuplicate = function(equipment){
+			Helper.post('/reservation-equipment/check-duplicate', equipment)
+				.success(function(data){
+					$scope.duplicate = data;
+					equipment.duplicate = data;
+				});
+		}
+
+		var request = {
+			'with': [
+				{
+					'relation': 'location',
+					'withTrashed': true,
+				},
+				{
+					'relation': 'user',
+					'withTrashed': true,
+				},
+				{
+					'relation': 'equipment_types',
+					'withTrashed': false,
+					'available_units': true,
+				},
+				{
+					'relation':'schedule_approver',
+					'withTrashed': true,
+				},
+				{
+					'relation':'equipment_approver',
+					'withTrashed': true,
+				},
+			],
+			'where': [
+				{
+					'label': 'id',
+					'condition': '=',
+					'value': reservation.id,
+				},
+			],
+			'first' : true,
+		}
+
+		Helper.post('/reservation/enlist', request)
+			.success(function(data){
+				$scope.start = new Date(data.start);
+				$scope.end = data.end ? new Date(data.end) : null;
+
+				$scope.reservation = data;
+			})
+			.error(function(){
+				Helper.error();
+			})
+
+		$scope.submit = function(){
+			if($scope.approvalForm.$invalid){
+				angular.forEach($scope.approvalForm.$error, function(field){
+					angular.forEach(field, function(errorField){
+						errorField.$setTouched();
+					});
+				});
+
+				return;
+			}
+
+			if(!$scope.duplicate)
+			{
+				$scope.busy = true;
+				// IT
+				if($scope.approver.group_id == 1){
+					Helper.post('/reservation-equipment/approve', $scope.reservation.equipment_types)
+						.success(function(data){
+							if(!data){
+								Helper.stop();
+							}
+							else{
+								$scope.duplicate = true;
+								$scope.busy = false;
+							}
+						})
+						.error(function(){
+							$scope.busy = false;
+							$scope.error = true;
+						})
+				}
+			}
+
+			if($scope.approver.group_id == 2){
+				Helper.post('/reservation/approve', $scope.reservation)
+					.success(function(data){
+						if(!data){
+							Helper.stop();
+						}
+						else{
+							$scope.duplicate = true;
+							$scope.busy = false;
+						}
+					})
+					.error(function(){
+						$scope.busy = false;
+						$scope.error = true;
+					})
+			}
+		}
+	}]);
+app
+	.controller('approvalsSubheaderController', ['$scope', 'Helper', function($scope, Helper){
+		var setInit = function(data){
+			Helper.set(data);
+
+			$scope.current_tab = data;
+
+			$scope.$emit('setInit');
+		}
+
+		var today = new Date().toDateString();
+
+		$scope.subheader.all = {};
+
+		$scope.subheader.all.label = 'All';
+
+		$scope.subheader.all.request = {
+			'with': [
+				{
+					'relation':'location',
+					'withTrashed': true,
+				},
+				{
+					'relation':'user',
+					'withTrashed': true,
+				},
+				{
+					'relation':'schedule_approver',
+					'withTrashed': true,
+				},
+				{
+					'relation':'equipment_approver',
+					'withTrashed': true,
+				},
+			],
+			'where': [],
+			'approvals': true,
+			'paginate': 10,
+		}
+
+		$scope.subheader.all.action = function(){
+			setInit($scope.subheader.all);
+		}
+
+		$scope.init = function(){
+			Helper.get('/location')
+				.success(function(data){
+					$scope.locations = data;
+					$scope.subheader.navs = [];
+					
+					angular.forEach($scope.locations, function(location){
+						var item = {};
+
+						item.id = location.id;
+						item.label = location.name;
+						item.request = {
+							'with': [
+								{
+									'relation':'location',
+									'withTrashed': true,
+								},
+								{
+									'relation':'user',
+									'withTrashed': true,
+								},
+								{
+									'relation':'schedule_approver',
+									'withTrashed': true,
+								},
+								{
+									'relation':'equipment_approver',
+									'withTrashed': true,
+								},
+							],
+							'where': [
+								{
+									'label':'location_id',
+									'condition':'=',
+									'value': location.id,
+								},
+							],
+							'approvals': true,
+							'paginate': 10,
+						}
+						item.menu = $scope.subheader.all.menu,
+						item.action = function(current){
+							setInit(current);
+						}
+
+						$scope.subheader.navs.push(item);
+					});
+
+					setInit($scope.subheader.all);
+				})
+		}
+
+		$scope.init();
+	}]);
+app
+	.controller('approvalsToolbarController', ['$scope', '$filter', function($scope, $filter){
+		$scope.toolbar.childState = 'Approvals';
+
+		$scope.$on('close', function(){
+			$scope.hideSearchBar();
+		});
+
+		$scope.$on('open', function(){
+			$scope.showSearchBar();
+			$scope.searchUserInput();
+		});
+
+		$scope.toolbar.getItems = function(query){
+			var results = query ? $filter('filter')($scope.toolbar.items, query) : $scope.toolbar.items;
+			return results;
+		}
+
+		$scope.toolbar.searchAll = true;
+		/**
+		 * Reveals the search bar.
+		 *
+		*/
+		$scope.showSearchBar = function(){
+			$scope.reservation.busy = true;
+			$scope.searchBar = true;
+		};
+
+		/**
+		 * Hides the search bar.
+		 *
+		*/
+		$scope.hideSearchBar = function(){
+			$scope.searchBar = false;
+			$scope.toolbar.searchText = '';
+			$scope.toolbar.searchItem = '';
+			/* Cancels the paginate when the user sent a query */
+			if($scope.searched){
+				$scope.searched = false;
+				$scope.$emit('refresh');
+			}
+		};
+
+		$scope.searchUserInput = function(){
+			$scope.$emit('search');
+			$scope.searched = true;
+		};
+
+		$scope.toolbar.options = true;
+		
+		$scope.toolbar.sort = [
+			{
+				'label': 'Title',
+				'type': 'title',
+				'sortReverse': false,
+			},
+			{
+				'label': 'Remarks',
+				'type': 'remarks',
+				'sortReverse': false,
+			},
+			{
+				'label': 'Date Start',
+				'type': 'start',
+				'sortReverse': false,
+			},
+			{
+				'label': 'Date End',
+				'type': 'end',
+				'sortReverse': false,
+			},
+			{
+				'label': 'Recently added',
+				'type': 'created_at',
+				'sortReverse': false,
+			},
+		];
 		
 		$scope.toolbar.refresh = function(){
 			$scope.$emit('refresh');

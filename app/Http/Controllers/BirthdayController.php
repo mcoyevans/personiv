@@ -108,16 +108,18 @@ class BirthdayController extends Controller
         if($request->has('where'))
         {
             for ($i=0; $i < count($request->where); $i++) { 
-
-                if($request->input('where')[$i]['label'] == 'birthdate')
-                {
-                    $birthdays->where('birthdate', Carbon::parse($request->input('where')[$i]['value']));
-
-                    continue;
-                }
-
                 $birthdays->where($request->input('where')[$i]['label'], $request->input('where')[$i]['condition'], $request->input('where')[$i]['value']);
             }
+        }
+
+        if($request->has('whereMonth'))
+        {
+            $birthdays->whereMonth($request->input('whereMonth.label'), $request->input('whereMonth.value'));
+        }
+
+        if($request->has('whereDay'))
+        {
+            $birthdays->whereDay($request->input('whereDay.label'), $request->input('whereDay.value'));
         }
 
         if($request->has('search'))
