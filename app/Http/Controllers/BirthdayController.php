@@ -38,6 +38,7 @@ class BirthdayController extends Controller
                 $birthday->last_name = $request->input($i.'.last_name');
                 $birthday->first_name = $request->input($i.'.first_name');
                 $birthday->middle_name = $request->input($i.'.middle_name');
+                $birthday->suffix = $request->input($i.'.suffix');
                 $birthday->lob = $request->input($i.'.lob');
                 $birthday->birthdate = Carbon::parse($request->input($i.'.birthdate'));
                 $birthday->save();
@@ -68,6 +69,7 @@ class BirthdayController extends Controller
             $birthdate->last_name = $request->input($i.'.last_name');
             $birthdate->first_name = $request->input($i.'.first_name');
             $birthdate->middle_name = $request->input($i.'.middle_name');
+            $birthdate->suffix = $request->input($i.'.suffix');
             $birthdate->lob = $request->input($i.'.lob');
             $birthdate->birthdate = Carbon::parse($request->input($i.'.birthdate'))->toFormattedDateString();
             
@@ -99,11 +101,6 @@ class BirthdayController extends Controller
     public function enlist(Request $request)
     {
         $birthdays = Birthday::query();
-
-        if($request->has('withTrashed'))
-        {
-            $birthdays->withTrashed();
-        }
 
         if($request->has('where'))
         {
@@ -189,6 +186,7 @@ class BirthdayController extends Controller
         $birthday->first_name = $request->first_name;
         $birthday->middle_name = $request->middle_name;
         $birthday->last_name = $request->last_name;
+        $birthday->suffix = $request->suffix;
         $birthday->lob = $request->lob;
         $birthday->birthdate = Carbon::parse($request->birthdate);
 
@@ -244,6 +242,7 @@ class BirthdayController extends Controller
         $birthday->first_name = $request->first_name;
         $birthday->middle_name = $request->middle_name;
         $birthday->last_name = $request->last_name;
+        $birthday->suffix = $request->suffix;
         $birthday->lob = $request->lob;
         $birthday->birthdate = Carbon::parse($request->birthdate);
 

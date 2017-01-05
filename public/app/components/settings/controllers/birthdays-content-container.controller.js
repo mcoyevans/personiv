@@ -177,7 +177,6 @@ app
 
 		$scope.request = {};
 
-		$scope.request.withTrashed = true;
 		$scope.request.paginate = 20;
 
 		$scope.request.withCount = [

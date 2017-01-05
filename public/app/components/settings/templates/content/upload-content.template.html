@@ -20,16 +20,18 @@
 				<th>Last Name</th>
 				<th>First Name</th>
 				<th>Middle Name</th>
+				<th>Suffix</th>
 				<th>LOB</th>
 				<th>Birthdate</th>
 			</tr>
 			<tr>
-				<td>10071128</td>
-				<td>Paco</td>
-				<td>Marco Christian</td>
-				<td>Santillan</td>
-				<td>IT Department</td>
-				<td>12/30/1993</td>
+				<td>123456789</td>
+				<td>Doe</td>
+				<td>John</td>
+				<td>Smith</td>
+				<td>Jr.</td>
+				<td>Department XYZ</td>
+				<td>01/01/1993</td>
 			</tr>
 		</table>
 	</div>
@@ -84,6 +86,11 @@
 		            <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
 		                <label>Middle name</label>
 		                <input type="text" name="MiddleName{{$index}}" ng-model="employee.middle_name">
+		            </md-input-container>
+		            <!-- Suffix -->
+		            <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+		                <label>Suffix</label>
+		                <input type="text" name="Suffix{{$index}}" ng-model="employee.suffix">
 		            </md-input-container>
 		        </div>
 		        <div layout="row" layout-wrap flex>

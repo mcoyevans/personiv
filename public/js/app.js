@@ -1773,7 +1773,6 @@ app
 
 		$scope.request = {};
 
-		$scope.request.withTrashed = true;
 		$scope.request.paginate = 20;
 
 		$scope.request.withCount = [
@@ -3495,680 +3494,6 @@ app
 		$scope.toolbar.hideSearchIcon = true;
 	}]);
 app
-	.controller('notificationsContentContainerController', ['$scope', '$state', 'Helper', function($scope, $state, Helper){
-		$scope.$emit('closeSidenav');
-
-		/*
-		 * Object for toolbar
-		 *
-		*/
-		$scope.toolbar = {};
-
-		/* Action originates from toolbar */
-		$scope.$on('search', function(){
-			$scope.request.search = $scope.toolbar.searchText;
-			$scope.refresh();
-		});
-
-		/* Listens for any request for refresh */
-		$scope.$on('refresh', function(){
-			$scope.request.search = null;
-			$scope.$broadcast('close');
-			$scope.refresh();
-		});
-
-		var pushItem = function(item){
-			var item = {
-				'display': item.data.sender.name,
-				'message': item.data.message,
-			}
-
-			$scope.toolbar.items.push(item);
-		}
-
-		$scope.readNotification = function(notification){
-			if(notification.data.withParams)
-			{
-				$state.go(notification.data.url, {'id':notification.data.attachment.id});
-			}
-			else{
-				$state.go(notification.data.url);
-				
-				if(notification.type == 'App\\Notifications\\PostCreated' || notification.type == 'App\\Notifications\\RepostCreated')
-				{
-					Helper.set(notification.data.attachment.id);
-					$scope.$broadcast('read-post');
-				}
-				else if(notification.type == 'App\\Notifications\\CommentCreated')
-				{
-					Helper.set(notification.data.attachment.post_id);
-					$scope.$broadcast('read-post-and-comments');
-				}
-				else if(notification.type == 'App\\Notifications\\ReservationCreated')
-				{
-					Helper.set(notification.data.attachment.id);
-					$scope.$broadcast('read-approval');
-				}
-			}
-		}
-
-		$scope.init = function(query){
-			$scope.notification = {};
-			$scope.notification.items = [];
-			$scope.toolbar.items = [];
-
-			// 2 is default so the next page to be loaded will be page 2 
-			$scope.notification.page = 2;
-
-			Helper.post('/user/notifications', query)
-				.success(function(data){
-					$scope.notification.details = data;
-					$scope.notification.items = data.data;
-					$scope.notification.show = true;
-
-					if(data.data.length){
-						// iterate over each record and set the format
-						angular.forEach(data.data, function(item){
-							pushItem(item);
-						});
-					}
-
-					$scope.notification.paginateLoad = function(){
-						// kills the function if ajax is busy or pagination reaches last page
-						if($scope.notification.busy || ($scope.notification.page > $scope.notification.details.last_page)){
-							$scope.isLoading = false;
-							return;
-						}
-						/**
-						 * Executes pagination call
-						 *
-						*/
-						// sets to true to disable pagination call if still busy.
-						$scope.notification.busy = true;
-						$scope.isLoading = true;
-						// Calls the next page of pagination.
-						Helper.post('/user/notifications' + '?page=' + $scope.notification.page, query)
-							.success(function(data){
-								// increment the page to set up next page for next AJAX Call
-								$scope.notification.page++;
-
-								// iterate over each data then splice it to the data array
-								angular.forEach(data.data, function(item, key){
-									pushItem(item);
-									$scope.notification.items.push(item);
-								});
-
-								// Enables again the pagination call for next call.
-								$scope.notification.busy = false;
-								$scope.isLoading = false;
-							});
-					}
-				})
-		}
-
-		$scope.refresh = function(){
-			$scope.isLoading = true;
-  			$scope.notification.show = false;
-			$scope.request.where = null;
-
-  			$scope.init($scope.request);
-		};
-
-		$scope.request = {
-			'paginate':20,
-		}
-
-		$scope.init($scope.request);
-	}]);
-app
-	.controller('notificationsToolbarController', ['$scope', '$filter', function($scope, $filter){
-		$scope.toolbar.childState = 'Notifications';
-
-		$scope.$on('close', function(){
-			$scope.hideSearchBar();
-		});
-
-		$scope.$on('open', function(){
-			$scope.showSearchBar();
-			$scope.searchUserInput();
-		});
-
-		$scope.toolbar.getItems = function(query){
-			var results = query ? $filter('filter')($scope.toolbar.items, query) : $scope.toolbar.items;
-			return results;
-		}
-
-		$scope.toolbar.searchAll = true;
-		/**
-		 * Reveals the search bar.
-		 *
-		*/
-		$scope.showSearchBar = function(){
-			$scope.notification.busy = true;
-			$scope.searchBar = true;
-		};
-
-		/**
-		 * Hides the search bar.
-		 *
-		*/
-		$scope.hideSearchBar = function(){
-			$scope.searchBar = false;
-			$scope.toolbar.searchText = '';
-			$scope.toolbar.searchItem = '';
-			/* Cancels the paginate when the user sent a query */
-			if($scope.searched){
-				$scope.searched = false;
-				$scope.$emit('refresh');
-			}
-		};
-
-		$scope.searchUserInput = function(){
-			$scope.$emit('search');
-			$scope.searched = true;
-		};
-
-		$scope.toolbar.options = true;
-		
-		$scope.toolbar.refresh = function(){
-			$scope.$emit('refresh');
-		}
-	}]);
-app
-	.controller('postDialogController', ['$scope', 'Helper', 'FileUploader', function($scope, Helper, FileUploader){
-		$scope.config = Helper.fetch();
-
-		var query = {};
-
-		query.self_group = true;
-
-		Helper.post('/group/enlist', query)
-			.success(function(data){
-				$scope.groups = data;
-			});
-
-		$scope.repost = {};
-
-		$scope.post = {};
-		$scope.post.group_id = 'all';
-		$scope.post.chips = [];
-
-		var uploader = {};
-
-		uploader.filter = {
-            name: 'photoFilter',
-            fn: function(item /*{File|FileLikeObject}*/, options) {
-                var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
-                return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
-            }
-        };
-
-        uploader.sizeFilter = {
-		    'name': 'enforceMaxFileSize',
-		    'fn': function (item) {
-		        return item.size <= 10485760;
-		    }
-        }
-
-        uploader.error = function(item /*{File|FileLikeObject}*/, filter, options) {
-            $scope.fileError = true;
-            $scope.postPhotoUploader.queue = [];
-        };
-
-        uploader.headers = { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')};
-
-		$scope.clickUpload = function(){
-		    angular.element('#post-upload').trigger('click');
-		};
-
-		/* Photo Uploader */
-		$scope.postPhotoUploader = new FileUploader({
-			url: '/temp-upload/upload-photo',
-			headers: uploader.headers,
-			queueLimit : 1
-		})
-
-		if($scope.config.action == 'edit')
-		{
-			$scope.currentTime = Date.now();
-			
-			var query = {};
-
-			query.with = [
-				{
-					'relation':'hashtags',
-					'withTrashed': false,	
-				},
-			];
-
-			query.where = [
-				{
-					'label':'id',
-					'condition':'=',
-					'value': $scope.config.id,
-				}
-			];
-
-			query.first = true;
-
-			Helper.post('/post/enlist', query)
-				.success(function(data){
-					data.chips = [];
-
-					angular.forEach(data.hashtags, function(hashtag){
-						data.chips.push(hashtag.tag);
-					});
-
-					$scope.post = data;
-					$scope.post.group_id = data.group_id ? data.group_id : 'all';
-					$scope.post.allow_comments = data.allow_comments ? true : false;
-				})
-				.error(function(){
-					Helper.error();
-				});
-		}
-
-		$scope.duplicate = false;
-
-		$scope.busy = false;
-
-		// FILTERS
-        $scope.postPhotoUploader.filters.push(uploader.filter);
-        $scope.postPhotoUploader.filters.push(uploader.sizeFilter);
-        
-		$scope.postPhotoUploader.onWhenAddingFileFailed = uploader.error;
-		$scope.postPhotoUploader.onAfterAddingFile  = function(){
-			$scope.fileError = false;
-			if($scope.postPhotoUploader.queue.length)
-			{	
-				$scope.postPhotoUploader.uploadAll()
-			}
-		};
-
-		$scope.postPhotoUploader.onCompleteItem  = function(data, response){
-			$scope.temp_upload = response;
-			$scope.post.image_path = response.path;
-			if(response)
-			{
-				$scope.preview = true;
-				$scope.currentTime = Date.now();
-			}
-		}
-
-		$scope.postPhotoUploader.onErrorItem = function()
-		{
-			Helper.error();
-		}
-
-		$scope.replace = function(){
-			// $scope.post.image_path = null;
-			// $scope.temp_upload = {};
-			// $scope.preview = false;
-			$scope.postPhotoUploader.queue = [];
-			$scope.clickUpload();
-		}
-
-		$scope.cancel = function(){
-			Helper.cancel();
-		}		
-
-		$scope.submit = function(){
-			if($scope.postForm.$invalid){
-				angular.forEach($scope.postForm.$error, function(field){
-					angular.forEach(field, function(errorField){
-						errorField.$setTouched();
-					});
-				});
-
-				return;
-			}
-
-			if(!$scope.duplicate)
-			{
-				$scope.busy = true;
-
-				if($scope.config.action == 'create')
-				{
-					Helper.post('/post', $scope.post)
-						.success(function(duplicate){
-							if(duplicate){
-								$scope.busy = false;
-								return;
-							}
-
-							Helper.stop();
-						})
-						.error(function(){
-							$scope.busy = false;
-							$scope.error = true;
-						});
-				}
-				else if($scope.config.action == 'edit')
-				{
-					Helper.put('/post' + '/' + $scope.config.id, $scope.post)
-						.success(function(duplicate){
-							if(duplicate){
-								$scope.busy = false;
-								return;
-							}
-
-							Helper.stop();
-						})
-						.error(function(){
-							$scope.busy = false;
-							$scope.error = true;
-						});
-				}
-			}
-		}
-	}]);
-app
-	.controller('repostDialogController', ['$scope', 'Helper', function($scope, Helper){
-		$scope.config = Helper.fetch();
-
-		var query = {};
-
-		query.self_group = true;
-
-		Helper.post('/group/enlist', query)
-			.success(function(data){
-				$scope.groups = data;
-			});
-
-		$scope.repost = {};
-
-		if($scope.config.action == 'create')
-		{
-			
-			var query = {};
-
-			query.with = [
-				{
-					'relation':'hashtags',
-					'withTrashed': false,	
-				},
-				{
-					'relation':'user',
-					'withTrashed': true,
-				},
-				{
-					'relation':'group',
-					'withTrashed': true,
-				},
-			];
-
-			query.where = [
-				{
-					'label':'id',
-					'condition':'=',
-					'value': $scope.config.id,
-				}
-			];
-
-			query.first = true;
-
-			Helper.post('/post/enlist', query)
-				.success(function(data){
-					data.created_at = new Date(data.created_at);
-					data.chips = [];
-
-					angular.forEach(data.hashtags, function(hashtag){
-						data.chips.push(hashtag.tag);
-					});
-
-					$scope.repost.post = data;
-					$scope.repost.post.allow_comments = data.allow_comments ? true : false;
-
-					$scope.repost.group_id = data.group_id ? data.group_id : 'all';
-				})
-				.error(function(){
-					Helper.error();
-				});
-		}
-
-		else if($scope.config.action == 'edit')
-		{
-			var query = {};
-
-			query.with = [
-				{
-					'relation':'post',
-					'withTrashed': false,	
-				},
-			];
-
-			query.where = [
-				{
-					'label':'id',
-					'condition':'=',
-					'value': $scope.config.id,
-				}
-			];
-
-			query.first = true;
-
-			Helper.post('/repost/enlist', query)
-				.success(function(data){
-					data.post.created_at = new Date(data.post.created_at);
-					data.post.chips = [];
-
-					angular.forEach(data.post.hashtags, function(hashtag){
-						data.post.chips.push(hashtag.tag);
-					});
-
-					$scope.repost.post = data.post;
-					$scope.repost.post.allow_comments = data.post.allow_comments ? true : false;
-
-					$scope.repost.group_id = data.post.group_id ? data.post.group_id : 'all';
-
-					Helper.get('/post/' + $scope.config.id)
-						.success(function(data){
-							$scope.repost.id = data.repost_id;
-							$scope.repost.title = data.title;
-							$scope.repost.allow_comments = data.allow_comments ? true : false;
-							$scope.repost.group_id = data.group_id ? data.group_id : 'all';
-						});
-				})
-				.error(function(){
-					Helper.error();
-				});
-
-		}
-
-		$scope.busy = false;
-
-		$scope.cancel = function(){
-			Helper.cancel();
-		}		
-
-		$scope.submit = function(){
-			if($scope.repostForm.$invalid){
-				angular.forEach($scope.repostForm.$error, function(field){
-					angular.forEach(field, function(errorField){
-						errorField.$setTouched();
-					});
-				});
-
-				return;
-			}
-
-			$scope.busy = true;
-
-			if($scope.config.action == 'create')
-			{
-				Helper.post('/repost', $scope.repost)
-					.success(function(duplicate){
-						if(duplicate){
-							$scope.busy = false;
-							return;
-						}
-
-						Helper.stop();
-					})
-					.error(function(){
-						$scope.busy = false;
-						$scope.error = true;
-					});
-			}
-			else if($scope.config.action == 'edit')
-			{
-				Helper.put('/repost' + '/' + $scope.config.id, $scope.repost)
-					.success(function(duplicate){
-						if(duplicate){
-							$scope.busy = false;
-							return;
-						}
-
-						Helper.stop();
-					})
-					.error(function(){
-						$scope.busy = false;
-						$scope.error = true;
-					});
-			}
-		}
-	}]);
-app
-	.controller('repostsDialogController', ['$scope', 'Helper', function($scope, Helper){
-		$scope.cancel = function(){
-			Helper.cancel();
-		}
-
-		var post = Helper.fetch();
-
-		var query = {};
-
-		query.with = [
-			{
-				'relation': 'post',
-				'withTrashed': false,
-			}
-		];
-
-		query.where = [
-			{
-				'label': 'post_id',
-				'condition' : '=',
-				'value': post.id
-			}
-		];
-
-		query.orderBy = [
-			{
-				'column':'created_at',
-				'order':'desc',
-			},
-		];
-
-		query.paginate = 10;
-
-		$scope.repost = {};
-		$scope.repost.items = [];
-		$scope.repost.page = 2;
-
-		var pushItem = function(data){
-			data.created_at = new Date(data.created_at);
-		}
-
-		Helper.post('/repost/enlist', query)
-			.success(function(data){
-				$scope.repost.details = data;
-				$scope.repost.items = data.data;
-				$scope.repost.show = true;
-
-				if(data.data.length){
-					angular.forEach(data.data, function(item){
-						pushItem(item);
-					})
-				}
-
-				$scope.repost.paginateLoad = function(){
-					// kills the function if ajax is busy or pagination reaches last page
-					if($scope.repost.busy || ($scope.repost.page > $scope.repost.details.last_page)){
-						$scope.isLoading = false;
-						return;
-					}
-					/**
-					 * Executes pagination call
-					 *
-					*/
-					// sets to true to disable pagination call if still busy.
-					$scope.repost.busy = true;
-					$scope.isLoading = true;
-					// Calls the next page of pagination.
-					Helper.post('/repost/enlist' + '?page=' + $scope.repost.page, query)
-						.success(function(data){
-							// increment the page to set up next page for next AJAX Call
-							$scope.repost.page++;
-
-							// iterate over each data then splice it to the data array
-							angular.forEach(data.data, function(item, key){
-								pushItem(item);
-								$scope.repost.items.push(item);
-							});
-
-							// Enables again the pagination call for next call.
-							$scope.repost.busy = false;
-							$scope.isLoading = false;
-						});
-				}
-			});
-	}]);
-app
-	.controller('postsToolbarController', ['$scope', '$filter', function($scope, $filter){
-		$scope.toolbar.childState = 'Home';
-
-		$scope.$on('close', function(){
-			$scope.hideSearchBar();
-		});
-
-		$scope.$on('open', function(){
-			$scope.showSearchBar();
-			$scope.searchUserInput();
-		});
-
-		$scope.toolbar.getItems = function(query){
-			var results = query ? $filter('filter')($scope.toolbar.items, query) : $scope.toolbar.items;
-			return results;
-		}
-
-		$scope.toolbar.searchAll = true;
-		/**
-		 * Reveals the search bar.
-		 *
-		*/
-		$scope.showSearchBar = function(){
-			$scope.post.busy = true;
-			$scope.searchBar = true;
-		};
-
-		/**
-		 * Hides the search bar.
-		 *
-		*/
-		$scope.hideSearchBar = function(){
-			$scope.searchBar = false;
-			$scope.toolbar.searchText = '';
-			$scope.toolbar.searchItem = '';
-			/* Cancels the paginate when the user sent a query */
-			if($scope.searched){
-				$scope.searched = false;
-				$scope.$emit('refresh');
-			}
-		};
-
-		$scope.searchUserInput = function(){
-			$scope.$emit('search');
-			$scope.searched = true;
-		};
-
-		$scope.toolbar.options = true;
-		
-		$scope.toolbar.refresh = function(){
-			$scope.$emit('refresh');
-		}
-	}]);
-app
 	.controller('approvalsContentContainerController', ['$scope', '$state', '$stateParams', 'Helper', function($scope, $state, $stateParams, Helper){
 		$scope.$emit('closeSidenav');
 
@@ -4679,6 +4004,680 @@ app
 		$scope.toolbar.refresh = function(){
 			$scope.$emit('refresh');
 		}
+	}]);
+app
+	.controller('notificationsContentContainerController', ['$scope', '$state', 'Helper', function($scope, $state, Helper){
+		$scope.$emit('closeSidenav');
+
+		/*
+		 * Object for toolbar
+		 *
+		*/
+		$scope.toolbar = {};
+
+		/* Action originates from toolbar */
+		$scope.$on('search', function(){
+			$scope.request.search = $scope.toolbar.searchText;
+			$scope.refresh();
+		});
+
+		/* Listens for any request for refresh */
+		$scope.$on('refresh', function(){
+			$scope.request.search = null;
+			$scope.$broadcast('close');
+			$scope.refresh();
+		});
+
+		var pushItem = function(item){
+			var item = {
+				'display': item.data.sender.name,
+				'message': item.data.message,
+			}
+
+			$scope.toolbar.items.push(item);
+		}
+
+		$scope.readNotification = function(notification){
+			if(notification.data.withParams)
+			{
+				$state.go(notification.data.url, {'id':notification.data.attachment.id});
+			}
+			else{
+				$state.go(notification.data.url);
+				
+				if(notification.type == 'App\\Notifications\\PostCreated' || notification.type == 'App\\Notifications\\RepostCreated')
+				{
+					Helper.set(notification.data.attachment.id);
+					$scope.$broadcast('read-post');
+				}
+				else if(notification.type == 'App\\Notifications\\CommentCreated')
+				{
+					Helper.set(notification.data.attachment.post_id);
+					$scope.$broadcast('read-post-and-comments');
+				}
+				else if(notification.type == 'App\\Notifications\\ReservationCreated')
+				{
+					Helper.set(notification.data.attachment.id);
+					$scope.$broadcast('read-approval');
+				}
+			}
+		}
+
+		$scope.init = function(query){
+			$scope.notification = {};
+			$scope.notification.items = [];
+			$scope.toolbar.items = [];
+
+			// 2 is default so the next page to be loaded will be page 2 
+			$scope.notification.page = 2;
+
+			Helper.post('/user/notifications', query)
+				.success(function(data){
+					$scope.notification.details = data;
+					$scope.notification.items = data.data;
+					$scope.notification.show = true;
+
+					if(data.data.length){
+						// iterate over each record and set the format
+						angular.forEach(data.data, function(item){
+							pushItem(item);
+						});
+					}
+
+					$scope.notification.paginateLoad = function(){
+						// kills the function if ajax is busy or pagination reaches last page
+						if($scope.notification.busy || ($scope.notification.page > $scope.notification.details.last_page)){
+							$scope.isLoading = false;
+							return;
+						}
+						/**
+						 * Executes pagination call
+						 *
+						*/
+						// sets to true to disable pagination call if still busy.
+						$scope.notification.busy = true;
+						$scope.isLoading = true;
+						// Calls the next page of pagination.
+						Helper.post('/user/notifications' + '?page=' + $scope.notification.page, query)
+							.success(function(data){
+								// increment the page to set up next page for next AJAX Call
+								$scope.notification.page++;
+
+								// iterate over each data then splice it to the data array
+								angular.forEach(data.data, function(item, key){
+									pushItem(item);
+									$scope.notification.items.push(item);
+								});
+
+								// Enables again the pagination call for next call.
+								$scope.notification.busy = false;
+								$scope.isLoading = false;
+							});
+					}
+				})
+		}
+
+		$scope.refresh = function(){
+			$scope.isLoading = true;
+  			$scope.notification.show = false;
+			$scope.request.where = null;
+
+  			$scope.init($scope.request);
+		};
+
+		$scope.request = {
+			'paginate':20,
+		}
+
+		$scope.init($scope.request);
+	}]);
+app
+	.controller('notificationsToolbarController', ['$scope', '$filter', function($scope, $filter){
+		$scope.toolbar.childState = 'Notifications';
+
+		$scope.$on('close', function(){
+			$scope.hideSearchBar();
+		});
+
+		$scope.$on('open', function(){
+			$scope.showSearchBar();
+			$scope.searchUserInput();
+		});
+
+		$scope.toolbar.getItems = function(query){
+			var results = query ? $filter('filter')($scope.toolbar.items, query) : $scope.toolbar.items;
+			return results;
+		}
+
+		$scope.toolbar.searchAll = true;
+		/**
+		 * Reveals the search bar.
+		 *
+		*/
+		$scope.showSearchBar = function(){
+			$scope.notification.busy = true;
+			$scope.searchBar = true;
+		};
+
+		/**
+		 * Hides the search bar.
+		 *
+		*/
+		$scope.hideSearchBar = function(){
+			$scope.searchBar = false;
+			$scope.toolbar.searchText = '';
+			$scope.toolbar.searchItem = '';
+			/* Cancels the paginate when the user sent a query */
+			if($scope.searched){
+				$scope.searched = false;
+				$scope.$emit('refresh');
+			}
+		};
+
+		$scope.searchUserInput = function(){
+			$scope.$emit('search');
+			$scope.searched = true;
+		};
+
+		$scope.toolbar.options = true;
+		
+		$scope.toolbar.refresh = function(){
+			$scope.$emit('refresh');
+		}
+	}]);
+app
+	.controller('postsToolbarController', ['$scope', '$filter', function($scope, $filter){
+		$scope.toolbar.childState = 'Home';
+
+		$scope.$on('close', function(){
+			$scope.hideSearchBar();
+		});
+
+		$scope.$on('open', function(){
+			$scope.showSearchBar();
+			$scope.searchUserInput();
+		});
+
+		$scope.toolbar.getItems = function(query){
+			var results = query ? $filter('filter')($scope.toolbar.items, query) : $scope.toolbar.items;
+			return results;
+		}
+
+		$scope.toolbar.searchAll = true;
+		/**
+		 * Reveals the search bar.
+		 *
+		*/
+		$scope.showSearchBar = function(){
+			$scope.post.busy = true;
+			$scope.searchBar = true;
+		};
+
+		/**
+		 * Hides the search bar.
+		 *
+		*/
+		$scope.hideSearchBar = function(){
+			$scope.searchBar = false;
+			$scope.toolbar.searchText = '';
+			$scope.toolbar.searchItem = '';
+			/* Cancels the paginate when the user sent a query */
+			if($scope.searched){
+				$scope.searched = false;
+				$scope.$emit('refresh');
+			}
+		};
+
+		$scope.searchUserInput = function(){
+			$scope.$emit('search');
+			$scope.searched = true;
+		};
+
+		$scope.toolbar.options = true;
+		
+		$scope.toolbar.refresh = function(){
+			$scope.$emit('refresh');
+		}
+	}]);
+app
+	.controller('postDialogController', ['$scope', 'Helper', 'FileUploader', function($scope, Helper, FileUploader){
+		$scope.config = Helper.fetch();
+
+		var query = {};
+
+		query.self_group = true;
+
+		Helper.post('/group/enlist', query)
+			.success(function(data){
+				$scope.groups = data;
+			});
+
+		$scope.repost = {};
+
+		$scope.post = {};
+		$scope.post.group_id = 'all';
+		$scope.post.chips = [];
+
+		var uploader = {};
+
+		uploader.filter = {
+            name: 'photoFilter',
+            fn: function(item /*{File|FileLikeObject}*/, options) {
+                var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
+                return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
+            }
+        };
+
+        uploader.sizeFilter = {
+		    'name': 'enforceMaxFileSize',
+		    'fn': function (item) {
+		        return item.size <= 10485760;
+		    }
+        }
+
+        uploader.error = function(item /*{File|FileLikeObject}*/, filter, options) {
+            $scope.fileError = true;
+            $scope.postPhotoUploader.queue = [];
+        };
+
+        uploader.headers = { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')};
+
+		$scope.clickUpload = function(){
+		    angular.element('#post-upload').trigger('click');
+		};
+
+		/* Photo Uploader */
+		$scope.postPhotoUploader = new FileUploader({
+			url: '/temp-upload/upload-photo',
+			headers: uploader.headers,
+			queueLimit : 1
+		})
+
+		if($scope.config.action == 'edit')
+		{
+			$scope.currentTime = Date.now();
+			
+			var query = {};
+
+			query.with = [
+				{
+					'relation':'hashtags',
+					'withTrashed': false,	
+				},
+			];
+
+			query.where = [
+				{
+					'label':'id',
+					'condition':'=',
+					'value': $scope.config.id,
+				}
+			];
+
+			query.first = true;
+
+			Helper.post('/post/enlist', query)
+				.success(function(data){
+					data.chips = [];
+
+					angular.forEach(data.hashtags, function(hashtag){
+						data.chips.push(hashtag.tag);
+					});
+
+					$scope.post = data;
+					$scope.post.group_id = data.group_id ? data.group_id : 'all';
+					$scope.post.allow_comments = data.allow_comments ? true : false;
+				})
+				.error(function(){
+					Helper.error();
+				});
+		}
+
+		$scope.duplicate = false;
+
+		$scope.busy = false;
+
+		// FILTERS
+        $scope.postPhotoUploader.filters.push(uploader.filter);
+        $scope.postPhotoUploader.filters.push(uploader.sizeFilter);
+        
+		$scope.postPhotoUploader.onWhenAddingFileFailed = uploader.error;
+		$scope.postPhotoUploader.onAfterAddingFile  = function(){
+			$scope.fileError = false;
+			if($scope.postPhotoUploader.queue.length)
+			{	
+				$scope.postPhotoUploader.uploadAll()
+			}
+		};
+
+		$scope.postPhotoUploader.onCompleteItem  = function(data, response){
+			$scope.temp_upload = response;
+			$scope.post.image_path = response.path;
+			if(response)
+			{
+				$scope.preview = true;
+				$scope.currentTime = Date.now();
+			}
+		}
+
+		$scope.postPhotoUploader.onErrorItem = function()
+		{
+			Helper.error();
+		}
+
+		$scope.replace = function(){
+			// $scope.post.image_path = null;
+			// $scope.temp_upload = {};
+			// $scope.preview = false;
+			$scope.postPhotoUploader.queue = [];
+			$scope.clickUpload();
+		}
+
+		$scope.cancel = function(){
+			Helper.cancel();
+		}		
+
+		$scope.submit = function(){
+			if($scope.postForm.$invalid){
+				angular.forEach($scope.postForm.$error, function(field){
+					angular.forEach(field, function(errorField){
+						errorField.$setTouched();
+					});
+				});
+
+				return;
+			}
+
+			if(!$scope.duplicate)
+			{
+				$scope.busy = true;
+
+				if($scope.config.action == 'create')
+				{
+					Helper.post('/post', $scope.post)
+						.success(function(duplicate){
+							if(duplicate){
+								$scope.busy = false;
+								return;
+							}
+
+							Helper.stop();
+						})
+						.error(function(){
+							$scope.busy = false;
+							$scope.error = true;
+						});
+				}
+				else if($scope.config.action == 'edit')
+				{
+					Helper.put('/post' + '/' + $scope.config.id, $scope.post)
+						.success(function(duplicate){
+							if(duplicate){
+								$scope.busy = false;
+								return;
+							}
+
+							Helper.stop();
+						})
+						.error(function(){
+							$scope.busy = false;
+							$scope.error = true;
+						});
+				}
+			}
+		}
+	}]);
+app
+	.controller('repostDialogController', ['$scope', 'Helper', function($scope, Helper){
+		$scope.config = Helper.fetch();
+
+		var query = {};
+
+		query.self_group = true;
+
+		Helper.post('/group/enlist', query)
+			.success(function(data){
+				$scope.groups = data;
+			});
+
+		$scope.repost = {};
+
+		if($scope.config.action == 'create')
+		{
+			
+			var query = {};
+
+			query.with = [
+				{
+					'relation':'hashtags',
+					'withTrashed': false,	
+				},
+				{
+					'relation':'user',
+					'withTrashed': true,
+				},
+				{
+					'relation':'group',
+					'withTrashed': true,
+				},
+			];
+
+			query.where = [
+				{
+					'label':'id',
+					'condition':'=',
+					'value': $scope.config.id,
+				}
+			];
+
+			query.first = true;
+
+			Helper.post('/post/enlist', query)
+				.success(function(data){
+					data.created_at = new Date(data.created_at);
+					data.chips = [];
+
+					angular.forEach(data.hashtags, function(hashtag){
+						data.chips.push(hashtag.tag);
+					});
+
+					$scope.repost.post = data;
+					$scope.repost.post.allow_comments = data.allow_comments ? true : false;
+
+					$scope.repost.group_id = data.group_id ? data.group_id : 'all';
+				})
+				.error(function(){
+					Helper.error();
+				});
+		}
+
+		else if($scope.config.action == 'edit')
+		{
+			var query = {};
+
+			query.with = [
+				{
+					'relation':'post',
+					'withTrashed': false,	
+				},
+			];
+
+			query.where = [
+				{
+					'label':'id',
+					'condition':'=',
+					'value': $scope.config.id,
+				}
+			];
+
+			query.first = true;
+
+			Helper.post('/repost/enlist', query)
+				.success(function(data){
+					data.post.created_at = new Date(data.post.created_at);
+					data.post.chips = [];
+
+					angular.forEach(data.post.hashtags, function(hashtag){
+						data.post.chips.push(hashtag.tag);
+					});
+
+					$scope.repost.post = data.post;
+					$scope.repost.post.allow_comments = data.post.allow_comments ? true : false;
+
+					$scope.repost.group_id = data.post.group_id ? data.post.group_id : 'all';
+
+					Helper.get('/post/' + $scope.config.id)
+						.success(function(data){
+							$scope.repost.id = data.repost_id;
+							$scope.repost.title = data.title;
+							$scope.repost.allow_comments = data.allow_comments ? true : false;
+							$scope.repost.group_id = data.group_id ? data.group_id : 'all';
+						});
+				})
+				.error(function(){
+					Helper.error();
+				});
+
+		}
+
+		$scope.busy = false;
+
+		$scope.cancel = function(){
+			Helper.cancel();
+		}		
+
+		$scope.submit = function(){
+			if($scope.repostForm.$invalid){
+				angular.forEach($scope.repostForm.$error, function(field){
+					angular.forEach(field, function(errorField){
+						errorField.$setTouched();
+					});
+				});
+
+				return;
+			}
+
+			$scope.busy = true;
+
+			if($scope.config.action == 'create')
+			{
+				Helper.post('/repost', $scope.repost)
+					.success(function(duplicate){
+						if(duplicate){
+							$scope.busy = false;
+							return;
+						}
+
+						Helper.stop();
+					})
+					.error(function(){
+						$scope.busy = false;
+						$scope.error = true;
+					});
+			}
+			else if($scope.config.action == 'edit')
+			{
+				Helper.put('/repost' + '/' + $scope.config.id, $scope.repost)
+					.success(function(duplicate){
+						if(duplicate){
+							$scope.busy = false;
+							return;
+						}
+
+						Helper.stop();
+					})
+					.error(function(){
+						$scope.busy = false;
+						$scope.error = true;
+					});
+			}
+		}
+	}]);
+app
+	.controller('repostsDialogController', ['$scope', 'Helper', function($scope, Helper){
+		$scope.cancel = function(){
+			Helper.cancel();
+		}
+
+		var post = Helper.fetch();
+
+		var query = {};
+
+		query.with = [
+			{
+				'relation': 'post',
+				'withTrashed': false,
+			}
+		];
+
+		query.where = [
+			{
+				'label': 'post_id',
+				'condition' : '=',
+				'value': post.id
+			}
+		];
+
+		query.orderBy = [
+			{
+				'column':'created_at',
+				'order':'desc',
+			},
+		];
+
+		query.paginate = 10;
+
+		$scope.repost = {};
+		$scope.repost.items = [];
+		$scope.repost.page = 2;
+
+		var pushItem = function(data){
+			data.created_at = new Date(data.created_at);
+		}
+
+		Helper.post('/repost/enlist', query)
+			.success(function(data){
+				$scope.repost.details = data;
+				$scope.repost.items = data.data;
+				$scope.repost.show = true;
+
+				if(data.data.length){
+					angular.forEach(data.data, function(item){
+						pushItem(item);
+					})
+				}
+
+				$scope.repost.paginateLoad = function(){
+					// kills the function if ajax is busy or pagination reaches last page
+					if($scope.repost.busy || ($scope.repost.page > $scope.repost.details.last_page)){
+						$scope.isLoading = false;
+						return;
+					}
+					/**
+					 * Executes pagination call
+					 *
+					*/
+					// sets to true to disable pagination call if still busy.
+					$scope.repost.busy = true;
+					$scope.isLoading = true;
+					// Calls the next page of pagination.
+					Helper.post('/repost/enlist' + '?page=' + $scope.repost.page, query)
+						.success(function(data){
+							// increment the page to set up next page for next AJAX Call
+							$scope.repost.page++;
+
+							// iterate over each data then splice it to the data array
+							angular.forEach(data.data, function(item, key){
+								pushItem(item);
+								$scope.repost.items.push(item);
+							});
+
+							// Enables again the pagination call for next call.
+							$scope.repost.busy = false;
+							$scope.isLoading = false;
+						});
+				}
+			});
 	}]);
 app
 	.controller('approvedReservationDialogController', ['$scope', 'Helper', function($scope, Helper){
