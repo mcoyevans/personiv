@@ -428,6 +428,11 @@ class ReservationController extends Controller
         DB::transaction(function() use($request, $start, $end, $id){
             $reservation = Reservation::where('id', $id)->first();
 
+            if($reservation->equipment_approver_id || $reservation->schedule_approver_id)
+            {
+                abort(422, 'Cannot edit partially approved reservation.');
+            }
+
             $reservation->title = $request->title;
             $reservation->remarks = $request->remarks;
             $reservation->location_id = $request->location_id;
