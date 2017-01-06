@@ -17,6 +17,7 @@ class ChangeEmployeeNumberUniqueFromBirthdaysTable extends Migration
             $table->integer('employee_number')->unsigned()->change();
             $table->string('suffix')->nullable();
             $table->dropColumn('deleted_at');
+            $table->engine = 'InnoDB';
         });
     }
 
