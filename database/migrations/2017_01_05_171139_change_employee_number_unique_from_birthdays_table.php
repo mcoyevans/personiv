@@ -29,9 +29,7 @@ class ChangeEmployeeNumberUniqueFromBirthdaysTable extends Migration
     public function down()
     {
         Schema::table('birthdays', function (Blueprint $table) {
-            $table->integer('employee_number')->unsigned()->unique()->change();
-            $table->dropColumn('suffix');
-            $table->softDeletes();
+            // 
         });
     }
 }

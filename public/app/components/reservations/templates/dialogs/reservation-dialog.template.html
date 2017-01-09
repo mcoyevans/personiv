@@ -1,4 +1,4 @@
-<md-dialog aria-label="Reservation Form"  flex flex-gt-sm="50" ng-cloak>
+<md-dialog aria-label="Reservation Form"  flex flex-gt-sm="60" ng-cloak>
     <form name="reservationForm">
         <md-toolbar >
             <div class="md-toolbar-tools">
@@ -31,39 +31,65 @@
                     </div>
                 </md-input-container>
             </div>
-            <!-- From -->
-            <md-subheader class="md-no-stick">From</md-subheader>
             <div layout="row" layout-wrap flex>
-                <div layout="column" flex-xs="100" flex-sm="100" flex-gt-sm>
-                    <md-datepicker name="DateStart" ng-model="reservation.date_start" md-placeholder="Enter date" md-min-date="min_start_date" ng-change="setDateStart()"></md-datepicker>
-                    <div class="validation-messages" ng-messages="reservationForm.DateStart.$error">
-                        <div ng-message="valid">The entered value is not a date!</div>
-                        <div ng-message="required">Date start is required!</div>
-                        <div ng-message="mindate">Date cannot be earlier than today</div>
+                <div flex flex-xs="100" flex-sm="100" flex-md="100">            
+                    <!-- From -->
+                    <md-subheader class="md-no-stick">From</md-subheader>
+                    <div layout="row" layout-wrap flex>
+                        <div layout="column" flex-xs="100" flex-sm="100" flex-gt-sm>
+                            <md-datepicker name="DateStart" required ng-model="reservation.date_start" md-placeholder="Enter date" md-min-date="min_start_date" ng-change="setDateStart()"></md-datepicker>
+                            <div class="validation-messages" ng-messages="reservationForm.DateStart.$error">
+                                <div ng-message="valid">The entered value is not a date!</div>
+                                <div ng-message="required">Date start is required!</div>
+                                <div ng-message="mindate">Date cannot be earlier than today</div>
+                            </div>
+                        </div>
+                        <div layout="column" flex-xs="100" flex-sm="100" flex-gt-sm ng-if="!reservation.allDay">
+                            <div uib-timepicker readonly-input="true" ng-model="reservation.time_start" ng-change="timeStartChanged()" hour-step="1" minute-step="30" show-meridian="true" min="min_start_time"></div>
+                            <div class="red-text" ng-if="reservation.time_start < min_start_time">Time start cannot be earlier than current time.</div>
+                        </div>
                     </div>
                 </div>
-                <div layout="column" flex-xs="100" flex-sm="100" flex-gt-sm ng-if="!reservation.allDay">
-                    <div uib-timepicker readonly-input="true" ng-model="reservation.time_start" ng-change="timeStartChanged()" hour-step="1" minute-step="30" show-meridian="true" min="min_start_time"></div>
-                    <div class="red-text" ng-if="reservation.time_start < min_start_time">Time start cannot be earlier than current time.</div>
-                </div>
-            </div>
-            <!-- To -->
-            <md-subheader class="md-no-stick">To</md-subheader>
-            <div layout="row" layout-wrap flex>
-                <div layout="column" flex-xs="100" flex-sm="100" flex-gt-sm>
-                    <md-datepicker name="DateEnd" ng-model="reservation.date_end" md-placeholder="Enter date" md-min-date="reservation.date_start" ng-change="setDateEnd()"></md-datepicker>
-                    <div class="validation-messages" ng-messages="reservationForm.DateEnd.$error">
-                        <div ng-message="valid">The entered value is not a date!</div>
-                        <div ng-message="required">Date end is required!</div>
-                        <div ng-message="mindate">Date cannot be earlier than today</div>
+                <div flex flex-xs="100" flex-sm="100" flex-md="100">            
+                    <!-- To -->
+                    <md-subheader class="md-no-stick">To</md-subheader>
+                    <div layout="row" layout-wrap flex>
+                        <div layout="column" flex-xs="100" flex-sm="100" flex-gt-sm>
+                            <md-datepicker name="DateEnd" required ng-model="reservation.date_end" md-placeholder="Enter date" md-min-date="reservation.date_start" ng-change="setDateEnd()"></md-datepicker>
+                            <div class="validation-messages" ng-messages="reservationForm.DateEnd.$error">
+                                <div ng-message="valid">The entered value is not a date!</div>
+                                <div ng-message="required">Date end is required!</div>
+                                <div ng-message="mindate">Date cannot be earlier than today</div>
+                            </div>
+                        </div>
+                        <div layout="column" flex-xs="100" flex-sm="100" flex-gt-sm ng-if="!reservation.allDay">
+                            <div uib-timepicker readonly-input="true" ng-model="reservation.time_end" ng-change="timeEndChanged()" hour-step="1" minute-step="30" show-meridian="true" min="min_end_time"></div>
+                            <div class="red-text" ng-if="reservation.time_end < reservation.time_start">Time end cannot be earlier than time start.</div>
+                        </div>
                     </div>
-                </div>
-                <div layout="column" flex-xs="100" flex-sm="100" flex-gt-sm ng-if="!reservation.allDay">
-                    <div uib-timepicker readonly-input="true" ng-model="reservation.time_end" ng-change="timeEndChanged()" hour-step="1" minute-step="30" show-meridian="true" min="min_end_time"></div>
-                    <div class="red-text" ng-if="reservation.time_end < reservation.time_start">Time end cannot be earlier than time start.</div>
                 </div>
             </div>
             <md-switch class="md-primary" ng-model="reservation.allDay" ng-change="allDay()">All Day</md-switch>
+            <md-switch class="md-primary" ng-model="repeat" ng-change="setRepeat()">Repeat</md-switch>
+            <div layout="row" layout-wrap layout-align="space-between center" flex ng-if="repeat">
+                <!-- Repeat -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Repeat</label>
+                    <md-select name="Repeat" ng-model="reservation.repeat" ng-change="setUntil()">
+                        <md-option ng-repeat="item in repetitions" value="{{item}}">{{item}}</md-option>
+                    </md-select>
+                </md-input-container>
+                <!-- Until -->
+                <div layout="column" flex-xs="100" flex-sm="100" flex-gt-sm ng-if="reservation.repeat">
+                    <h4>Until</h4>
+                    <md-datepicker name="Until" required ng-model="reservation.until" md-placeholder="Enter date" md-min-date="reservation.date_end" ng-change="checkDuplicate()"></md-datepicker>
+                    <div class="validation-messages" ng-messages="reservationForm.Until.$error">
+                        <div ng-message="valid">The entered value is not a date!</div>
+                        <div ng-message="required">Date is required!</div>
+                        <div ng-message="mindate">Date cannot be earlier than date end.</div>
+                    </div>
+                </div>
+            </div>
             <div layout="row" layout-wrap flex>
                 <!-- Remarks -->
                 <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>

@@ -6,6 +6,8 @@ app
 			Helper.cancel();
 		}
 
+		$scope.repetitions = ['Daily', 'Weekly', 'Monthly'];
+
 		$scope.duplicate = false;
 
 		$scope.fallback = {};
@@ -36,6 +38,7 @@ app
 			$scope.fallback.date_end = new Date($scope.reservation.date_end);
 			$scope.fallback.time_start = new Date($scope.reservation.time_start);
 			$scope.fallback.time_end = new Date($scope.reservation.time_end);
+			$scope.fallback.until = $scope.reservation.until ? new Date($scope.reservation.until) : null;
 		}
 
 		var fallbackDateToObject = function(){
@@ -43,6 +46,19 @@ app
 			$scope.reservation.date_end = new Date($scope.fallback.date_end);
 			$scope.reservation.time_start = new Date($scope.fallback.time_start);
 			$scope.reservation.time_end = new Date($scope.fallback.time_end);
+			$scope.reservation.until = $scope.fallback.until ? new Date($scope.fallback.until) : null;
+		}
+
+		$scope.setUntil = function(){
+			$scope.reservation.until = new Date();
+		}
+
+		$scope.setRepeat = function(){
+			if(!$scope.repeat)
+			{
+				$scope.reservation.repeat = null;
+				$scope.reservation.until = null;
+			}
 		}
 
 		$scope.checkDuplicate = function(){
@@ -56,6 +72,11 @@ app
 				request.time_start = new Date($scope.reservation.time_start).toLocaleTimeString();
 				request.time_end = new Date($scope.reservation.time_end).toLocaleTimeString();
 
+				if($scope.reservation.until)
+				{
+					request.repeat = $scope.reservation.repeat;
+					request.until = new Date($scope.reservation.until).toDateString();
+				}
 
 				Helper.post('/reservation/check-duplicate', request)
 					.success(function(data){
@@ -292,6 +313,7 @@ app
 				$scope.reservation.date_end = $scope.reservation.date_end.toDateString();
 				$scope.reservation.time_start = $scope.reservation.time_start.toLocaleTimeString();
 				$scope.reservation.time_end = $scope.reservation.time_end.toLocaleTimeString();
+				$scope.reservation.until = $scope.reservation.until ? $scope.reservation.until.toDateString() : null;
 
 				if($scope.config.action == 'create')
 				{

@@ -118,7 +118,131 @@ class ReservationController extends Controller
         $start = Carbon::parse($request->date_start .' '. $request->time_start);
         $end = Carbon::parse($request->date_end .' '. $request->time_end);
 
-        $new = Reservation::whereNotNull('schedule_approver_id')->whereNotNull('equipment_approver_id')->where('location_id', $request->location_id)
+        if($request->has('repeat'))
+        {
+            $until = Carbon::parse($request->until .' '. $request->time_end);
+
+            if($request->repeat == 'Daily')
+            {
+                $date_end = Carbon::parse($request->date_end .' '. $request->time_end);
+                
+                for ($date_start = Carbon::parse($request->date_start .' '. $request->time_start); $date_start->lte($until); $date_start->addDay()) { 
+
+                    if($request->has('id'))
+                    {
+                        $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                            ->where(function($query) use ($date_start, $date_end){
+                                // in between approved reservation
+                                $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
+                                // overlap on start of approved reservation
+                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // overlap on end of approved reservation
+                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                            })->first();
+                    }
+                    else{
+                        $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                            ->where(function($query) use ($date_start, $date_end){
+                                // in between approved reservation
+                                $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
+                                // overlap on start of approved reservation
+                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // overlap on end of approved reservation
+                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                            })->first();
+                    }
+
+                    $date_end->addDay();
+
+                    if($reservation)
+                    {
+                        return response()->json(true);
+                    }
+                }                
+            }
+
+            else if($request->repeat == 'Weekly')
+            {
+                $date_end = Carbon::parse($request->date_end .' '. $request->time_end);
+                
+                for ($date_start = Carbon::parse($request->date_start .' '. $request->time_start); $date_start->lte($until); $date_start->addWeek()) { 
+
+                    if($request->has('id'))
+                    {
+                        $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                            ->where(function($query) use ($date_start, $date_end){
+                                // in between approved reservation
+                                $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
+                                // overlap on start of approved reservation
+                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // overlap on end of approved reservation
+                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                            })->first();
+                    }
+                    else{
+                        $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                            ->where(function($query) use ($date_start, $date_end){
+                                // in between approved reservation
+                                $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
+                                // overlap on start of approved reservation
+                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // overlap on end of approved reservation
+                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                            })->first();
+                    }
+
+                    $date_end->addWeek();
+
+                    if($reservation)
+                    {
+                        return response()->json(true);
+                    }
+                }
+            }
+
+            else if($request->repeat == 'Monthly')
+            {
+                $date_end = Carbon::parse($request->date_end .' '. $request->time_end);
+                
+                for ($date_start = Carbon::parse($request->date_start .' '. $request->time_start); $date_start->lte($until); $date_start->addMonth()) { 
+
+                    if($request->has('id'))
+                    {
+                        $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                            ->where(function($query) use ($date_start, $date_end){
+                                // in between approved reservation
+                                $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
+                                // overlap on start of approved reservation
+                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // overlap on end of approved reservation
+                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                            })->first();
+                    }
+                    else{
+                        $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                            ->where(function($query) use ($date_start, $date_end){
+                                // in between approved reservation
+                                $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
+                                // overlap on start of approved reservation
+                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // overlap on end of approved reservation
+                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                            })->first();
+                    }
+
+                    $date_end->addMonth();
+
+                    if($reservation)
+                    {
+                        return response()->json(true);
+                    }
+                }
+            }
+
+            return response()->json(false);
+        }
+
+        $new = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
             ->where(function($query) use ($start, $end){
                 // in between approved reservation
                 $query->where('start', '<=', $start)->where('end', '>=', $end);
@@ -128,7 +252,7 @@ class ReservationController extends Controller
                 $query->orWhereBetween('end', [$start, $end]);
             })->first();
 
-        $existing = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->whereNotNull('equipment_approver_id')->where('location_id', $request->location_id)
+        $existing = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
             ->where(function($query) use ($start, $end){
                 // in between approved reservation
                 $query->where('start', '<=', $start)->where('end', '>=', $end);
@@ -141,6 +265,7 @@ class ReservationController extends Controller
         $reservation = $request->id ? $existing : $new;
 
         return response()->json($reservation ? true : false);
+
     }
 
     /**
@@ -302,13 +427,140 @@ class ReservationController extends Controller
 
         $start = Carbon::parse($request->date_start .' '. $request->time_start);
         $end = Carbon::parse($request->date_end .' '. $request->time_end);
-        
+
         if($start->lt(Carbon::now()))
         {
             abort(422, 'Reservation cannot be earlier than current time.');
         }
 
-        $duplicate = Reservation::whereNotNull('schedule_approver_id')->whereNotNull('equipment_approver_id')->where('location_id', $request->location_id)
+        $until = null;
+
+        if($request->has('until'))
+        {
+            $until = Carbon::parse($request->until .' '. $request->time_end);
+        }
+        
+        if($request->has('repeat'))
+        {
+            if($request->repeat == 'Daily')
+            {
+                $date_end = Carbon::parse($request->date_end .' '. $request->time_end);
+                
+                for ($date_start = Carbon::parse($request->date_start .' '. $request->time_start); $date_start->lte($until); $date_start->addDay()) { 
+
+                    if($request->has('id'))
+                    {
+                        $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                            ->where(function($query) use ($date_start, $date_end){
+                                // in between approved reservation
+                                $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
+                                // overlap on start of approved reservation
+                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // overlap on end of approved reservation
+                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                            })->first();
+                    }
+                    else{
+                        $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                            ->where(function($query) use ($date_start, $date_end){
+                                // in between approved reservation
+                                $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
+                                // overlap on start of approved reservation
+                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // overlap on end of approved reservation
+                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                            })->first();
+                    }
+
+                    $date_end->addDay();
+
+                    if($reservation)
+                    {
+                        return response()->json(true);
+                    }
+                }                
+            }
+
+            else if($request->repeat == 'Weekly')
+            {
+                $date_end = Carbon::parse($request->date_end .' '. $request->time_end);
+                
+                for ($date_start = Carbon::parse($request->date_start .' '. $request->time_start); $date_start->lte($until); $date_start->addWeek()) { 
+
+                    if($request->has('id'))
+                    {
+                        $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                            ->where(function($query) use ($date_start, $date_end){
+                                // in between approved reservation
+                                $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
+                                // overlap on start of approved reservation
+                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // overlap on end of approved reservation
+                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                            })->first();
+                    }
+                    else{
+                        $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                            ->where(function($query) use ($date_start, $date_end){
+                                // in between approved reservation
+                                $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
+                                // overlap on start of approved reservation
+                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // overlap on end of approved reservation
+                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                            })->first();
+                    }
+
+                    $date_end->addWeek();
+
+                    if($reservation)
+                    {
+                        return response()->json(true);
+                    }
+                }
+            }
+
+            else if($request->repeat == 'Monthly')
+            {
+                $date_end = Carbon::parse($request->date_end .' '. $request->time_end);
+                
+                for ($date_start = Carbon::parse($request->date_start .' '. $request->time_start); $date_start->lte($until); $date_start->addMonth()) { 
+
+                    if($request->has('id'))
+                    {
+                        $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                            ->where(function($query) use ($date_start, $date_end){
+                                // in between approved reservation
+                                $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
+                                // overlap on start of approved reservation
+                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // overlap on end of approved reservation
+                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                            })->first();
+                    }
+                    else{
+                        $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                            ->where(function($query) use ($date_start, $date_end){
+                                // in between approved reservation
+                                $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
+                                // overlap on start of approved reservation
+                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // overlap on end of approved reservation
+                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                            })->first();
+                    }
+
+                    $date_end->addMonth();
+
+                    if($reservation)
+                    {
+                        return response()->json(true);
+                    }
+                }
+            }
+        }
+
+        $duplicate = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
             ->where(function($query) use ($start, $end){
                 // in between approved reservation
                 $query->where('start', '<=', $start)->where('end', '>=', $end);
@@ -323,7 +575,7 @@ class ReservationController extends Controller
             return response()->json(true);
         }
 
-        DB::transaction(function() use($request, $start, $end){
+        DB::transaction(function() use($request, $start, $end, $until){
             $reservation = new Reservation;
 
             $reservation->title = $request->title;
@@ -350,6 +602,109 @@ class ReservationController extends Controller
                     if(isset($request->input('equipment_types')[$i]['id']))
                     {
                         $reservation->equipment_types()->save(EquipmentType::find($request->input('equipment_types')[$i]['id']), ['approved' => false]);
+                    }
+                }
+            }
+
+            if($request->has('repeat'))
+            {
+                if(Carbon::parse($request->date_end .' '. $request->time_end)->gt(Carbon::parse($request->until .' '. $request->time_end)))
+                {
+                    abort(422, 'Last date of repeat cannot be earlier than end date');
+                }
+
+                $reservation->repeat = $request->repeat;
+
+                if($request->repeat == 'Daily')
+                {
+                    $date_end = Carbon::parse($request->date_end .' '. $request->time_end)->addDay();
+
+                    for ($date_start = Carbon::parse($request->date_start .' '. $request->time_start)->addDay(); $date_start->lte($until); $date_start->addDay()) { 
+                        $repeat = new Reservation;
+
+                        $repeat->title = $request->title;
+                        $repeat->remarks = $request->remarks;
+                        $repeat->location_id = $request->location_id;
+                        $repeat->user_id = $request->user()->id;
+                        $repeat->start = $date_start->toDateTimeString();
+                        $repeat->end = $date_end->toDateTimeString();
+                        $repeat->allDay = $request->has('allDay') ? true : false;
+
+                        $repeat->save();
+
+                        if($request->has('equipment_types'))
+                        {
+                            for ($i=0; $i < count($request->equipment_types); $i++) { 
+                                if(isset($request->input('equipment_types')[$i]['id']))
+                                {
+                                    $repeat->equipment_types()->save(EquipmentType::find($request->input('equipment_types')[$i]['id']), ['approved' => false]);
+                                }
+                            }
+                        }
+
+                        $date_end->addDay();
+                    }
+                }
+
+                if($request->repeat == 'Weekly')
+                {
+                    $date_end = Carbon::parse($request->date_end .' '. $request->time_end)->addWeek();
+
+                    for ($date_start = Carbon::parse($request->date_start .' '. $request->time_start)->addWeek(); $date_start->lte($until); $date_start->addWeek()) { 
+                        $repeat = new Reservation;
+
+                        $repeat->title = $request->title;
+                        $repeat->remarks = $request->remarks;
+                        $repeat->location_id = $request->location_id;
+                        $repeat->user_id = $request->user()->id;
+                        $repeat->start = $date_start->toDateTimeString();
+                        $repeat->end = $date_end->toDateTimeString();
+                        $repeat->allDay = $request->has('allDay') ? true : false;
+
+                        $repeat->save();
+
+                        if($request->has('equipment_types'))
+                        {
+                            for ($i=0; $i < count($request->equipment_types); $i++) { 
+                                if(isset($request->input('equipment_types')[$i]['id']))
+                                {
+                                    $repeat->equipment_types()->save(EquipmentType::find($request->input('equipment_types')[$i]['id']), ['approved' => false]);
+                                }
+                            }
+                        }
+
+                        $date_end->addWeek();
+                    }
+                }
+
+                if($request->repeat == 'Monthly')
+                {
+                    $date_end = Carbon::parse($request->date_end .' '. $request->time_end)->addMonth();
+
+                    for ($date_start = Carbon::parse($request->date_start .' '. $request->time_start)->addMonth(); $date_start->lte($until); $date_start->addMonth()) { 
+                        $repeat = new Reservation;
+
+                        $repeat->title = $request->title;
+                        $repeat->remarks = $request->remarks;
+                        $repeat->location_id = $request->location_id;
+                        $repeat->user_id = $request->user()->id;
+                        $repeat->start = $date_start->toDateTimeString();
+                        $repeat->end = $date_end->toDateTimeString();
+                        $repeat->allDay = $request->has('allDay') ? true : false;
+
+                        $repeat->save();
+
+                        if($request->has('equipment_types'))
+                        {
+                            for ($i=0; $i < count($request->equipment_types); $i++) { 
+                                if(isset($request->input('equipment_types')[$i]['id']))
+                                {
+                                    $repeat->equipment_types()->save(EquipmentType::find($request->input('equipment_types')[$i]['id']), ['approved' => false]);
+                                }
+                            }
+                        }
+
+                        $date_end->addMonth();
                     }
                 }
             }
@@ -410,7 +765,7 @@ class ReservationController extends Controller
             abort(422, 'Reservation cannot be earlier than current time.');
         }
 
-        $duplicate = Reservation::whereNotIn('id', [$id])->whereNotNull('schedule_approver_id')->whereNotNull('equipment_approver_id')->where('location_id', $request->location_id)
+        $duplicate = Reservation::whereNotIn('id', [$id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
             ->where(function($query) use ($start, $end){
                 // in between approved reservation
                 $query->where('start', '<=', $start)->where('end', '>=', $end);
