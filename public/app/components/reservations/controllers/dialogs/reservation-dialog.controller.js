@@ -78,6 +78,11 @@ app
 					request.until = new Date($scope.reservation.until).toDateString();
 				}
 
+				if($scope.reservation.id)
+				{
+					request.id = $scope.reservation.id;
+				}
+
 				Helper.post('/reservation/check-duplicate', request)
 					.success(function(data){
 						$scope.duplicate = data;
@@ -97,6 +102,11 @@ app
 			$scope.reservation.time_start = new Date($scope.reservation.time_start);
 
 			$scope.min_end_time = new Date($scope.reservation.time_start);
+
+			if($scope.min_end_time >= $scope.reservation.time_end)
+			{
+				$scope.reservation.time_end = new Date($scope.min_end_time);
+			}
 
 			if($scope.reservation.time_start > $scope.reservation.time_end)
 			{
@@ -277,8 +287,8 @@ app
 					$scope.reservation.date_start = new Date(data.start);
 					$scope.reservation.date_end = new Date(data.end);
 
-					$scope.reservation.time_start = $scope.current;
-					$scope.reservation.time_end = $scope.current;
+					$scope.reservation.time_start = new Date(data.start);
+					$scope.reservation.time_end = new Date(data.end);
 
 					$scope.min_start_time = new Date();
 					$scope.min_start_date = new Date();

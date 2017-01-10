@@ -9,7 +9,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 
 use App\Reservation;
 
-class ReservationCreated extends Notification
+class ReservationCancelled extends Notification
 {
     use Queueable;
 
@@ -31,7 +31,7 @@ class ReservationCreated extends Notification
      */
     public function via($notifiable)
     {
-        return ['mail', 'database', 'broadcast'];
+        return ['database', 'broadcast'];
     }
 
     /**
@@ -43,9 +43,9 @@ class ReservationCreated extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('Request for Room Reservation.')
-                    ->action('Read More', 'http://172.17.0.210:914')
-                    ->line($this->reservation->user->name . ' requested a room reservation.');
+                    ->line('The introduction to the notification.')
+                    ->action('Notification Action', 'https://laravel.com')
+                    ->line('Thank you for using our application!');
     }
 
     /**
@@ -59,8 +59,8 @@ class ReservationCreated extends Notification
         return [
             'attachment' => $this->reservation,
             'sender' => $this->reservation->user,
-            'message' => 'created a new reservation.',
-            'url' => 'main.approvals',
+            'message' => 'cancelled reservation.',
+            'url' => 'main.reservations',
             'withParams' => false,
         ];
     }

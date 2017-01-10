@@ -14,6 +14,7 @@ use App\Post;
 use App\User;
 
 use App\Notifications\ReservationCreated;
+use App\Notifications\ReservationCancelled;
 use App\Notifications\PostCreated;
 
 use Auth;
@@ -56,7 +57,7 @@ class ReservationController extends Controller
         ]);
 
         DB::transaction(function() use($request){
-            $reservation = Reservation::with('location', 'user')->where('id', $request->id)->first();
+            $reservation = Reservation::with('location', 'user')->withCount()->where('id', $request->id)->first();
 
             $reservation->schedule_approver_id = $request->user()->id;
 
@@ -783,16 +784,18 @@ class ReservationController extends Controller
         DB::transaction(function() use($request, $start, $end, $id){
             $reservation = Reservation::where('id', $id)->first();
 
-            if($reservation->equipment_approver_id || $reservation->schedule_approver_id)
-            {
-                abort(422, 'Cannot edit partially approved reservation.');
-            }
+            // if($reservation->equipment_approver_id || $reservation->schedule_approver_id)
+            // {
+            //     abort(422, 'Cannot edit partially approved reservation.');
+            // }
 
             $reservation->title = $request->title;
             $reservation->remarks = $request->remarks;
             $reservation->location_id = $request->location_id;
             $reservation->user_id = $request->user()->id;
             $reservation->start = $start->toDateTimeString();
+            $reservation->schedule_approver_id = null;
+            $reservation->equipment_approver_id = null;
 
             if(Carbon::parse($request->date_start .' '. $request->time_start)->gt(Carbon::parse($request->date_end .' '. $request->time_end)))
             {
@@ -806,10 +809,10 @@ class ReservationController extends Controller
 
             $reservation->load('user');
 
+            ReservationEquipment::where('reservation_id', $id)->delete();
+            
             if($request->has('equipment_types'))
             {
-                ReservationEquipment::where('reservation_id', $id)->delete();
-
                 for ($i=0; $i < count($request->equipment_types); $i++) { 
                     if(isset($request->input('equipment_types')[$i]['id']))
                     {
@@ -831,6 +834,13 @@ class ReservationController extends Controller
         $reservation = Reservation::withCount('equipment_types')->where('id', $id)->first();
 
         $this->authorize('delete', $reservation);
+
+        if($reservation->schedule_approver_id || $reservation->equipment_approver_id)
+        {
+            $users = User::whereNotIn('id', [Auth::user()->id])->whereIn('group_id', [1,2])->get();
+
+            Notification::send($users, new ReservationCancelled($reservation));
+        }
 
         if($reservation->equipment_types_count)
         {
