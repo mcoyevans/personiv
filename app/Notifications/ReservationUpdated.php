@@ -9,7 +9,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 
 use App\Reservation;
 
-class ReservationCreated extends Notification
+class ReservationUpdated extends Notification
 {
     use Queueable;
 
@@ -43,9 +43,9 @@ class ReservationCreated extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->subject('New Room Reservation')
-                    ->greeting('Hey there!')
-                    ->line($this->reservation->user->name . ' requested for a room reservation that needs your approval.')
+                    ->subject('Updated Room Reservation')
+                    ->greeting('Heads up!')
+                    ->line($this->reservation->user->name . ' needs approval for his/her updated room reservation.')
                     ->action('View Reservation', 'http://172.17.0.210:914/home#/approvals/');
     }
 
@@ -60,7 +60,7 @@ class ReservationCreated extends Notification
         return [
             'attachment' => $this->reservation,
             'sender' => $this->reservation->user,
-            'message' => 'created a new reservation.',
+            'message' => 'updated a reservation.',
             'url' => 'main.approvals',
             'withParams' => false,
         ];

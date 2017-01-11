@@ -57,7 +57,7 @@ return [
 
     'from' => [
         'address' => 'reservations@personive.com',
-        'name' => 'Reservations',
+        'name' => 'Personiv Portal',
     ],
 
     /*

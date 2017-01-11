@@ -8,8 +8,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
 use App\Reservation;
+use App\User;
+use Carbon\Carbon;
 
-class ReservationCreated extends Notification
+class ReservationApproved extends Notification
 {
     use Queueable;
 
@@ -18,9 +20,10 @@ class ReservationCreated extends Notification
      *
      * @return void
      */
-    public function __construct(Reservation $reservation)
+    public function __construct(Reservation $reservation, User $user)
     {
         $this->reservation = $reservation;
+        $this->user = $user;
     }
 
     /**
@@ -43,10 +46,10 @@ class ReservationCreated extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->subject('New Room Reservation')
-                    ->greeting('Hey there!')
-                    ->line($this->reservation->user->name . ' requested for a room reservation that needs your approval.')
-                    ->action('View Reservation', 'http://172.17.0.210:914/home#/approvals/');
+                    ->subject('Approved Room Reservation')
+                    ->greeting('Hurray!')
+                    ->line('Your room reservation for ' . $this->reservation->location->name . ' has been approved.')
+                    ->action('View Reservation', 'http://172.17.0.210:914/home#/reservations/');
     }
 
     /**
@@ -59,9 +62,9 @@ class ReservationCreated extends Notification
     {
         return [
             'attachment' => $this->reservation,
-            'sender' => $this->reservation->user,
-            'message' => 'created a new reservation.',
-            'url' => 'main.approvals',
+            'sender' => $this->user,
+            'message' => 'approved your room reservation.',
+            'url' => 'main.reservations',
             'withParams' => false,
         ];
     }

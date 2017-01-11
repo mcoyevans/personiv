@@ -13,7 +13,9 @@ use App\Hashtag;
 use App\Post;
 use App\User;
 
+use App\Notifications\ReservationApproved;
 use App\Notifications\ReservationCreated;
+use App\Notifications\ReservationUpdated;
 use App\Notifications\ReservationCancelled;
 use App\Notifications\PostCreated;
 
@@ -57,19 +59,18 @@ class ReservationController extends Controller
         ]);
 
         DB::transaction(function() use($request){
-            $reservation = Reservation::with('location', 'user')->withCount()->where('id', $request->id)->first();
+            $reservation = Reservation::with('location', 'user')->withCount('equipment_types')->where('id', $request->id)->first();
 
             $reservation->schedule_approver_id = $request->user()->id;
 
             $reservation->save();
 
-            if($reservation->schedule_approver_id && $reservation->equipment_approver_id)
+            if(($reservation->schedule_approver_id && $reservation->equipment_approver_id && $reservation->equipment_types_count) || ($reservation->schedule_approver_id && !$reservation->equipment_types_count))
             {
                 $post = new Post;
 
                 $post->title = 'Room reservation for ' . $reservation->location->name;
                 $post->body = $reservation->user->name .' requested a room reservation for ' .$reservation->location->name. ' from ' .Carbon::parse($reservation->start)->toDayDateTimeString(). ' to '. Carbon::parse($reservation->end)->toDayDateTimeString().'.';
-                $post->pinned = false;
                 $post->allow_comments = true;
                 $post->user_id = $reservation->user_id;
 
@@ -92,6 +93,10 @@ class ReservationController extends Controller
                 $users = User::whereNotIn('id', [$request->user()->id])->get();
 
                 Notification::send($users, new PostCreated($post));
+
+                $recipient = User::find($reservation->user_id);
+
+                Notification::send($recipient, new ReservationApproved($reservation, $request->user()));
             }
         });
     }
@@ -107,6 +112,14 @@ class ReservationController extends Controller
         {
             abort(403, 'Unauthorized action');
         }
+
+        $this->validate($request, [
+            'id' => 'required',
+        ]);
+
+        DB::transaction(function() use($request){
+            $reservation = Reservation::with('location', 'user')->withCount('equipment_types')->where('id', $request->id)->first();
+        });
     }
 
     /**
@@ -136,9 +149,15 @@ class ReservationController extends Controller
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
                                 // overlap on start of approved reservation
-                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // $query->orWhereBetween('start', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('start', '>', $date_start)->where('end', '<', $date_end);
+                                });
                                 // overlap on end of approved reservation
-                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                                // $query->orWhereBetween('end', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('end', '>', $date_start)->where('end', '<', $date_end);
+                                });
                             })->first();
                     }
                     else{
@@ -147,9 +166,15 @@ class ReservationController extends Controller
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
                                 // overlap on start of approved reservation
-                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // $query->orWhereBetween('start', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('start', '>', $date_start)->where('end', '<', $date_end);
+                                });
                                 // overlap on end of approved reservation
-                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                                // $query->orWhereBetween('end', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('end', '>', $date_start)->where('end', '<', $date_end);
+                                });
                             })->first();
                     }
 
@@ -175,9 +200,15 @@ class ReservationController extends Controller
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
                                 // overlap on start of approved reservation
-                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // $query->orWhereBetween('start', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('start', '>', $date_start)->where('end', '<', $date_end);
+                                });
                                 // overlap on end of approved reservation
-                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                                // $query->orWhereBetween('end', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('end', '>', $date_start)->where('end', '<', $date_end);
+                                });
                             })->first();
                     }
                     else{
@@ -186,9 +217,15 @@ class ReservationController extends Controller
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
                                 // overlap on start of approved reservation
-                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // $query->orWhereBetween('start', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('start', '>', $date_start)->where('end', '<', $date_end);
+                                });
                                 // overlap on end of approved reservation
-                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                                // $query->orWhereBetween('end', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('end', '>', $date_start)->where('end', '<', $date_end);
+                                });
                             })->first();
                     }
 
@@ -214,9 +251,15 @@ class ReservationController extends Controller
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
                                 // overlap on start of approved reservation
-                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // $query->orWhereBetween('start', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('start', '>', $date_start)->where('end', '<', $date_end);
+                                });
                                 // overlap on end of approved reservation
-                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                                // $query->orWhereBetween('end', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('end', '>', $date_start)->where('end', '<', $date_end);
+                                });
                             })->first();
                     }
                     else{
@@ -225,9 +268,15 @@ class ReservationController extends Controller
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
                                 // overlap on start of approved reservation
-                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // $query->orWhereBetween('start', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('start', '>', $date_start)->where('end', '<', $date_end);
+                                });
                                 // overlap on end of approved reservation
-                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                                // $query->orWhereBetween('end', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('end', '>', $date_start)->where('end', '<', $date_end);
+                                });
                             })->first();
                     }
 
@@ -248,9 +297,15 @@ class ReservationController extends Controller
                 // in between approved reservation
                 $query->where('start', '<=', $start)->where('end', '>=', $end);
                 // overlap on start of approved reservation
-                $query->orWhereBetween('start', [$start, $end]);
+                // $query->orWhereBetween('start', [$start, $end]);
+                $query->orWhere(function($query) use($start, $end){
+                    $query->where('start', '>', $start)->where('end', '<', $end);
+                });
                 // overlap on end of approved reservation
-                $query->orWhereBetween('end', [$start, $end]);
+                // $query->orWhereBetween('end', [$start, $end]);
+                $query->orWhere(function($query) use($start, $end){
+                    $query->where('end', '>', $start)->where('end', '<', $end);
+                });
             })->first();
 
         $existing = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
@@ -258,9 +313,15 @@ class ReservationController extends Controller
                 // in between approved reservation
                 $query->where('start', '<=', $start)->where('end', '>=', $end);
                 // overlap on start of approved reservation
-                $query->orWhereBetween('start', [$start, $end]);
+                // $query->orWhereBetween('start', [$start, $end]);
+                $query->orWhere(function($query) use($start, $end){
+                    $query->where('start', '>', $start)->where('end', '<', $end);
+                });
                 // overlap on end of approved reservation
-                $query->orWhereBetween('end', [$start, $end]);
+                // $query->orWhereBetween('end', [$start, $end]);
+                $query->orWhere(function($query) use($start, $end){
+                    $query->where('end', '>', $start)->where('end', '<', $end);
+                });
             })->first();
 
         $reservation = $request->id ? $existing : $new;
@@ -301,9 +362,15 @@ class ReservationController extends Controller
                                     // in between approved reservation
                                     $query->where('start', '<=', $start)->where('end', '>=', $end);
                                     // overlap on start of approved reservation
-                                    $query->orWhereBetween('start', [$start, $end]);
+                                    // $query->orWhereBetween('start', [$start, $end]);
+                                    $query->orWhere(function($query) use($start, $end){
+                                        $query->where('start', '>', $start)->where('end', '<', $end);
+                                    });
                                     // overlap on end of approved reservation
-                                    $query->orWhereBetween('end', [$start, $end]);
+                                    // $query->orWhereBetween('end', [$start, $end]);
+                                    $query->orWhere(function($query) use($start, $end){
+                                        $query->where('end', '>', $start)->where('end', '<', $end);
+                                    });
                                 });
                             });
                         }]);
@@ -456,9 +523,15 @@ class ReservationController extends Controller
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
                                 // overlap on start of approved reservation
-                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // $query->orWhereBetween('start', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('start', '>', $date_start)->where('end', '<', $date_end);
+                                });
                                 // overlap on end of approved reservation
-                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                                // $query->orWhereBetween('end', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('end', '>', $date_start)->where('end', '<', $date_end);
+                                });
                             })->first();
                     }
                     else{
@@ -467,9 +540,15 @@ class ReservationController extends Controller
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
                                 // overlap on start of approved reservation
-                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // $query->orWhereBetween('start', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('start', '>', $date_start)->where('end', '<', $date_end);
+                                });
                                 // overlap on end of approved reservation
-                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                                // $query->orWhereBetween('end', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('end', '>', $date_start)->where('end', '<', $date_end);
+                                });
                             })->first();
                     }
 
@@ -495,9 +574,15 @@ class ReservationController extends Controller
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
                                 // overlap on start of approved reservation
-                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // $query->orWhereBetween('start', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('start', '>', $date_start)->where('end', '<', $date_end);
+                                });
                                 // overlap on end of approved reservation
-                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                                // $query->orWhereBetween('end', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('end', '>', $date_start)->where('end', '<', $date_end);
+                                });
                             })->first();
                     }
                     else{
@@ -506,9 +591,15 @@ class ReservationController extends Controller
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
                                 // overlap on start of approved reservation
-                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // $query->orWhereBetween('start', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('start', '>', $date_start)->where('end', '<', $date_end);
+                                });
                                 // overlap on end of approved reservation
-                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                                // $query->orWhereBetween('end', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('end', '>', $date_start)->where('end', '<', $date_end);
+                                });
                             })->first();
                     }
 
@@ -534,9 +625,15 @@ class ReservationController extends Controller
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
                                 // overlap on start of approved reservation
-                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // $query->orWhereBetween('start', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('start', '>', $date_start)->where('end', '<', $date_end);
+                                });
                                 // overlap on end of approved reservation
-                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                                // $query->orWhereBetween('end', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('end', '>', $date_start)->where('end', '<', $date_end);
+                                });
                             })->first();
                     }
                     else{
@@ -545,9 +642,15 @@ class ReservationController extends Controller
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
                                 // overlap on start of approved reservation
-                                $query->orWhereBetween('start', [$date_start, $date_end]);
+                                // $query->orWhereBetween('start', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('start', '>', $date_start)->where('end', '<', $date_end);
+                                });
                                 // overlap on end of approved reservation
-                                $query->orWhereBetween('end', [$date_start, $date_end]);
+                                // $query->orWhereBetween('end', [$date_start, $date_end]);
+                                $query->orWhere(function($query) use($date_start, $date_end){
+                                    $query->where('end', '>', $date_start)->where('end', '<', $date_end);
+                                });
                             })->first();
                     }
 
@@ -566,9 +669,15 @@ class ReservationController extends Controller
                 // in between approved reservation
                 $query->where('start', '<=', $start)->where('end', '>=', $end);
                 // overlap on start of approved reservation
-                $query->orWhereBetween('start', [$start, $end]);
+                // $query->orWhereBetween('start', [$start, $end]);
+                $query->orWhere(function($query) use($start, $end){
+                    $query->where('start', '>', $start)->where('end', '<', $end);
+                });
                 // overlap on end of approved reservation
-                $query->orWhereBetween('end', [$start, $end]);
+                // $query->orWhereBetween('end', [$start, $end]);
+                $query->orWhere(function($query) use($start, $end){
+                    $query->where('end', '>', $start)->where('end', '<', $end);
+                });
             })->first();
 
         if($duplicate)
@@ -710,7 +819,9 @@ class ReservationController extends Controller
                 }
             }
 
-            $users = User::whereNotIn('id', [$request->user()->id])->whereIn('group_id', [1,2])->get();
+            $user_groups = count($request->equipment_types) ? array(1,2) : array(2);
+
+            $users = User::whereNotIn('id', [$request->user()->id])->whereIn('group_id', $user_groups)->get();
 
             Notification::send($users, new ReservationCreated($reservation));
         });
@@ -771,9 +882,15 @@ class ReservationController extends Controller
                 // in between approved reservation
                 $query->where('start', '<=', $start)->where('end', '>=', $end);
                 // overlap on start of approved reservation
-                $query->orWhereBetween('start', [$start, $end]);
+                // $query->orWhereBetween('start', [$start, $end]);
+                $query->orWhere(function($query) use($start, $end){
+                    $query->where('start', '>', $start)->where('end', '<', $end);
+                });
                 // overlap on end of approved reservation
-                $query->orWhereBetween('end', [$start, $end]);
+                // $query->orWhereBetween('end', [$start, $end]);
+                $query->orWhere(function($query) use($start, $end){
+                    $query->where('end', '>', $start)->where('end', '<', $end);
+                });
             })->first();
 
         if($duplicate)
@@ -784,10 +901,10 @@ class ReservationController extends Controller
         DB::transaction(function() use($request, $start, $end, $id){
             $reservation = Reservation::where('id', $id)->first();
 
-            // if($reservation->equipment_approver_id || $reservation->schedule_approver_id)
-            // {
-            //     abort(422, 'Cannot edit partially approved reservation.');
-            // }
+            if($reservation->equipment_approver_id || $reservation->schedule_approver_id)
+            {
+                $notify = true;
+            }
 
             $reservation->title = $request->title;
             $reservation->remarks = $request->remarks;
@@ -805,10 +922,6 @@ class ReservationController extends Controller
             $reservation->end = $end->toDateTimeString();
             $reservation->allDay = $request->allDay ? true : false;
 
-            $reservation->save();
-
-            $reservation->load('user');
-
             ReservationEquipment::where('reservation_id', $id)->delete();
             
             if($request->has('equipment_types'))
@@ -820,6 +933,20 @@ class ReservationController extends Controller
                     }
                 }
             }
+
+            $reservation->save();
+
+            $reservation->load('user');
+
+            if($notify)
+            {
+                $user_groups = count($request->equipment_types) ? array(1,2) : array(2);
+
+                $users = User::whereNotIn('id', [$request->user()->id])->whereIn('group_id', $user_groups)->get();
+
+                Notification::send($users, new ReservationUpdated($reservation));
+            }
+
         });
     }
 
