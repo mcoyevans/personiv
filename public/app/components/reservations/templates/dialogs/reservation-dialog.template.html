@@ -69,8 +69,8 @@
                     </div>
                 </div>
             </div>
-            <md-switch class="md-primary" ng-model="reservation.allDay" ng-change="allDay()">All Day</md-switch>
-            <md-switch class="md-primary" ng-model="repeat" ng-change="setRepeat()">Repeat</md-switch>
+            <md-switch class="md-primary" ng-model="reservation.allDay" ng-change="allDay()" ng-disabled="busy">All Day</md-switch>
+            <md-switch class="md-primary" ng-model="repeat" ng-change="setRepeat()" ng-disabled="busy">Repeat</md-switch>
             <div layout="row" layout-wrap layout-align="space-between center" flex ng-if="repeat">
                 <!-- Repeat -->
                 <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>

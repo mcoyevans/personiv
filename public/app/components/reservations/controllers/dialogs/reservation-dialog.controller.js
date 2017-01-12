@@ -133,6 +133,7 @@ app
 			$scope.reservation.time_end.setFullYear($scope.reservation.date_end.getFullYear());
 
 			$scope.reservation.time_end = new Date($scope.reservation.time_end);
+			$scope.reservation.until = new Date($scope.reservation.time_end);
 
 			if($scope.reservation.time_start > $scope.reservation.time_end)
 			{

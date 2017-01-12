@@ -81,10 +81,36 @@ app
 
 			Helper.confirm(dialog)
 				.then(function(){
+					Helper.preload();
 					Helper.delete('/reservation/' + data.id)
 						.success(function(){
 							$scope.refresh();
+							Helper.stop();
 							Helper.notify('Reservation deleted.');
+						})
+						.error(function(){
+							Helper.error();
+						});
+				}, function(){
+					return;
+				})
+	    }
+
+	    $scope.disapproveReservation = function(data){
+	    	var dialog = {};
+			dialog.title = 'Disapprove';
+			dialog.message = 'Disapprove this reservation?'
+			dialog.ok = 'Disapprove';
+			dialog.cancel = 'Cancel';
+
+			Helper.confirm(dialog)
+				.then(function(){
+					Helper.preload();
+					Helper.post('/reservation/disapprove', data)
+						.success(function(){
+							$scope.refresh();
+							Helper.stop();
+							Helper.notify('Reservation disapproved.');
 						})
 						.error(function(){
 							Helper.error();
@@ -182,6 +208,10 @@ app
 						if(role.name == 'reservations')
 						{
 							data.can_reserve = true;
+						}
+						if(role.name == 'approvals')
+						{
+							data.can_approve = true;
 						}
 					});
 

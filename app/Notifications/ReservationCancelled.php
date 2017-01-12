@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
 use App\Reservation;
+use Carbon\Carbon;
 
 class ReservationCancelled extends Notification
 {
@@ -31,7 +32,7 @@ class ReservationCancelled extends Notification
      */
     public function via($notifiable)
     {
-        return ['database', 'broadcast'];
+        return ['mail', 'database', 'broadcast'];
     }
 
     /**
@@ -43,9 +44,10 @@ class ReservationCancelled extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', 'https://laravel.com')
-                    ->line('Thank you for using our application!');
+                    ->subject('Cancelled Room Reservation')
+                    ->greeting('Heads up!')
+                    ->line($this->reservation->user->name . ' cancelled a room reservation at ' . $this->reservation->location->name . ' around ' . Carbon::parse($this->reservation->start)->toDayDateTimeString() . ' to ' . Carbon::parse($this->reservation->end)->toDayDateTimeString())
+                    ->action('View Reservation', 'http://172.17.0.210:914/home#/reservations/');
     }
 
     /**

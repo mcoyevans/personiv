@@ -44,7 +44,7 @@ class ReservationUpdated extends Notification
     {
         return (new MailMessage)
                     ->subject('Updated Room Reservation')
-                    ->greeting('Heads up!')
+                    ->greeting('Hello!')
                     ->line($this->reservation->user->name . ' needs approval for his/her updated room reservation.')
                     ->action('View Reservation', 'http://172.17.0.210:914/home#/approvals/');
     }

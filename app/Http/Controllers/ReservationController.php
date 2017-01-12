@@ -17,6 +17,7 @@ use App\Notifications\ReservationApproved;
 use App\Notifications\ReservationCreated;
 use App\Notifications\ReservationUpdated;
 use App\Notifications\ReservationCancelled;
+use App\Notifications\ReservationDisapproved;
 use App\Notifications\PostCreated;
 
 use Auth;
@@ -67,32 +68,32 @@ class ReservationController extends Controller
 
             if(($reservation->schedule_approver_id && $reservation->equipment_approver_id && $reservation->equipment_types_count) || ($reservation->schedule_approver_id && !$reservation->equipment_types_count))
             {
-                $post = new Post;
+                // $post = new Post;
 
-                $post->title = 'Room reservation for ' . $reservation->location->name;
-                $post->body = $reservation->user->name .' requested a room reservation for ' .$reservation->location->name. ' from ' .Carbon::parse($reservation->start)->toDayDateTimeString(). ' to '. Carbon::parse($reservation->end)->toDayDateTimeString().'.';
-                $post->allow_comments = true;
-                $post->user_id = $reservation->user_id;
+                // $post->title = 'Room reservation for ' . $reservation->location->name;
+                // $post->body = $reservation->user->name .' requested a room reservation for ' .$reservation->location->name. ' from ' .Carbon::parse($reservation->start)->toDayDateTimeString(). ' to '. Carbon::parse($reservation->end)->toDayDateTimeString().'.';
+                // $post->allow_comments = true;
+                // $post->user_id = $reservation->user_id;
 
-                $post->save();
+                // $post->save();
 
-                $post->load('user');
+                // $post->load('user');
 
-                $tags = ['#Room Reservation', '#'.$reservation->location->name];
+                // $tags = ['#Room Reservation', '#'.$reservation->location->name];
 
-                $hashtags = array();
+                // $hashtags = array();
 
-                foreach ($tags as $item) {
-                    $hashtag = new Hashtag(['tag' => $item]);
+                // foreach ($tags as $item) {
+                //     $hashtag = new Hashtag(['tag' => $item]);
 
-                    array_push($hashtags, $hashtag);
-                }
+                //     array_push($hashtags, $hashtag);
+                // }
 
-                $post->hashtags()->saveMany($hashtags);
+                // $post->hashtags()->saveMany($hashtags);
 
-                $users = User::whereNotIn('id', [$request->user()->id])->get();
+                // $users = User::whereNotIn('id', [$request->user()->id])->get();
 
-                Notification::send($users, new PostCreated($post));
+                // Notification::send($users, new PostCreated($post));
 
                 $recipient = User::find($reservation->user_id);
 
@@ -102,11 +103,11 @@ class ReservationController extends Controller
     }
 
     /**
-     * Decline reservation according to users authorization.
+     * Disapprove reservation according to users authorization.
      *
      * @return \Illuminate\Http\Response
      */
-    public function decline(Request $request)
+    public function disapprove(Request $request)
     {
         if(!Gate::forUser($request->user())->allows('approvals'))
         {
@@ -118,7 +119,27 @@ class ReservationController extends Controller
         ]);
 
         DB::transaction(function() use($request){
-            $reservation = Reservation::with('location', 'user')->withCount('equipment_types')->where('id', $request->id)->first();
+            $reservation = Reservation::with('location', 'user')->with('equipment_types')->where('id', $request->id)->first();
+
+            if($request->user()->group_id == 1)
+            {
+                $reservation->equipment_approver_id = null;
+                
+                foreach ($reservation->equipment_types as $key => $equipment) {
+                    $equipment->approved = false;
+
+                    $equipment->save();
+                }
+            }
+
+            else if($request->user()->group_id == 2)
+            {
+                $reservation->schedule_approver_id = null;
+            }
+
+            $reservation->save();
+
+            Notification::send($reservation->user, new ReservationDisapproved($reservation, $request->user()));
         });
     }
 
@@ -958,22 +979,29 @@ class ReservationController extends Controller
      */
     public function destroy($id)
     {
-        $reservation = Reservation::withCount('equipment_types')->where('id', $id)->first();
+        $reservation = Reservation::with('user')->withCount('equipment_types')->where('id', $id)->first();
 
         $this->authorize('delete', $reservation);
 
-        if($reservation->schedule_approver_id || $reservation->equipment_approver_id)
-        {
-            $users = User::whereNotIn('id', [Auth::user()->id])->whereIn('group_id', [1,2])->get();
+        DB::transaction(function() use($reservation){        
+            if($reservation->equipment_types_count)
+            {
+                ReservationEquipment::where('reservation_id', $id)->delete();
+            }
 
-            Notification::send($users, new ReservationCancelled($reservation));
-        }
+            if(Auth::user()->id == $reservation->user_id)
+            {
+                $group = $reservation->equipment_types_count ? array(1,2) : array(2);
 
-        if($reservation->equipment_types_count)
-        {
-            ReservationEquipment::where('reservation_id', $id)->delete();
-        }
+                $users = User::whereNotIn('id', [Auth::user()->id])->whereIn('group_id', $group)->get();
 
-        $reservation->delete();
+                Notification::send($users, new ReservationCancelled($reservation));
+            }
+            else{
+                Notification::send($reservation->user, new ReservationDisapproved($reservation, Auth::user()));
+            }
+
+            $reservation->delete();
+        });
     }
 }
