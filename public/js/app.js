@@ -435,6 +435,11 @@ app
 				'icon': 'mdi-format-list-numbers',
 				'label': 'Training Room Reservations',
 			},
+			{
+				'state': 'main.notifications',
+				'icon': 'mdi-bell',
+				'label': 'Notifications',
+			},
 		];
 
 		$scope.menu.section = [
@@ -813,558 +818,6 @@ app
 		});
 	}]);
 app
-	.controller('postsContentContainerController', ['$scope', '$stateParams', '$state', 'Helper', function($scope, $stateParams, $state, Helper){
-		$scope.$emit('closeSidenav');
-
-		$scope.today = new Date();
-
-		$scope.viewReposts = function(post){
-			var dialog = {
-				'template':'/app/components/posts/templates/dialogs/reposts-dialog.template.html',
-				'controller': 'repostsDialogController',
-			}
-
-			Helper.set(post);
-
-			Helper.customDialog(dialog);
-		}
-
-		$scope.fetchComments = function(post){
-			if(!post.comments)
-			{
-				var query= {};
-
-				query.where = [
-					{
-						'label':'post_id',
-						'condition': '=',
-						'value': post.id
-					}
-				];
-
-				query.with = [
-					{
-						'relation':'user',
-						'withTrashed':true,
-					}
-				]
-				query.paginate = 10;
-
-				Helper.post('/comment/enlist', query)
-					.success(function(data){
-						post.comment_details = data;
-
-						post.comments = [];
-
-						angular.forEach(data.data, function(item){
-							item.created_at = new Date(item.created_at);
-							item.updated_at = new Date(item.updated_at);
-							post.comments.unshift(item);
-						});
-					})
-			}
-		}
-
-		$scope.previousComments = function(post)
-		{
-			var next_page = post.comment_details.current_page + 1;
-			
-			if(next_page <= post.comment_details.last_page)
-			{
-				var query= {};
-
-				query.where = [
-					{
-						'label':'post_id',
-						'condition': '=',
-						'value': post.id
-					}
-				];
-
-				query.with = [
-					{
-						'relation':'user',
-						'withTrashed':true,
-					}
-				]
-				query.paginate = 10;
-
-				Helper.post('/comment/enlist?page=' + next_page, query)
-					.success(function(data){
-						post.comment_details = data;
-
-						angular.forEach(data.data, function(item){
-							item.created_at = new Date(item.created_at);
-							item.updated_at = new Date(item.updated_at);
-							post.comments.unshift(item);
-						});
-					})
-			}
-
-		}
-
-		$scope.repost = function(post){
-			if(!post.repost_id)
-			{			
-				var dialog = {
-					'template':'/app/components/posts/templates/dialogs/repost-dialog.template.html',
-					'controller': 'repostDialogController',
-				}
-
-				post.action = 'create';
-
-				Helper.set(post);
-
-				Helper.customDialog(dialog)
-					.then(function(){
-						Helper.notify('Repost successful.');
-						$scope.refresh();
-					}, function(){
-						return;
-					});
-			}
-			else{
-				var dialog = {
-					'template':'/app/components/posts/templates/dialogs/repost-dialog.template.html',
-					'controller': 'repostDialogController',
-				}
-
-				post.repost.post.action = 'create';
-
-				Helper.set(post.repost.post);
-
-				Helper.customDialog(dialog)
-					.then(function(){
-						Helper.notify('Repost successful.');
-						$scope.refresh();
-					}, function(){
-						return;
-					});
-			}
-		}
-
-		$scope.commentSection = function(post){
-		    angular.element('#comment-' + post.id).trigger('focus');
-		    $scope.fetchComments(post);
-		};
-
-		$scope.submit = function(post)
-		{
-			$scope.busy = true;
-			if(post.new_comment)
-			{
-				$scope.fetchComments(post);
-
-				Helper.post('/comment', post)
-					.success(function(data){
-						post.error = false;
-						data.created_at = new Date(data.created_at);
-						post.comments_count += 1;
-						post.comments.push(data);
-						post.new_comment = null;
-
-						$scope.busy = false;
-					})
-					.error(function(){
-						$scope.busy = false;
-						post.error = true;
-					})
-			}
-		}
-		/*
-		 * Object for toolbar
-		 *
-		*/
-		$scope.toolbar = {};
-
-		/*
-		 * Object for fab
-		 *
-		*/
-		$scope.fab = {};
-		$scope.fab.icon = 'mdi-message-text';
-
-		$scope.fab.label = 'Post';
-
-		$scope.fab.action = function(){
-			var dialog = {
-				'template':'/app/components/posts/templates/dialogs/post-dialog.template.html',
-				'controller': 'postDialogController',
-			}
-
-			dialog.action = 'create';
-
-			Helper.set(dialog);
-
-			Helper.customDialog(dialog)
-				.then(function(){
-					Helper.notify('Post created.');
-					$scope.refresh();
-				}, function(){
-					return;
-				});
-		}
-
-		/* Action originates from toolbar */
-		$scope.$on('search', function(){
-			$scope.request.search = $scope.toolbar.searchText;
-			$scope.refresh();
-		});
-
-		/* Listens for any request for refresh */
-		$scope.$on('refresh', function(){
-			$scope.request.search = null;
-			$scope.$broadcast('close');
-			$scope.refresh();
-		});
-
-		$scope.$on('read-post', function(){
-			$scope.request.where = [
-				{
-					'label':'id',
-					'condition':'=',
-					'value': Helper.fetch()
-				}
-			];
-
-			$scope.isLoading = true;
-  			$scope.post.show = false;
-  			$scope.currentTime = Date.now();
-
-			$scope.init($scope.request);
-		});
-
-		$scope.$on('read-post-and-comments', function(){
-			$scope.request.where = [
-				{
-					'label':'id',
-					'condition':'=',
-					'value': Helper.fetch()
-				}
-			];
-
-			$scope.isLoading = true;
-  			$scope.post.show = false;
-  			$scope.currentTime = Date.now();
-
-			$scope.init($scope.request, true);
-		});
-
-		$scope.updatePost = function(data){
-			if(!data.repost_id)
-			{			
-				var dialog = {
-					'template':'/app/components/posts/templates/dialogs/post-dialog.template.html',
-					'controller': 'postDialogController',
-				}
-
-				data.action = 'edit';
-
-				Helper.set(data);
-
-				Helper.customDialog(dialog)
-					.then(function(){
-						$scope.refresh();
-						Helper.notify('Post updated.');
-					}, function(){
-						return;
-					});
-			}
-			else{
-				var dialog = {
-					'template':'/app/components/posts/templates/dialogs/repost-dialog.template.html',
-					'controller': 'repostDialogController',
-				}
-
-				data.action = 'edit';
-
-				Helper.set(data);
-
-				Helper.customDialog(dialog)
-					.then(function(){
-						Helper.notify('Repost updated.');
-						$scope.refresh();
-					}, function(){
-						return;
-					});
-			}
-		}
-
-		$scope.deletePost = function(data){
-			var dialog = {};
-			dialog.title = 'Delete';
-			dialog.message = 'Delete this post?'
-			dialog.ok = 'Delete';
-			dialog.cancel = 'Cancel';
-
-			Helper.confirm(dialog)
-				.then(function(){
-					Helper.delete('/post/' + data.id)
-						.success(function(){
-							$scope.refresh();
-							Helper.notify('Post deleted.');
-						})
-						.error(function(){
-							Helper.error();
-						});
-				}, function(){
-					return;
-				})
-		}
-
-		$scope.editComment = function(comment, post){
-			angular.forEach(post.comments, function(item){
-				item.edit = false;
-			});
-
-			comment.edit = true;
-
-			comment.new_message = comment.message;
-		}
-
-		$scope.updateComment = function(comment){
-			$scope.busy = true;
-
-			Helper.put('/comment/' + comment.id, comment)
-				.success(function(data){
-					data.updated_at = new Date(data.updated_at);
-					comment.message = data.message;
-					comment.error = false;
-					comment.edit = false;
-					
-					$scope.busy = false;
-
-					Helper.notify('Comment updated.');
-				})
-				.error(function(){
-					$scope.busy = false;
-					comment.error = true;
-				});			
-		}
-
-		$scope.deleteComment = function(comment, post){
-			var dialog = {};
-			dialog.title = 'Delete';
-			dialog.message = 'Delete this comment?'
-			dialog.ok = 'Delete';
-			dialog.cancel = 'Cancel';
-
-			Helper.confirm(dialog)
-				.then(function(){
-					Helper.delete('/comment/' + comment.id)
-						.success(function(){
-							var index = post.comments.indexOf(comment);
-
-							post.comments.splice(index, 1);
-							post.comments_count--;
-
-							Helper.notify('Comment deleted.');
-						})
-						.error(function(){
-							Helper.error();
-						});
-				}, function(){
-					return;
-				})
-		}
-
-		/* Formats every data in the paginated call */
-		var pushItem = function(data){
-			data.created_at = new Date(data.created_at);
-
-			if(data.repost_id)
-			{
-				data.repost.post.created_at = new Date(data.repost.post.created_at);
-
-				data.repost.post.chips = [];
-
-				angular.forEach(data.repost.post.hashtags, function(hashtag){
-					data.repost.post.chips.push(hashtag.tag);
-				});
-			}
-			
-			data.chips = [];
-
-			angular.forEach(data.hashtags, function(hashtag){
-				data.chips.push(hashtag.tag);
-			});
-			
-			var item = {};
-
-			item.display = data.title;
-
-			$scope.toolbar.items.push(item);
-		}
-
-		$scope.searchHashTag = function(chip){
-			$scope.toolbar.searchText = chip;
-			$scope.$broadcast('open');
-		}
-
-		var birthday_query = {
-			'whereMonth': 
-			{
-				'label': 'birthdate',
-				'value' : new Date().getMonth() + 1,
-			},
-			'whereDay': 
-			{
-				'label': 'birthdate',
-				'value' : new Date().getDate(),
-			},
-		}
-
-		Helper.post('/birthday/enlist', birthday_query)
-			.success(function(data){
-				$scope.birthdays = data;
-			})
-
-		$scope.init = function(query, withComments){
-			$scope.post = {};
-			$scope.post.items = [];
-			$scope.toolbar.items = [];
-
-			// 2 is default so the next page to be loaded will be page 2 
-			$scope.post.page = 2;
-
-			Helper.post('/user/check')
-				.success(function(data){
-					angular.forEach(data.roles, function(role){
-						if(role.name == 'posts')
-						{
-							data.can_post = true;
-						}
-					});
-
-					$scope.current_user = data;
-
-					Helper.post('/post/enlist', query)
-						.success(function(data){
-							$scope.post.details = data;
-							$scope.post.items = data.data;
-							$scope.post.show = true;
-
-							$scope.fab.show = $scope.current_user.can_post ? true : false;
-
-							if(data.data.length){
-								// iterate over each record and set the format
-								angular.forEach(data.data, function(item){
-									pushItem(item);
-
-									if(withComments){
-										$scope.fetchComments(item);
-									}
-								});
-							}
-
-							$scope.post.paginateLoad = function(){
-								// kills the function if ajax is busy or pagination reaches last page
-								if($scope.post.busy || ($scope.post.page > $scope.post.details.last_page)){
-									$scope.isLoading = false;
-									return;
-								}
-								/**
-								 * Executes pagination call
-								 *
-								*/
-								// sets to true to disable pagination call if still busy.
-								$scope.post.busy = true;
-								$scope.isLoading = true;
-								// Calls the next page of pagination.
-								Helper.post('/post/enlist' + '?page=' + $scope.post.page, query)
-									.success(function(data){
-										// increment the page to set up next page for next AJAX Call
-										$scope.post.page++;
-
-										// iterate over each data then splice it to the data array
-										angular.forEach(data.data, function(item, key){
-											pushItem(item);
-											$scope.post.items.push(item);
-										});
-
-										// Enables again the pagination call for next call.
-										$scope.post.busy = false;
-										$scope.isLoading = false;
-									});
-							}
-						});
-				});
-		}
-
-		$scope.refresh = function(){
-			if(!$stateParams.postID)
-			{
-				$scope.isLoading = true;
-	  			$scope.post.show = false;
-	  			$scope.currentTime = Date.now();
-				$scope.request.where = null;
-
-	  			$scope.init($scope.request);
-			}
-			else{
-	  			$state.go('main.posts', {'postID':null});
-			}
-		};
-
-		$scope.request = {};
-
-		$scope.request.withTrashed = false;
-		$scope.request.paginate = 10;
-
-		$scope.request.with = [
-			{
-				'relation':'user',
-				'withTrashed': true,
-			},
-			{
-				'relation':'hashtags',
-				'withTrashed': false,	
-			},
-			{
-				'relation':'group',
-				'withTrashed': true,	
-			},
-			{
-				'relation':'repost.post',
-				'withTrashed': false,	
-			},
-		];
-
-		$scope.request.withCount = [
-			{
-				'relation':'comments',
-				'withTrashed': false,
-			},
-			{
-				'relation':'reposts',
-				'withTrashed': false,
-			}			
-		]	
-
-		$scope.request.orderBy = [
-			{
-				'column':'updated_at',
-				'order':'desc',
-			},
-		]
-
-		if($stateParams.postID)
-		{		
-			$scope.request.where = [
-				{
-					'label': 'id',
-					'condition': '=',
-					'value': $stateParams.postID,
-				}
-			];
-		}
-
-		$scope.isLoading = true;
-		$scope.$broadcast('close');
-
-		$scope.init($scope.request);
-	}]);
-app
 	.controller('reservationsContentContainerController', ['$scope', '$compile', 'Helper', 'uiCalendarConfig', function($scope, $compile, Helper, uiCalendarConfig){
 		$scope.$emit('closeSidenav');
 
@@ -1447,10 +900,36 @@ app
 
 			Helper.confirm(dialog)
 				.then(function(){
+					Helper.preload();
 					Helper.delete('/reservation/' + data.id)
 						.success(function(){
 							$scope.refresh();
+							Helper.stop();
 							Helper.notify('Reservation deleted.');
+						})
+						.error(function(){
+							Helper.error();
+						});
+				}, function(){
+					return;
+				})
+	    }
+
+	    $scope.disapproveReservation = function(data){
+	    	var dialog = {};
+			dialog.title = 'Disapprove';
+			dialog.message = 'Disapprove this reservation?'
+			dialog.ok = 'Disapprove';
+			dialog.cancel = 'Cancel';
+
+			Helper.confirm(dialog)
+				.then(function(){
+					Helper.preload();
+					Helper.post('/reservation/disapprove', data)
+						.success(function(){
+							$scope.refresh();
+							Helper.stop();
+							Helper.notify('Reservation disapproved.');
 						})
 						.error(function(){
 							Helper.error();
@@ -1548,6 +1027,10 @@ app
 						if(role.name == 'reservations')
 						{
 							data.can_reserve = true;
+						}
+						if(role.name == 'approvals')
+						{
+							data.can_approve = true;
 						}
 					});
 
@@ -3196,24 +2679,556 @@ app
 		$scope.init($scope.request);
 	}]);
 app
-	.controller('homeToolbarController', ['$scope', 'Helper', function($scope, Helper){
-		$scope.toolbar.childState = 'Home';
+	.controller('postsContentContainerController', ['$scope', '$stateParams', '$state', 'Helper', function($scope, $stateParams, $state, Helper){
+		$scope.$emit('closeSidenav');
 
-		$scope.toolbar.hideSearchIcon = true;
-	}]);
-app
-	.controller('slideshowToolbarController', ['$scope', '$stateParams', 'Helper', function($scope, $stateParams, Helper){
-		$scope.toolbar.parentState = 'Slideshow';
+		$scope.today = new Date();
 
-		if(!$stateParams.slideshowID)
+		$scope.viewReposts = function(post){
+			var dialog = {
+				'template':'/app/components/posts/templates/dialogs/reposts-dialog.template.html',
+				'controller': 'repostsDialogController',
+			}
+
+			Helper.set(post);
+
+			Helper.customDialog(dialog);
+		}
+
+		$scope.fetchComments = function(post){
+			if(!post.comments)
+			{
+				var query= {};
+
+				query.where = [
+					{
+						'label':'post_id',
+						'condition': '=',
+						'value': post.id
+					}
+				];
+
+				query.with = [
+					{
+						'relation':'user',
+						'withTrashed':true,
+					}
+				]
+				query.paginate = 10;
+
+				Helper.post('/comment/enlist', query)
+					.success(function(data){
+						post.comment_details = data;
+
+						post.comments = [];
+
+						angular.forEach(data.data, function(item){
+							item.created_at = new Date(item.created_at);
+							item.updated_at = new Date(item.updated_at);
+							post.comments.unshift(item);
+						});
+					})
+			}
+		}
+
+		$scope.previousComments = function(post)
 		{
-			$scope.toolbar.childState = 'New';
-		}
-		else{
-			$scope.toolbar.childState = 'Edit';
+			var next_page = post.comment_details.current_page + 1;
+			
+			if(next_page <= post.comment_details.last_page)
+			{
+				var query= {};
+
+				query.where = [
+					{
+						'label':'post_id',
+						'condition': '=',
+						'value': post.id
+					}
+				];
+
+				query.with = [
+					{
+						'relation':'user',
+						'withTrashed':true,
+					}
+				]
+				query.paginate = 10;
+
+				Helper.post('/comment/enlist?page=' + next_page, query)
+					.success(function(data){
+						post.comment_details = data;
+
+						angular.forEach(data.data, function(item){
+							item.created_at = new Date(item.created_at);
+							item.updated_at = new Date(item.updated_at);
+							post.comments.unshift(item);
+						});
+					})
+			}
+
 		}
 
-		$scope.toolbar.hideSearchIcon = true;
+		$scope.repost = function(post){
+			if(!post.repost_id)
+			{			
+				var dialog = {
+					'template':'/app/components/posts/templates/dialogs/repost-dialog.template.html',
+					'controller': 'repostDialogController',
+				}
+
+				post.action = 'create';
+
+				Helper.set(post);
+
+				Helper.customDialog(dialog)
+					.then(function(){
+						Helper.notify('Repost successful.');
+						$scope.refresh();
+					}, function(){
+						return;
+					});
+			}
+			else{
+				var dialog = {
+					'template':'/app/components/posts/templates/dialogs/repost-dialog.template.html',
+					'controller': 'repostDialogController',
+				}
+
+				post.repost.post.action = 'create';
+
+				Helper.set(post.repost.post);
+
+				Helper.customDialog(dialog)
+					.then(function(){
+						Helper.notify('Repost successful.');
+						$scope.refresh();
+					}, function(){
+						return;
+					});
+			}
+		}
+
+		$scope.commentSection = function(post){
+		    angular.element('#comment-' + post.id).trigger('focus');
+		    $scope.fetchComments(post);
+		};
+
+		$scope.submit = function(post)
+		{
+			$scope.busy = true;
+			if(post.new_comment)
+			{
+				$scope.fetchComments(post);
+
+				Helper.post('/comment', post)
+					.success(function(data){
+						post.error = false;
+						data.created_at = new Date(data.created_at);
+						post.comments_count += 1;
+						post.comments.push(data);
+						post.new_comment = null;
+
+						$scope.busy = false;
+					})
+					.error(function(){
+						$scope.busy = false;
+						post.error = true;
+					})
+			}
+		}
+		/*
+		 * Object for toolbar
+		 *
+		*/
+		$scope.toolbar = {};
+
+		/*
+		 * Object for fab
+		 *
+		*/
+		$scope.fab = {};
+		$scope.fab.icon = 'mdi-message-text';
+
+		$scope.fab.label = 'Post';
+
+		$scope.fab.action = function(){
+			var dialog = {
+				'template':'/app/components/posts/templates/dialogs/post-dialog.template.html',
+				'controller': 'postDialogController',
+			}
+
+			dialog.action = 'create';
+
+			Helper.set(dialog);
+
+			Helper.customDialog(dialog)
+				.then(function(){
+					Helper.notify('Post created.');
+					$scope.refresh();
+				}, function(){
+					return;
+				});
+		}
+
+		/* Action originates from toolbar */
+		$scope.$on('search', function(){
+			$scope.request.search = $scope.toolbar.searchText;
+			$scope.refresh();
+		});
+
+		/* Listens for any request for refresh */
+		$scope.$on('refresh', function(){
+			$scope.request.search = null;
+			$scope.$broadcast('close');
+			$scope.refresh();
+		});
+
+		$scope.$on('read-post', function(){
+			$scope.request.where = [
+				{
+					'label':'id',
+					'condition':'=',
+					'value': Helper.fetch()
+				}
+			];
+
+			$scope.isLoading = true;
+  			$scope.post.show = false;
+  			$scope.currentTime = Date.now();
+
+			$scope.init($scope.request);
+		});
+
+		$scope.$on('read-post-and-comments', function(){
+			$scope.request.where = [
+				{
+					'label':'id',
+					'condition':'=',
+					'value': Helper.fetch()
+				}
+			];
+
+			$scope.isLoading = true;
+  			$scope.post.show = false;
+  			$scope.currentTime = Date.now();
+
+			$scope.init($scope.request, true);
+		});
+
+		$scope.updatePost = function(data){
+			if(!data.repost_id)
+			{			
+				var dialog = {
+					'template':'/app/components/posts/templates/dialogs/post-dialog.template.html',
+					'controller': 'postDialogController',
+				}
+
+				data.action = 'edit';
+
+				Helper.set(data);
+
+				Helper.customDialog(dialog)
+					.then(function(){
+						$scope.refresh();
+						Helper.notify('Post updated.');
+					}, function(){
+						return;
+					});
+			}
+			else{
+				var dialog = {
+					'template':'/app/components/posts/templates/dialogs/repost-dialog.template.html',
+					'controller': 'repostDialogController',
+				}
+
+				data.action = 'edit';
+
+				Helper.set(data);
+
+				Helper.customDialog(dialog)
+					.then(function(){
+						Helper.notify('Repost updated.');
+						$scope.refresh();
+					}, function(){
+						return;
+					});
+			}
+		}
+
+		$scope.deletePost = function(data){
+			var dialog = {};
+			dialog.title = 'Delete';
+			dialog.message = 'Delete this post?'
+			dialog.ok = 'Delete';
+			dialog.cancel = 'Cancel';
+
+			Helper.confirm(dialog)
+				.then(function(){
+					Helper.delete('/post/' + data.id)
+						.success(function(){
+							$scope.refresh();
+							Helper.notify('Post deleted.');
+						})
+						.error(function(){
+							Helper.error();
+						});
+				}, function(){
+					return;
+				})
+		}
+
+		$scope.editComment = function(comment, post){
+			angular.forEach(post.comments, function(item){
+				item.edit = false;
+			});
+
+			comment.edit = true;
+
+			comment.new_message = comment.message;
+		}
+
+		$scope.updateComment = function(comment){
+			$scope.busy = true;
+
+			Helper.put('/comment/' + comment.id, comment)
+				.success(function(data){
+					data.updated_at = new Date(data.updated_at);
+					comment.message = data.message;
+					comment.error = false;
+					comment.edit = false;
+					
+					$scope.busy = false;
+
+					Helper.notify('Comment updated.');
+				})
+				.error(function(){
+					$scope.busy = false;
+					comment.error = true;
+				});			
+		}
+
+		$scope.deleteComment = function(comment, post){
+			var dialog = {};
+			dialog.title = 'Delete';
+			dialog.message = 'Delete this comment?'
+			dialog.ok = 'Delete';
+			dialog.cancel = 'Cancel';
+
+			Helper.confirm(dialog)
+				.then(function(){
+					Helper.delete('/comment/' + comment.id)
+						.success(function(){
+							var index = post.comments.indexOf(comment);
+
+							post.comments.splice(index, 1);
+							post.comments_count--;
+
+							Helper.notify('Comment deleted.');
+						})
+						.error(function(){
+							Helper.error();
+						});
+				}, function(){
+					return;
+				})
+		}
+
+		/* Formats every data in the paginated call */
+		var pushItem = function(data){
+			data.created_at = new Date(data.created_at);
+
+			if(data.repost_id)
+			{
+				data.repost.post.created_at = new Date(data.repost.post.created_at);
+
+				data.repost.post.chips = [];
+
+				angular.forEach(data.repost.post.hashtags, function(hashtag){
+					data.repost.post.chips.push(hashtag.tag);
+				});
+			}
+			
+			data.chips = [];
+
+			angular.forEach(data.hashtags, function(hashtag){
+				data.chips.push(hashtag.tag);
+			});
+			
+			var item = {};
+
+			item.display = data.title;
+
+			$scope.toolbar.items.push(item);
+		}
+
+		$scope.searchHashTag = function(chip){
+			$scope.toolbar.searchText = chip;
+			$scope.$broadcast('open');
+		}
+
+		var birthday_query = {
+			'whereMonth': 
+			{
+				'label': 'birthdate',
+				'value' : new Date().getMonth() + 1,
+			},
+			'whereDay': 
+			{
+				'label': 'birthdate',
+				'value' : new Date().getDate(),
+			},
+		}
+
+		Helper.post('/birthday/enlist', birthday_query)
+			.success(function(data){
+				$scope.birthdays = data;
+			})
+
+		$scope.init = function(query, withComments){
+			$scope.post = {};
+			$scope.post.items = [];
+			$scope.toolbar.items = [];
+
+			// 2 is default so the next page to be loaded will be page 2 
+			$scope.post.page = 2;
+
+			Helper.post('/user/check')
+				.success(function(data){
+					angular.forEach(data.roles, function(role){
+						if(role.name == 'posts')
+						{
+							data.can_post = true;
+						}
+					});
+
+					$scope.current_user = data;
+
+					Helper.post('/post/enlist', query)
+						.success(function(data){
+							$scope.post.details = data;
+							$scope.post.items = data.data;
+							$scope.post.show = true;
+
+							$scope.fab.show = $scope.current_user.can_post ? true : false;
+
+							if(data.data.length){
+								// iterate over each record and set the format
+								angular.forEach(data.data, function(item){
+									pushItem(item);
+
+									if(withComments){
+										$scope.fetchComments(item);
+									}
+								});
+							}
+
+							$scope.post.paginateLoad = function(){
+								// kills the function if ajax is busy or pagination reaches last page
+								if($scope.post.busy || ($scope.post.page > $scope.post.details.last_page)){
+									$scope.isLoading = false;
+									return;
+								}
+								/**
+								 * Executes pagination call
+								 *
+								*/
+								// sets to true to disable pagination call if still busy.
+								$scope.post.busy = true;
+								$scope.isLoading = true;
+								// Calls the next page of pagination.
+								Helper.post('/post/enlist' + '?page=' + $scope.post.page, query)
+									.success(function(data){
+										// increment the page to set up next page for next AJAX Call
+										$scope.post.page++;
+
+										// iterate over each data then splice it to the data array
+										angular.forEach(data.data, function(item, key){
+											pushItem(item);
+											$scope.post.items.push(item);
+										});
+
+										// Enables again the pagination call for next call.
+										$scope.post.busy = false;
+										$scope.isLoading = false;
+									});
+							}
+						});
+				});
+		}
+
+		$scope.refresh = function(){
+			if(!$stateParams.postID)
+			{
+				$scope.isLoading = true;
+	  			$scope.post.show = false;
+	  			$scope.currentTime = Date.now();
+				$scope.request.where = null;
+
+	  			$scope.init($scope.request);
+			}
+			else{
+	  			$state.go('main.posts', {'postID':null});
+			}
+		};
+
+		$scope.request = {};
+
+		$scope.request.withTrashed = false;
+		$scope.request.paginate = 10;
+
+		$scope.request.with = [
+			{
+				'relation':'user',
+				'withTrashed': true,
+			},
+			{
+				'relation':'hashtags',
+				'withTrashed': false,	
+			},
+			{
+				'relation':'group',
+				'withTrashed': true,	
+			},
+			{
+				'relation':'repost.post',
+				'withTrashed': false,	
+			},
+		];
+
+		$scope.request.withCount = [
+			{
+				'relation':'comments',
+				'withTrashed': false,
+			},
+			{
+				'relation':'reposts',
+				'withTrashed': false,
+			}			
+		]	
+
+		$scope.request.orderBy = [
+			{
+				'column':'updated_at',
+				'order':'desc',
+			},
+		]
+
+		if($stateParams.postID)
+		{		
+			$scope.request.where = [
+				{
+					'label': 'id',
+					'condition': '=',
+					'value': $stateParams.postID,
+				}
+			];
+		}
+
+		$scope.isLoading = true;
+		$scope.$broadcast('close');
+
+		$scope.init($scope.request);
 	}]);
 app
 	.controller('homeContentContainerController', ['$scope', '$state', 'Helper', function($scope, $state, Helper){
@@ -3494,146 +3509,309 @@ app
 		}
 	}]);
 app
-	.controller('postDialogController', ['$scope', 'Helper', 'FileUploader', function($scope, Helper, FileUploader){
-		$scope.config = Helper.fetch();
+	.controller('homeToolbarController', ['$scope', 'Helper', function($scope, Helper){
+		$scope.toolbar.childState = 'Home';
 
-		var query = {};
+		$scope.toolbar.hideSearchIcon = true;
+	}]);
+app
+	.controller('slideshowToolbarController', ['$scope', '$stateParams', 'Helper', function($scope, $stateParams, Helper){
+		$scope.toolbar.parentState = 'Slideshow';
 
-		query.self_group = true;
-
-		Helper.post('/group/enlist', query)
-			.success(function(data){
-				$scope.groups = data;
-			});
-
-		$scope.repost = {};
-
-		$scope.post = {};
-		$scope.post.group_id = 'all';
-		$scope.post.chips = [];
-
-		var uploader = {};
-
-		uploader.filter = {
-            name: 'photoFilter',
-            fn: function(item /*{File|FileLikeObject}*/, options) {
-                var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
-                return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
-            }
-        };
-
-        uploader.sizeFilter = {
-		    'name': 'enforceMaxFileSize',
-		    'fn': function (item) {
-		        return item.size <= 10485760;
-		    }
-        }
-
-        uploader.error = function(item /*{File|FileLikeObject}*/, filter, options) {
-            $scope.fileError = true;
-            $scope.postPhotoUploader.queue = [];
-        };
-
-        uploader.headers = { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')};
-
-		$scope.clickUpload = function(){
-		    angular.element('#post-upload').trigger('click');
-		};
-
-		/* Photo Uploader */
-		$scope.postPhotoUploader = new FileUploader({
-			url: '/temp-upload/upload-photo',
-			headers: uploader.headers,
-			queueLimit : 1
-		})
-
-		if($scope.config.action == 'edit')
+		if(!$stateParams.slideshowID)
 		{
-			$scope.currentTime = Date.now();
+			$scope.toolbar.childState = 'New';
+		}
+		else{
+			$scope.toolbar.childState = 'Edit';
+		}
+
+		$scope.toolbar.hideSearchIcon = true;
+	}]);
+app
+	.controller('approvalsContentContainerController', ['$scope', '$state', '$stateParams', 'Helper', function($scope, $state, $stateParams, Helper){
+		$scope.$emit('closeSidenav');
+
+		/*
+		 * Object for toolbar
+		 *
+		*/
+		$scope.toolbar = {};
+
+		$scope.toolbar.sortBy = function(filter){
+			filter.sortReverse = !filter.sortReverse;			
+			$scope.sortType = filter.type;
+			$scope.sortReverse = filter.sortReverse;
+		}
+
+		/*
+		 * Object for subheader
+		 *
+		*/
+		$scope.subheader = {};
+		$scope.subheader.show = true;
+		$scope.subheader.current = {};
+
+		$scope.subheader.mark = {};
+
+		$scope.subheader.toggleMark = function(){
+			$scope.subheader.mark.all = !$scope.subheader.mark.all;
+			$scope.subheader.mark.icon = $scope.subheader.mark.all ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline';
+			$scope.subheader.mark.label = $scope.subheader.mark.all ? 'Uncheck all' : 'Check all';
+			angular.forEach($scope.reservation.items, function(item){
+				item.include = $scope.subheader.mark.all;
+			});
+		}
+
+		$scope.subheader.cancelSelectMultiple = function(){
+			$scope.selectMultiple = false;
+			$scope.fab.show = false;
+			$scope.subheader.mark.all = false;
+			$scope.subheader.mark.icon = 'mdi-checkbox-blank-outline';
+			$scope.subheader.mark.label = 'Check all';
+
+			angular.forEach($scope.reservation.items, function(item){
+				item.include = false;
+			});
+		}
+
+		/**
+		 * Object for fab
+		 *
+		*/
+		$scope.fab = {};
+		$scope.fab.icon = 'mdi-check';
+
+		$scope.viewReservation = function(data){
+	    	Helper.set(data);
+
+	    	var dialog = {
+	    		'template':'/app/components/approvals/templates/dialogs/approval-dialog.template.html',
+				'controller': 'approvalDialogController',
+	    	}
+
+	    	Helper.customDialog(dialog)
+	    		.then(function(){
+	    			Helper.notify('Reservation approved.');
+	    			$scope.refresh();
+	    		}, function(){
+	    			return;
+	    		});
+	    }
+
+	    /* Action originates from subheader */
+		$scope.$on('setInit', function(){
+			$scope.isLoading = true;
+			$scope.$broadcast('close');
 			
-			var query = {};
+			var current = Helper.fetch();
 
-			query.with = [
-				{
-					'relation':'hashtags',
-					'withTrashed': false,	
-				},
-			];
+			$scope.subheader.current = current;
 
-			query.where = [
+			$scope.init(current);
+		});
+
+		/* Action originates from toolbar */
+		$scope.$on('search', function(){
+			$scope.subheader.current.request.search = $scope.toolbar.searchText;
+			$scope.refresh();
+		});
+
+		/* Listens for any request for refresh */
+		$scope.$on('refresh', function(){
+			$scope.subheader.current.request.search = null;
+			$scope.$broadcast('close');
+			$scope.refresh();
+		});
+
+		$scope.$on('selectMultiple', function(){
+			$scope.selectMultiple = true;
+		});
+
+		$scope.$on('cancelSelectMultiple', function(){
+			$scope.subheader.cancelSelectMultiple();
+		});
+
+		$scope.$on('read-approval', function(){
+			$scope.subheader.current.request.where.push(
 				{
 					'label':'id',
 					'condition':'=',
-					'value': $scope.config.id,
+					'value': Helper.fetch()
 				}
-			];
+			);
 
-			query.first = true;
+			$scope.isLoading = true;
+  			$scope.reservation.show = false;
 
-			Helper.post('/post/enlist', query)
+			$scope.init($scope.subheader.current);
+		});
+
+		/* Formats every data in the paginated call */
+		var pushItem = function(data){
+			data.deleted_at =  data.deleted_at ? new Date(data.deleted_at) : null;
+			data.created_at = new Date(data.created_at);
+			data.start = new Date(data.start);
+			data.end = new Date(data.end);
+
+			var item = {};
+
+			item.display = data.title;
+			
+			$scope.toolbar.items.push(item);
+		}
+
+		$scope.init = function(query){
+			if($stateParams.reservationID)
+			{
+				query.request.where.push(
+					{
+						'label':'id',
+						'condition':'=',
+						'value': $stateParams.reservationID,	
+					}
+				);
+			}
+
+			$scope.subheader.mark.all = false;
+			$scope.subheader.mark.icon = 'mdi-checkbox-blank-outline';
+			$scope.subheader.mark.label = 'Check all';
+
+			$scope.toolbar.items = [];
+
+			$scope.reservation = {};
+			$scope.reservation.items = [];
+			$scope.reservation.show = true;
+
+			// 2 is default so the next page to be loaded will be page 2 
+			$scope.reservation.page = 2;
+
+			Helper.post('/reservation/enlist', query.request)
 				.success(function(data){
-					data.chips = [];
+					$scope.reservation.details = data;
+					$scope.reservation.items = [];
+					
+					if(data.data.length){
+						// iterate over each record and set the format
+						angular.forEach(data.data, function(item){
+							pushItem(item);
+							$scope.reservation.items.push(item);
+						});
+					}
 
-					angular.forEach(data.hashtags, function(hashtag){
-						data.chips.push(hashtag.tag);
-					});
+					$scope.isLoading = false;
 
-					$scope.post = data;
-					$scope.post.group_id = data.group_id ? data.group_id : 'all';
-					$scope.post.allow_comments = data.allow_comments ? true : false;
-				})
-				.error(function(){
-					Helper.error();
+					$scope.reservation.paginateLoad = function(){
+						// kills the function if ajax is busy or pagination reaches last page
+						if($scope.reservation.busy || ($scope.reservation.page > $scope.reservation.details.last_page)){
+							$scope.isLoading = false;
+							return;
+						}
+						/**
+						 * Executes pagination call
+						 *
+						*/
+						// sets to true to disable pagination call if still busy.
+						$scope.reservation.busy = true;
+						$scope.isLoading = true;
+						// Calls the next page of pagination.
+						Helper.post('/reservation/enlist', $scope.reservation.page)
+							.success(function(data){
+								// increment the page to set up next page for next AJAX Call
+								$scope.reservation.page++;
+
+								// iterate over each data then splice it to the data array
+								angular.forEach(data.data, function(item, key){
+									pushItem(item);
+									$scope.reservation.items.push(item);
+								});
+
+								// Enables again the pagination call for next call.
+								$scope.reservation.busy = false;
+								$scope.isLoading = false;
+							});
+					}
 				});
 		}
 
-		$scope.duplicate = false;
+		$scope.refresh = function(){
+			$scope.isLoading = true;
+  			$scope.reservation.show = false;
 
-		$scope.busy = false;
+  			$scope.init($scope.subheader.current);
 
-		// FILTERS
-        $scope.postPhotoUploader.filters.push(uploader.filter);
-        $scope.postPhotoUploader.filters.push(uploader.sizeFilter);
-        
-		$scope.postPhotoUploader.onWhenAddingFileFailed = uploader.error;
-		$scope.postPhotoUploader.onAfterAddingFile  = function(){
-			$scope.fileError = false;
-			if($scope.postPhotoUploader.queue.length)
-			{	
-				$scope.postPhotoUploader.uploadAll()
-			}
+  			$state.go('main.approvals', {'reservationID':null});
 		};
+	}]);
+app
+	.controller('approvalDialogController', ['$scope', 'Helper', function($scope, Helper){
+		var reservation = Helper.fetch();
 
-		$scope.postPhotoUploader.onCompleteItem  = function(data, response){
-			$scope.temp_upload = response;
-			$scope.post.image_path = response.path;
-			if(response)
-			{
-				$scope.preview = true;
-				$scope.currentTime = Date.now();
-			}
-		}
-
-		$scope.postPhotoUploader.onErrorItem = function()
-		{
-			Helper.error();
-		}
-
-		$scope.replace = function(){
-			// $scope.post.image_path = null;
-			// $scope.temp_upload = {};
-			// $scope.preview = false;
-			$scope.postPhotoUploader.queue = [];
-			$scope.clickUpload();
-		}
+		Helper.post('/user/check')
+			.success(function(data){
+				$scope.approver = data;
+			});
 
 		$scope.cancel = function(){
 			Helper.cancel();
-		}		
+		}
+
+		$scope.checkDuplicate = function(equipment){
+			Helper.post('/reservation-equipment/check-duplicate', equipment)
+				.success(function(data){
+					$scope.duplicate = data;
+					equipment.duplicate = data;
+				});
+		}
+
+		var request = {
+			'with': [
+				{
+					'relation': 'location',
+					'withTrashed': true,
+				},
+				{
+					'relation': 'user',
+					'withTrashed': true,
+				},
+				{
+					'relation': 'equipment_types',
+					'withTrashed': false,
+					'available_units': true,
+				},
+				{
+					'relation':'schedule_approver',
+					'withTrashed': true,
+				},
+				{
+					'relation':'equipment_approver',
+					'withTrashed': true,
+				},
+			],
+			'where': [
+				{
+					'label': 'id',
+					'condition': '=',
+					'value': reservation.id,
+				},
+			],
+			'first' : true,
+		}
+
+		Helper.post('/reservation/enlist', request)
+			.success(function(data){
+				$scope.start = new Date(data.start);
+				$scope.end = data.end ? new Date(data.end) : null;
+
+				$scope.reservation = data;
+			})
+			.error(function(){
+				Helper.error();
+			})
 
 		$scope.submit = function(){
-			if($scope.postForm.$invalid){
-				angular.forEach($scope.postForm.$error, function(field){
+			if($scope.approvalForm.$invalid){
+				angular.forEach($scope.approvalForm.$error, function(field){
 					angular.forEach(field, function(errorField){
 						errorField.$setTouched();
 					});
@@ -3645,297 +3823,144 @@ app
 			if(!$scope.duplicate)
 			{
 				$scope.busy = true;
-
-				if($scope.config.action == 'create')
-				{
-					Helper.post('/post', $scope.post)
-						.success(function(duplicate){
-							if(duplicate){
-								$scope.busy = false;
-								return;
+				// IT
+				if($scope.approver.group_id == 1){
+					Helper.post('/reservation-equipment/approve', $scope.reservation.equipment_types)
+						.success(function(data){
+							if(!data){
+								Helper.stop();
 							}
-
-							Helper.stop();
+							else{
+								$scope.duplicate = true;
+								$scope.busy = false;
+							}
 						})
 						.error(function(){
 							$scope.busy = false;
 							$scope.error = true;
-						});
-				}
-				else if($scope.config.action == 'edit')
-				{
-					Helper.put('/post' + '/' + $scope.config.id, $scope.post)
-						.success(function(duplicate){
-							if(duplicate){
-								$scope.busy = false;
-								return;
-							}
-
-							Helper.stop();
 						})
-						.error(function(){
-							$scope.busy = false;
-							$scope.error = true;
-						});
 				}
+			}
+
+			if($scope.approver.group_id == 2){
+				Helper.post('/reservation/approve', $scope.reservation)
+					.success(function(data){
+						if(!data){
+							Helper.stop();
+						}
+						else{
+							$scope.duplicate = true;
+							$scope.busy = false;
+						}
+					})
+					.error(function(){
+						$scope.busy = false;
+						$scope.error = true;
+					})
 			}
 		}
 	}]);
 app
-	.controller('repostDialogController', ['$scope', 'Helper', function($scope, Helper){
-		$scope.config = Helper.fetch();
+	.controller('approvalsSubheaderController', ['$scope', 'Helper', function($scope, Helper){
+		var setInit = function(data){
+			Helper.set(data);
 
-		var query = {};
+			$scope.current_tab = data;
 
-		query.self_group = true;
+			$scope.$emit('setInit');
+		}
 
-		Helper.post('/group/enlist', query)
-			.success(function(data){
-				$scope.groups = data;
-			});
+		var today = new Date().toDateString();
 
-		$scope.repost = {};
+		$scope.subheader.all = {};
 
-		if($scope.config.action == 'create')
-		{
-			
-			var query = {};
+		$scope.subheader.all.label = 'All';
 
-			query.with = [
+		$scope.subheader.all.request = {
+			'with': [
 				{
-					'relation':'hashtags',
-					'withTrashed': false,	
+					'relation':'location',
+					'withTrashed': true,
 				},
 				{
 					'relation':'user',
 					'withTrashed': true,
 				},
 				{
-					'relation':'group',
+					'relation':'schedule_approver',
 					'withTrashed': true,
 				},
-			];
-
-			query.where = [
 				{
-					'label':'id',
-					'condition':'=',
-					'value': $scope.config.id,
-				}
-			];
-
-			query.first = true;
-
-			Helper.post('/post/enlist', query)
-				.success(function(data){
-					data.created_at = new Date(data.created_at);
-					data.chips = [];
-
-					angular.forEach(data.hashtags, function(hashtag){
-						data.chips.push(hashtag.tag);
-					});
-
-					$scope.repost.post = data;
-					$scope.repost.post.allow_comments = data.allow_comments ? true : false;
-
-					$scope.repost.group_id = data.group_id ? data.group_id : 'all';
-				})
-				.error(function(){
-					Helper.error();
-				});
-		}
-
-		else if($scope.config.action == 'edit')
-		{
-			var query = {};
-
-			query.with = [
-				{
-					'relation':'post',
-					'withTrashed': false,	
+					'relation':'equipment_approver',
+					'withTrashed': true,
 				},
-			];
+			],
+			'where': [],
+			'approvals': true,
+			'paginate': 10,
+		}
 
-			query.where = [
-				{
-					'label':'id',
-					'condition':'=',
-					'value': $scope.config.id,
-				}
-			];
+		$scope.subheader.all.action = function(){
+			setInit($scope.subheader.all);
+		}
 
-			query.first = true;
-
-			Helper.post('/repost/enlist', query)
+		$scope.init = function(){
+			Helper.get('/location')
 				.success(function(data){
-					data.post.created_at = new Date(data.post.created_at);
-					data.post.chips = [];
+					$scope.locations = data;
+					$scope.subheader.navs = [];
+					
+					angular.forEach($scope.locations, function(location){
+						var item = {};
 
-					angular.forEach(data.post.hashtags, function(hashtag){
-						data.post.chips.push(hashtag.tag);
+						item.id = location.id;
+						item.label = location.name;
+						item.request = {
+							'with': [
+								{
+									'relation':'location',
+									'withTrashed': true,
+								},
+								{
+									'relation':'user',
+									'withTrashed': true,
+								},
+								{
+									'relation':'schedule_approver',
+									'withTrashed': true,
+								},
+								{
+									'relation':'equipment_approver',
+									'withTrashed': true,
+								},
+							],
+							'where': [
+								{
+									'label':'location_id',
+									'condition':'=',
+									'value': location.id,
+								},
+							],
+							'approvals': true,
+							'paginate': 10,
+						}
+						item.menu = $scope.subheader.all.menu,
+						item.action = function(current){
+							setInit(current);
+						}
+
+						$scope.subheader.navs.push(item);
 					});
 
-					$scope.repost.post = data.post;
-					$scope.repost.post.allow_comments = data.post.allow_comments ? true : false;
-
-					$scope.repost.group_id = data.post.group_id ? data.post.group_id : 'all';
-
-					Helper.get('/post/' + $scope.config.id)
-						.success(function(data){
-							$scope.repost.id = data.repost_id;
-							$scope.repost.title = data.title;
-							$scope.repost.allow_comments = data.allow_comments ? true : false;
-							$scope.repost.group_id = data.group_id ? data.group_id : 'all';
-						});
+					setInit($scope.subheader.all);
 				})
-				.error(function(){
-					Helper.error();
-				});
-
 		}
 
-		$scope.busy = false;
-
-		$scope.cancel = function(){
-			Helper.cancel();
-		}		
-
-		$scope.submit = function(){
-			if($scope.repostForm.$invalid){
-				angular.forEach($scope.repostForm.$error, function(field){
-					angular.forEach(field, function(errorField){
-						errorField.$setTouched();
-					});
-				});
-
-				return;
-			}
-
-			$scope.busy = true;
-
-			if($scope.config.action == 'create')
-			{
-				Helper.post('/repost', $scope.repost)
-					.success(function(duplicate){
-						if(duplicate){
-							$scope.busy = false;
-							return;
-						}
-
-						Helper.stop();
-					})
-					.error(function(){
-						$scope.busy = false;
-						$scope.error = true;
-					});
-			}
-			else if($scope.config.action == 'edit')
-			{
-				Helper.put('/repost' + '/' + $scope.config.id, $scope.repost)
-					.success(function(duplicate){
-						if(duplicate){
-							$scope.busy = false;
-							return;
-						}
-
-						Helper.stop();
-					})
-					.error(function(){
-						$scope.busy = false;
-						$scope.error = true;
-					});
-			}
-		}
+		$scope.init();
 	}]);
 app
-	.controller('repostsDialogController', ['$scope', 'Helper', function($scope, Helper){
-		$scope.cancel = function(){
-			Helper.cancel();
-		}
-
-		var post = Helper.fetch();
-
-		var query = {};
-
-		query.with = [
-			{
-				'relation': 'post',
-				'withTrashed': false,
-			}
-		];
-
-		query.where = [
-			{
-				'label': 'post_id',
-				'condition' : '=',
-				'value': post.id
-			}
-		];
-
-		query.orderBy = [
-			{
-				'column':'created_at',
-				'order':'desc',
-			},
-		];
-
-		query.paginate = 10;
-
-		$scope.repost = {};
-		$scope.repost.items = [];
-		$scope.repost.page = 2;
-
-		var pushItem = function(data){
-			data.created_at = new Date(data.created_at);
-		}
-
-		Helper.post('/repost/enlist', query)
-			.success(function(data){
-				$scope.repost.details = data;
-				$scope.repost.items = data.data;
-				$scope.repost.show = true;
-
-				if(data.data.length){
-					angular.forEach(data.data, function(item){
-						pushItem(item);
-					})
-				}
-
-				$scope.repost.paginateLoad = function(){
-					// kills the function if ajax is busy or pagination reaches last page
-					if($scope.repost.busy || ($scope.repost.page > $scope.repost.details.last_page)){
-						$scope.isLoading = false;
-						return;
-					}
-					/**
-					 * Executes pagination call
-					 *
-					*/
-					// sets to true to disable pagination call if still busy.
-					$scope.repost.busy = true;
-					$scope.isLoading = true;
-					// Calls the next page of pagination.
-					Helper.post('/repost/enlist' + '?page=' + $scope.repost.page, query)
-						.success(function(data){
-							// increment the page to set up next page for next AJAX Call
-							$scope.repost.page++;
-
-							// iterate over each data then splice it to the data array
-							angular.forEach(data.data, function(item, key){
-								pushItem(item);
-								$scope.repost.items.push(item);
-							});
-
-							// Enables again the pagination call for next call.
-							$scope.repost.busy = false;
-							$scope.isLoading = false;
-						});
-				}
-			});
-	}]);
-app
-	.controller('postsToolbarController', ['$scope', '$filter', function($scope, $filter){
-		$scope.toolbar.childState = 'Home';
+	.controller('approvalsToolbarController', ['$scope', '$filter', function($scope, $filter){
+		$scope.toolbar.childState = 'Approvals';
 
 		$scope.$on('close', function(){
 			$scope.hideSearchBar();
@@ -3957,7 +3982,7 @@ app
 		 *
 		*/
 		$scope.showSearchBar = function(){
-			$scope.post.busy = true;
+			$scope.reservation.busy = true;
 			$scope.searchBar = true;
 		};
 
@@ -3982,6 +4007,34 @@ app
 		};
 
 		$scope.toolbar.options = true;
+		
+		$scope.toolbar.sort = [
+			{
+				'label': 'Title',
+				'type': 'title',
+				'sortReverse': false,
+			},
+			{
+				'label': 'Remarks',
+				'type': 'remarks',
+				'sortReverse': false,
+			},
+			{
+				'label': 'Date Start',
+				'type': 'start',
+				'sortReverse': false,
+			},
+			{
+				'label': 'Date End',
+				'type': 'end',
+				'sortReverse': false,
+			},
+			{
+				'label': 'Recently added',
+				'type': 'created_at',
+				'sortReverse': false,
+			},
+		];
 		
 		$scope.toolbar.refresh = function(){
 			$scope.$emit('refresh');
@@ -4231,6 +4284,8 @@ app
 			Helper.cancel();
 		}
 
+		$scope.repetitions = ['Daily', 'Weekly', 'Monthly'];
+
 		$scope.duplicate = false;
 
 		$scope.fallback = {};
@@ -4241,15 +4296,21 @@ app
 
 		$scope.current = new Date();
 
-		if($scope.current.getMinutes() < 30)
-		{
-			$scope.current.setMinutes(30);
+		var formatTime = function(time){
+			if(time.getMinutes() < 30)
+			{
+				time.setMinutes(30);
+			}
+			else if(time.getMinutes() > 30)
+			{
+				time.setHours(time.getHours() + 1);
+				time.setMinutes(0);
+			}
+			
+			time.setSeconds(0);
 		}
-		else if($scope.current.getMinutes() > 30)
-		{
-			$scope.current.setHours($scope.current.getHours() + 1);
-			$scope.current.setMinutes(0);
-		}
+
+		formatTime($scope.current);
 
 		$scope.reservation.date_start = new Date();
 		$scope.reservation.time_start = $scope.current;
@@ -4261,6 +4322,7 @@ app
 			$scope.fallback.date_end = new Date($scope.reservation.date_end);
 			$scope.fallback.time_start = new Date($scope.reservation.time_start);
 			$scope.fallback.time_end = new Date($scope.reservation.time_end);
+			$scope.fallback.until = $scope.reservation.until ? new Date($scope.reservation.until) : null;
 		}
 
 		var fallbackDateToObject = function(){
@@ -4268,6 +4330,19 @@ app
 			$scope.reservation.date_end = new Date($scope.fallback.date_end);
 			$scope.reservation.time_start = new Date($scope.fallback.time_start);
 			$scope.reservation.time_end = new Date($scope.fallback.time_end);
+			$scope.reservation.until = $scope.fallback.until ? new Date($scope.fallback.until) : null;
+		}
+
+		$scope.setUntil = function(){
+			$scope.reservation.until = new Date();
+		}
+
+		$scope.setRepeat = function(){
+			if(!$scope.repeat)
+			{
+				$scope.reservation.repeat = null;
+				$scope.reservation.until = null;
+			}
 		}
 
 		$scope.checkDuplicate = function(){
@@ -4281,6 +4356,16 @@ app
 				request.time_start = new Date($scope.reservation.time_start).toLocaleTimeString();
 				request.time_end = new Date($scope.reservation.time_end).toLocaleTimeString();
 
+				if($scope.reservation.until)
+				{
+					request.repeat = $scope.reservation.repeat;
+					request.until = new Date($scope.reservation.until).toDateString();
+				}
+
+				if($scope.reservation.id)
+				{
+					request.id = $scope.reservation.id;
+				}
 
 				Helper.post('/reservation/check-duplicate', request)
 					.success(function(data){
@@ -4302,6 +4387,11 @@ app
 
 			$scope.min_end_time = new Date($scope.reservation.time_start);
 
+			if($scope.min_end_time >= $scope.reservation.time_end)
+			{
+				$scope.reservation.time_end = new Date($scope.min_end_time);
+			}
+
 			if($scope.reservation.time_start > $scope.reservation.time_end)
 			{
 				$scope.reservation.time_end = new Date($scope.reservation.time_start);
@@ -4321,6 +4411,7 @@ app
 			$scope.reservation.time_end.setFullYear($scope.reservation.date_end.getFullYear());
 
 			$scope.reservation.time_end = new Date($scope.reservation.time_end);
+			$scope.reservation.until = new Date($scope.reservation.time_end);
 
 			if($scope.reservation.time_start > $scope.reservation.time_end)
 			{
@@ -4364,8 +4455,12 @@ app
 				$scope.reservation.time_end = new Date();
 				$scope.min_start_time = new Date();
 				$scope.min_start_date = new Date();
-
 				$scope.min_end_time = new Date();
+
+				formatTime($scope.reservation.time_start);
+				formatTime($scope.reservation.time_end);
+				formatTime($scope.reservation.min_start_time);
+				formatTime($scope.reservation.min_end_time);
 			}
 
 			$scope.checkDuplicate();
@@ -4481,8 +4576,8 @@ app
 					$scope.reservation.date_start = new Date(data.start);
 					$scope.reservation.date_end = new Date(data.end);
 
-					$scope.reservation.time_start = $scope.current;
-					$scope.reservation.time_end = $scope.current;
+					$scope.reservation.time_start = new Date(data.start);
+					$scope.reservation.time_end = new Date(data.end);
 
 					$scope.min_start_time = new Date();
 					$scope.min_start_date = new Date();
@@ -4513,10 +4608,14 @@ app
 
 				formatDateToObject();
 
-				$scope.reservation.date_start = $scope.reservation.date_start.toDateString();
-				$scope.reservation.date_end = $scope.reservation.date_end.toDateString();
-				$scope.reservation.time_start = $scope.reservation.time_start.toLocaleTimeString();
-				$scope.reservation.time_end = $scope.reservation.time_end.toLocaleTimeString();
+				$scope.reservation.time_start = new Date($scope.reservation.time_start).setSeconds(0);
+				$scope.reservation.time_end = new Date($scope.reservation.time_end).setSeconds(0);
+
+				$scope.reservation.date_start = new Date($scope.reservation.date_start).toDateString();
+				$scope.reservation.date_end = new Date($scope.reservation.date_end).toDateString();
+				$scope.reservation.time_start = new Date($scope.reservation.time_start).toLocaleTimeString();
+				$scope.reservation.time_end = new Date($scope.reservation.time_end).toLocaleTimeString();
+				$scope.reservation.until = $scope.reservation.until ? new Date($scope.reservation.until).toDateString() : null;
 
 				if($scope.config.action == 'create')
 				{
@@ -6207,289 +6306,146 @@ app
 		}
 	}]);
 app
-	.controller('approvalsContentContainerController', ['$scope', '$state', '$stateParams', 'Helper', function($scope, $state, $stateParams, Helper){
-		$scope.$emit('closeSidenav');
+	.controller('postDialogController', ['$scope', 'Helper', 'FileUploader', function($scope, Helper, FileUploader){
+		$scope.config = Helper.fetch();
 
-		/*
-		 * Object for toolbar
-		 *
-		*/
-		$scope.toolbar = {};
+		var query = {};
 
-		$scope.toolbar.sortBy = function(filter){
-			filter.sortReverse = !filter.sortReverse;			
-			$scope.sortType = filter.type;
-			$scope.sortReverse = filter.sortReverse;
-		}
+		query.self_group = true;
 
-		/*
-		 * Object for subheader
-		 *
-		*/
-		$scope.subheader = {};
-		$scope.subheader.show = true;
-		$scope.subheader.current = {};
-
-		$scope.subheader.mark = {};
-
-		$scope.subheader.toggleMark = function(){
-			$scope.subheader.mark.all = !$scope.subheader.mark.all;
-			$scope.subheader.mark.icon = $scope.subheader.mark.all ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline';
-			$scope.subheader.mark.label = $scope.subheader.mark.all ? 'Uncheck all' : 'Check all';
-			angular.forEach($scope.reservation.items, function(item){
-				item.include = $scope.subheader.mark.all;
+		Helper.post('/group/enlist', query)
+			.success(function(data){
+				$scope.groups = data;
 			});
-		}
 
-		$scope.subheader.cancelSelectMultiple = function(){
-			$scope.selectMultiple = false;
-			$scope.fab.show = false;
-			$scope.subheader.mark.all = false;
-			$scope.subheader.mark.icon = 'mdi-checkbox-blank-outline';
-			$scope.subheader.mark.label = 'Check all';
+		$scope.repost = {};
 
-			angular.forEach($scope.reservation.items, function(item){
-				item.include = false;
-			});
-		}
+		$scope.post = {};
+		$scope.post.group_id = 'all';
+		$scope.post.chips = [];
 
-		/**
-		 * Object for fab
-		 *
-		*/
-		$scope.fab = {};
-		$scope.fab.icon = 'mdi-check';
+		var uploader = {};
 
-		$scope.viewReservation = function(data){
-	    	Helper.set(data);
+		uploader.filter = {
+            name: 'photoFilter',
+            fn: function(item /*{File|FileLikeObject}*/, options) {
+                var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
+                return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
+            }
+        };
 
-	    	var dialog = {
-	    		'template':'/app/components/approvals/templates/dialogs/approval-dialog.template.html',
-				'controller': 'approvalDialogController',
-	    	}
+        uploader.sizeFilter = {
+		    'name': 'enforceMaxFileSize',
+		    'fn': function (item) {
+		        return item.size <= 10485760;
+		    }
+        }
 
-	    	Helper.customDialog(dialog)
-	    		.then(function(){
-	    			Helper.notify('Reservation approved.');
-	    			$scope.refresh();
-	    		}, function(){
-	    			return;
-	    		});
-	    }
+        uploader.error = function(item /*{File|FileLikeObject}*/, filter, options) {
+            $scope.fileError = true;
+            $scope.postPhotoUploader.queue = [];
+        };
 
-	    /* Action originates from subheader */
-		$scope.$on('setInit', function(){
-			$scope.isLoading = true;
-			$scope.$broadcast('close');
+        uploader.headers = { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')};
+
+		$scope.clickUpload = function(){
+		    angular.element('#post-upload').trigger('click');
+		};
+
+		/* Photo Uploader */
+		$scope.postPhotoUploader = new FileUploader({
+			url: '/temp-upload/upload-photo',
+			headers: uploader.headers,
+			queueLimit : 1
+		})
+
+		if($scope.config.action == 'edit')
+		{
+			$scope.currentTime = Date.now();
 			
-			var current = Helper.fetch();
+			var query = {};
 
-			$scope.subheader.current = current;
+			query.with = [
+				{
+					'relation':'hashtags',
+					'withTrashed': false,	
+				},
+			];
 
-			$scope.init(current);
-		});
-
-		/* Action originates from toolbar */
-		$scope.$on('search', function(){
-			$scope.subheader.current.request.search = $scope.toolbar.searchText;
-			$scope.refresh();
-		});
-
-		/* Listens for any request for refresh */
-		$scope.$on('refresh', function(){
-			$scope.subheader.current.request.search = null;
-			$scope.$broadcast('close');
-			$scope.refresh();
-		});
-
-		$scope.$on('selectMultiple', function(){
-			$scope.selectMultiple = true;
-		});
-
-		$scope.$on('cancelSelectMultiple', function(){
-			$scope.subheader.cancelSelectMultiple();
-		});
-
-		$scope.$on('read-approval', function(){
-			$scope.subheader.current.request.where.push(
+			query.where = [
 				{
 					'label':'id',
 					'condition':'=',
-					'value': Helper.fetch()
+					'value': $scope.config.id,
 				}
-			);
+			];
 
-			$scope.isLoading = true;
-  			$scope.reservation.show = false;
+			query.first = true;
 
-			$scope.init($scope.subheader.current);
-		});
-
-		/* Formats every data in the paginated call */
-		var pushItem = function(data){
-			data.deleted_at =  data.deleted_at ? new Date(data.deleted_at) : null;
-			data.created_at = new Date(data.created_at);
-			data.start = new Date(data.start);
-			data.end = new Date(data.end);
-
-			var item = {};
-
-			item.display = data.title;
-			
-			$scope.toolbar.items.push(item);
-		}
-
-		$scope.init = function(query){
-			if($stateParams.reservationID)
-			{
-				query.request.where.push(
-					{
-						'label':'id',
-						'condition':'=',
-						'value': $stateParams.reservationID,	
-					}
-				);
-			}
-
-			$scope.subheader.mark.all = false;
-			$scope.subheader.mark.icon = 'mdi-checkbox-blank-outline';
-			$scope.subheader.mark.label = 'Check all';
-
-			$scope.toolbar.items = [];
-
-			$scope.reservation = {};
-			$scope.reservation.items = [];
-			$scope.reservation.show = true;
-
-			// 2 is default so the next page to be loaded will be page 2 
-			$scope.reservation.page = 2;
-
-			Helper.post('/reservation/enlist', query.request)
+			Helper.post('/post/enlist', query)
 				.success(function(data){
-					$scope.reservation.details = data;
-					$scope.reservation.items = [];
-					
-					if(data.data.length){
-						// iterate over each record and set the format
-						angular.forEach(data.data, function(item){
-							pushItem(item);
-							$scope.reservation.items.push(item);
-						});
-					}
+					data.chips = [];
 
-					$scope.isLoading = false;
+					angular.forEach(data.hashtags, function(hashtag){
+						data.chips.push(hashtag.tag);
+					});
 
-					$scope.reservation.paginateLoad = function(){
-						// kills the function if ajax is busy or pagination reaches last page
-						if($scope.reservation.busy || ($scope.reservation.page > $scope.reservation.details.last_page)){
-							$scope.isLoading = false;
-							return;
-						}
-						/**
-						 * Executes pagination call
-						 *
-						*/
-						// sets to true to disable pagination call if still busy.
-						$scope.reservation.busy = true;
-						$scope.isLoading = true;
-						// Calls the next page of pagination.
-						Helper.post('/reservation/enlist', $scope.reservation.page)
-							.success(function(data){
-								// increment the page to set up next page for next AJAX Call
-								$scope.reservation.page++;
-
-								// iterate over each data then splice it to the data array
-								angular.forEach(data.data, function(item, key){
-									pushItem(item);
-									$scope.reservation.items.push(item);
-								});
-
-								// Enables again the pagination call for next call.
-								$scope.reservation.busy = false;
-								$scope.isLoading = false;
-							});
-					}
+					$scope.post = data;
+					$scope.post.group_id = data.group_id ? data.group_id : 'all';
+					$scope.post.allow_comments = data.allow_comments ? true : false;
+				})
+				.error(function(){
+					Helper.error();
 				});
 		}
 
-		$scope.refresh = function(){
-			$scope.isLoading = true;
-  			$scope.reservation.show = false;
+		$scope.duplicate = false;
 
-  			$scope.init($scope.subheader.current);
+		$scope.busy = false;
 
-  			$state.go('main.approvals', {'reservationID':null});
+		// FILTERS
+        $scope.postPhotoUploader.filters.push(uploader.filter);
+        $scope.postPhotoUploader.filters.push(uploader.sizeFilter);
+        
+		$scope.postPhotoUploader.onWhenAddingFileFailed = uploader.error;
+		$scope.postPhotoUploader.onAfterAddingFile  = function(){
+			$scope.fileError = false;
+			if($scope.postPhotoUploader.queue.length)
+			{	
+				$scope.postPhotoUploader.uploadAll()
+			}
 		};
-	}]);
-app
-	.controller('approvalDialogController', ['$scope', 'Helper', function($scope, Helper){
-		var reservation = Helper.fetch();
 
-		Helper.post('/user/check')
-			.success(function(data){
-				$scope.approver = data;
-			});
+		$scope.postPhotoUploader.onCompleteItem  = function(data, response){
+			$scope.temp_upload = response;
+			$scope.post.image_path = response.path;
+			if(response)
+			{
+				$scope.preview = true;
+				$scope.currentTime = Date.now();
+			}
+		}
+
+		$scope.postPhotoUploader.onErrorItem = function()
+		{
+			Helper.error();
+		}
+
+		$scope.replace = function(){
+			// $scope.post.image_path = null;
+			// $scope.temp_upload = {};
+			// $scope.preview = false;
+			$scope.postPhotoUploader.queue = [];
+			$scope.clickUpload();
+		}
 
 		$scope.cancel = function(){
 			Helper.cancel();
-		}
-
-		$scope.checkDuplicate = function(equipment){
-			Helper.post('/reservation-equipment/check-duplicate', equipment)
-				.success(function(data){
-					$scope.duplicate = data;
-					equipment.duplicate = data;
-				});
-		}
-
-		var request = {
-			'with': [
-				{
-					'relation': 'location',
-					'withTrashed': true,
-				},
-				{
-					'relation': 'user',
-					'withTrashed': true,
-				},
-				{
-					'relation': 'equipment_types',
-					'withTrashed': false,
-					'available_units': true,
-				},
-				{
-					'relation':'schedule_approver',
-					'withTrashed': true,
-				},
-				{
-					'relation':'equipment_approver',
-					'withTrashed': true,
-				},
-			],
-			'where': [
-				{
-					'label': 'id',
-					'condition': '=',
-					'value': reservation.id,
-				},
-			],
-			'first' : true,
-		}
-
-		Helper.post('/reservation/enlist', request)
-			.success(function(data){
-				$scope.start = new Date(data.start);
-				$scope.end = data.end ? new Date(data.end) : null;
-
-				$scope.reservation = data;
-			})
-			.error(function(){
-				Helper.error();
-			})
+		}		
 
 		$scope.submit = function(){
-			if($scope.approvalForm.$invalid){
-				angular.forEach($scope.approvalForm.$error, function(field){
+			if($scope.postForm.$invalid){
+				angular.forEach($scope.postForm.$error, function(field){
 					angular.forEach(field, function(errorField){
 						errorField.$setTouched();
 					});
@@ -6501,144 +6457,297 @@ app
 			if(!$scope.duplicate)
 			{
 				$scope.busy = true;
-				// IT
-				if($scope.approver.group_id == 1){
-					Helper.post('/reservation-equipment/approve', $scope.reservation.equipment_types)
-						.success(function(data){
-							if(!data){
-								Helper.stop();
-							}
-							else{
-								$scope.duplicate = true;
+
+				if($scope.config.action == 'create')
+				{
+					Helper.post('/post', $scope.post)
+						.success(function(duplicate){
+							if(duplicate){
 								$scope.busy = false;
+								return;
 							}
+
+							Helper.stop();
 						})
 						.error(function(){
 							$scope.busy = false;
 							$scope.error = true;
-						})
+						});
 				}
-			}
+				else if($scope.config.action == 'edit')
+				{
+					Helper.put('/post' + '/' + $scope.config.id, $scope.post)
+						.success(function(duplicate){
+							if(duplicate){
+								$scope.busy = false;
+								return;
+							}
 
-			if($scope.approver.group_id == 2){
-				Helper.post('/reservation/approve', $scope.reservation)
-					.success(function(data){
-						if(!data){
 							Helper.stop();
-						}
-						else{
-							$scope.duplicate = true;
+						})
+						.error(function(){
 							$scope.busy = false;
-						}
-					})
-					.error(function(){
-						$scope.busy = false;
-						$scope.error = true;
-					})
+							$scope.error = true;
+						});
+				}
 			}
 		}
 	}]);
 app
-	.controller('approvalsSubheaderController', ['$scope', 'Helper', function($scope, Helper){
-		var setInit = function(data){
-			Helper.set(data);
+	.controller('repostDialogController', ['$scope', 'Helper', function($scope, Helper){
+		$scope.config = Helper.fetch();
 
-			$scope.current_tab = data;
+		var query = {};
 
-			$scope.$emit('setInit');
-		}
+		query.self_group = true;
 
-		var today = new Date().toDateString();
+		Helper.post('/group/enlist', query)
+			.success(function(data){
+				$scope.groups = data;
+			});
 
-		$scope.subheader.all = {};
+		$scope.repost = {};
 
-		$scope.subheader.all.label = 'All';
+		if($scope.config.action == 'create')
+		{
+			
+			var query = {};
 
-		$scope.subheader.all.request = {
-			'with': [
+			query.with = [
 				{
-					'relation':'location',
-					'withTrashed': true,
+					'relation':'hashtags',
+					'withTrashed': false,	
 				},
 				{
 					'relation':'user',
 					'withTrashed': true,
 				},
 				{
-					'relation':'schedule_approver',
+					'relation':'group',
 					'withTrashed': true,
 				},
+			];
+
+			query.where = [
 				{
-					'relation':'equipment_approver',
-					'withTrashed': true,
-				},
-			],
-			'where': [],
-			'approvals': true,
-			'paginate': 10,
-		}
+					'label':'id',
+					'condition':'=',
+					'value': $scope.config.id,
+				}
+			];
 
-		$scope.subheader.all.action = function(){
-			setInit($scope.subheader.all);
-		}
+			query.first = true;
 
-		$scope.init = function(){
-			Helper.get('/location')
+			Helper.post('/post/enlist', query)
 				.success(function(data){
-					$scope.locations = data;
-					$scope.subheader.navs = [];
-					
-					angular.forEach($scope.locations, function(location){
-						var item = {};
+					data.created_at = new Date(data.created_at);
+					data.chips = [];
 
-						item.id = location.id;
-						item.label = location.name;
-						item.request = {
-							'with': [
-								{
-									'relation':'location',
-									'withTrashed': true,
-								},
-								{
-									'relation':'user',
-									'withTrashed': true,
-								},
-								{
-									'relation':'schedule_approver',
-									'withTrashed': true,
-								},
-								{
-									'relation':'equipment_approver',
-									'withTrashed': true,
-								},
-							],
-							'where': [
-								{
-									'label':'location_id',
-									'condition':'=',
-									'value': location.id,
-								},
-							],
-							'approvals': true,
-							'paginate': 10,
-						}
-						item.menu = $scope.subheader.all.menu,
-						item.action = function(current){
-							setInit(current);
-						}
-
-						$scope.subheader.navs.push(item);
+					angular.forEach(data.hashtags, function(hashtag){
+						data.chips.push(hashtag.tag);
 					});
 
-					setInit($scope.subheader.all);
+					$scope.repost.post = data;
+					$scope.repost.post.allow_comments = data.allow_comments ? true : false;
+
+					$scope.repost.group_id = data.group_id ? data.group_id : 'all';
 				})
+				.error(function(){
+					Helper.error();
+				});
 		}
 
-		$scope.init();
+		else if($scope.config.action == 'edit')
+		{
+			var query = {};
+
+			query.with = [
+				{
+					'relation':'post',
+					'withTrashed': false,	
+				},
+			];
+
+			query.where = [
+				{
+					'label':'id',
+					'condition':'=',
+					'value': $scope.config.id,
+				}
+			];
+
+			query.first = true;
+
+			Helper.post('/repost/enlist', query)
+				.success(function(data){
+					data.post.created_at = new Date(data.post.created_at);
+					data.post.chips = [];
+
+					angular.forEach(data.post.hashtags, function(hashtag){
+						data.post.chips.push(hashtag.tag);
+					});
+
+					$scope.repost.post = data.post;
+					$scope.repost.post.allow_comments = data.post.allow_comments ? true : false;
+
+					$scope.repost.group_id = data.post.group_id ? data.post.group_id : 'all';
+
+					Helper.get('/post/' + $scope.config.id)
+						.success(function(data){
+							$scope.repost.id = data.repost_id;
+							$scope.repost.title = data.title;
+							$scope.repost.allow_comments = data.allow_comments ? true : false;
+							$scope.repost.group_id = data.group_id ? data.group_id : 'all';
+						});
+				})
+				.error(function(){
+					Helper.error();
+				});
+
+		}
+
+		$scope.busy = false;
+
+		$scope.cancel = function(){
+			Helper.cancel();
+		}		
+
+		$scope.submit = function(){
+			if($scope.repostForm.$invalid){
+				angular.forEach($scope.repostForm.$error, function(field){
+					angular.forEach(field, function(errorField){
+						errorField.$setTouched();
+					});
+				});
+
+				return;
+			}
+
+			$scope.busy = true;
+
+			if($scope.config.action == 'create')
+			{
+				Helper.post('/repost', $scope.repost)
+					.success(function(duplicate){
+						if(duplicate){
+							$scope.busy = false;
+							return;
+						}
+
+						Helper.stop();
+					})
+					.error(function(){
+						$scope.busy = false;
+						$scope.error = true;
+					});
+			}
+			else if($scope.config.action == 'edit')
+			{
+				Helper.put('/repost' + '/' + $scope.config.id, $scope.repost)
+					.success(function(duplicate){
+						if(duplicate){
+							$scope.busy = false;
+							return;
+						}
+
+						Helper.stop();
+					})
+					.error(function(){
+						$scope.busy = false;
+						$scope.error = true;
+					});
+			}
+		}
 	}]);
 app
-	.controller('approvalsToolbarController', ['$scope', '$filter', function($scope, $filter){
-		$scope.toolbar.childState = 'Approvals';
+	.controller('repostsDialogController', ['$scope', 'Helper', function($scope, Helper){
+		$scope.cancel = function(){
+			Helper.cancel();
+		}
+
+		var post = Helper.fetch();
+
+		var query = {};
+
+		query.with = [
+			{
+				'relation': 'post',
+				'withTrashed': false,
+			}
+		];
+
+		query.where = [
+			{
+				'label': 'post_id',
+				'condition' : '=',
+				'value': post.id
+			}
+		];
+
+		query.orderBy = [
+			{
+				'column':'created_at',
+				'order':'desc',
+			},
+		];
+
+		query.paginate = 10;
+
+		$scope.repost = {};
+		$scope.repost.items = [];
+		$scope.repost.page = 2;
+
+		var pushItem = function(data){
+			data.created_at = new Date(data.created_at);
+		}
+
+		Helper.post('/repost/enlist', query)
+			.success(function(data){
+				$scope.repost.details = data;
+				$scope.repost.items = data.data;
+				$scope.repost.show = true;
+
+				if(data.data.length){
+					angular.forEach(data.data, function(item){
+						pushItem(item);
+					})
+				}
+
+				$scope.repost.paginateLoad = function(){
+					// kills the function if ajax is busy or pagination reaches last page
+					if($scope.repost.busy || ($scope.repost.page > $scope.repost.details.last_page)){
+						$scope.isLoading = false;
+						return;
+					}
+					/**
+					 * Executes pagination call
+					 *
+					*/
+					// sets to true to disable pagination call if still busy.
+					$scope.repost.busy = true;
+					$scope.isLoading = true;
+					// Calls the next page of pagination.
+					Helper.post('/repost/enlist' + '?page=' + $scope.repost.page, query)
+						.success(function(data){
+							// increment the page to set up next page for next AJAX Call
+							$scope.repost.page++;
+
+							// iterate over each data then splice it to the data array
+							angular.forEach(data.data, function(item, key){
+								pushItem(item);
+								$scope.repost.items.push(item);
+							});
+
+							// Enables again the pagination call for next call.
+							$scope.repost.busy = false;
+							$scope.isLoading = false;
+						});
+				}
+			});
+	}]);
+app
+	.controller('postsToolbarController', ['$scope', '$filter', function($scope, $filter){
+		$scope.toolbar.childState = 'Home';
 
 		$scope.$on('close', function(){
 			$scope.hideSearchBar();
@@ -6660,7 +6769,7 @@ app
 		 *
 		*/
 		$scope.showSearchBar = function(){
-			$scope.reservation.busy = true;
+			$scope.post.busy = true;
 			$scope.searchBar = true;
 		};
 
@@ -6685,34 +6794,6 @@ app
 		};
 
 		$scope.toolbar.options = true;
-		
-		$scope.toolbar.sort = [
-			{
-				'label': 'Title',
-				'type': 'title',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Remarks',
-				'type': 'remarks',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Date Start',
-				'type': 'start',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Date End',
-				'type': 'end',
-				'sortReverse': false,
-			},
-			{
-				'label': 'Recently added',
-				'type': 'created_at',
-				'sortReverse': false,
-			},
-		];
 		
 		$scope.toolbar.refresh = function(){
 			$scope.$emit('refresh');

@@ -23,6 +23,11 @@ app
 				'icon': 'mdi-format-list-numbers',
 				'label': 'Training Room Reservations',
 			},
+			{
+				'state': 'main.notifications',
+				'icon': 'mdi-bell',
+				'label': 'Notifications',
+			},
 		];
 
 		$scope.menu.section = [
