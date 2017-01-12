@@ -842,7 +842,9 @@ class ReservationController extends Controller
 
             $user_groups = count($request->equipment_types) ? array(1,2) : array(2);
 
-            $users = User::whereNotIn('id', [$request->user()->id])->whereIn('group_id', $user_groups)->get();
+            $users = User::whereNotIn('id', [$request->user()->id])->whereIn('group_id', $user_groups)->whereHas('roles', function($query){
+                $query->where('name', 'approvals');
+            })->get();
 
             Notification::send($users, new ReservationCreated($reservation));
         });
@@ -963,7 +965,9 @@ class ReservationController extends Controller
             {
                 $user_groups = count($request->equipment_types) ? array(1,2) : array(2);
 
-                $users = User::whereNotIn('id', [$request->user()->id])->whereIn('group_id', $user_groups)->get();
+                $users = User::whereNotIn('id', [$request->user()->id])->whereIn('group_id', $user_groups)->whereHas('roles', function($query){
+                    $query->where('name', 'approvals');
+                })->get();
 
                 Notification::send($users, new ReservationUpdated($reservation));
             }
@@ -993,7 +997,9 @@ class ReservationController extends Controller
             {
                 $group = $reservation->equipment_types_count ? array(1,2) : array(2);
 
-                $users = User::whereNotIn('id', [Auth::user()->id])->whereIn('group_id', $group)->get();
+                $users = User::whereNotIn('id', [Auth::user()->id])->whereIn('group_id', $group)->whereHas('roles', function($query){
+                    $query->where('name', 'approvals');
+                })->get();
 
                 Notification::send($users, new ReservationCancelled($reservation));
             }
