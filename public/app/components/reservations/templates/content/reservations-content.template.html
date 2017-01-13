@@ -28,12 +28,12 @@
 
 				        <md-menu-content width="3">
 							<!-- Reschedule -->
-				            <md-menu-item ng-if="user.id == reservation.user_id">
+				            <md-menu-item ng-if="current_user.id == reservation.user_id">
 					            <md-button aria-label="Reschedule" ng-click="editReservation(reservation)" flex>
 					                Reschedule
 					            </md-button>
 				        	</md-menu-item>
-				        	<md-menu-item ng-if="user.id == reservation.user_id">
+				        	<md-menu-item ng-if="current_user.id == reservation.user_id || current_user.super_admin">
 					            <!-- Cancel -->
 					            <md-button aria-label="Cancel" ng-click="deleteReservation(reservation)" flex>
 					                Cancel
@@ -62,7 +62,7 @@
 						<h4>{{reservation.user.name}} - {{reservation.user.email}}</h4>
 						<p>{{reservation.location.name}} - {{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{reservation.start | date: 'hh:mma'}} to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span></p>
 					</div>
-					<md-menu md-position-mode="target-right target" class="md-secondary" ng-show="reservation.options" ng-if="user.id == reservation.user_id || current_user.can_approve">
+					<md-menu md-position-mode="target-right target" class="md-secondary" ng-show="reservation.options" ng-if="current_user.id == reservation.user_id || current_user.can_approve">
 						<md-button aria-label="Menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
 				            <md-icon class="mdi mdi-dots-vertical grey"></md-icon>
 				            <md-tooltip>Edit or delete this</md-tooltip>
@@ -70,7 +70,7 @@
 
 				        <md-menu-content width="3">
 							<!-- Edit -->
-				            <md-menu-item ng-if="!reservation.equipment_approver_id && !reservation.schedule_approver_id && user.id == reservation.user_id">
+				            <md-menu-item ng-if="!reservation.equipment_approver_id && !reservation.schedule_approver_id && current_user.id == reservation.user_id">
 					            <md-button aria-label="Edit" ng-click="editReservation(reservation)" flex>
 					                Edit
 					            </md-button>
