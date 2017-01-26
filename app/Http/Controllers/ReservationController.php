@@ -987,7 +987,7 @@ class ReservationController extends Controller
 
         $this->authorize('delete', $reservation);
 
-        DB::transaction(function() use($reservation){        
+        DB::transaction(function() use($reservation, $id){        
             if($reservation->equipment_types_count)
             {
                 ReservationEquipment::where('reservation_id', $id)->delete();
