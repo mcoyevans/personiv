@@ -46,7 +46,7 @@ class ReservationCreated extends Notification
                     ->subject('New Room Reservation')
                     ->greeting('Hey there!')
                     ->line($this->reservation->user->name . ' requested for a room reservation that needs your approval.')
-                    ->action('View Reservation', 'http://172.17.0.210:914/home#/approvals/');
+                    ->action('View Reservation', 'http://172.17.0.210:914/home#/approvals');
     }
 
     /**

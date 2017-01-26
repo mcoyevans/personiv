@@ -46,7 +46,7 @@ class PostCreated extends Notification
             ->subject('New Post!')
             ->greeting('Hey there!')        
             ->line($this->post->user->name. ' created a new post at Personiv portal.')
-            ->action('View Post', 'http://localhost:91/')
+            ->action('View Post', 'http://172.17.0.210:914/home#/')
             ->line('Thank you for using our application!');
     }
 
