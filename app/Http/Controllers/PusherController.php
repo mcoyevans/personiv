@@ -12,7 +12,7 @@ class PusherController extends Controller
 {
     public function auth(Request $request)
     {
-    	$pusher = new Pusher('0521fe41d7482726355c', 'bb83b0ac81fb9d12d190', '253851');
+    	$pusher = new Pusher('73a46f761ea4637481b5', '5c3f50ca95b3f8bb5fa5', '253849');
     	
     	echo $pusher->socket_auth($request->channel_name, $request->socket_id);
     }

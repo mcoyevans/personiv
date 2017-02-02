@@ -50,7 +50,7 @@ class ReservationDisapproved extends Notification
                     ->subject('Disapproved Room Reservation')
                     ->greeting('Sorry,')
                     ->line('Your room reservation for ' . $this->reservation->location->name . ' around ' . Carbon::parse($this->reservation->start)->toDayDateTimeString() . ' to ' . Carbon::parse($this->reservation->end)->toDayDateTimeString()  . ' has been disapproved by '. $this->user->name . '.')
-                    ->action('View Reservation', 'http://172.17.0.210:914/home#/reservations/');
+                    ->action('View Reservation', 'http://172.17.0.210:914/home#/reservations');
     }
 
     /**

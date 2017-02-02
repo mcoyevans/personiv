@@ -44,7 +44,7 @@ class CommentCreated extends Notification
     {
         return (new MailMessage)
                     ->line('The introduction to the notification.')
-                    ->action('Notification Action', 'https://laravel.com')
+                    ->action('Notification Action', 'http://172.17.0.210:914/home#/')
                     ->line('Thank you for using our application!');
     }
 
