@@ -14,6 +14,7 @@ use App\Post;
 use App\User;
 
 use App\Notifications\ReservationApproved;
+use App\Notifications\ReservationApprovedConfirmation;
 use App\Notifications\ReservationCreated;
 use App\Notifications\ReservationUpdated;
 use App\Notifications\ReservationCancelled;
@@ -98,6 +99,8 @@ class ReservationController extends Controller
                 $recipient = User::find($reservation->user_id);
 
                 Notification::send($recipient, new ReservationApproved($reservation, $request->user()));
+
+                Notification::send($request->user(), new ReservationApprovedConfirmation($reservation, $recipient, $request->user()));
             }
         });
     }
