@@ -49,7 +49,7 @@ class ReservationApprovedConfirmation extends Notification
         return (new MailMessage)
             ->subject('Approved Room Reservation Confirmation')
             ->greeting('Hi!')
-            ->line('You just approved ' . $this->user->name . '\'s request for room reservation at '. $this->reservation->location->name .' around '. Carbon::parse($this->reservation->start)->toDayDateTimeString() . ' to ' . Carbon::parse($this->reservation->end)->toDayDateTimeString() '.')
+            ->line('You just approved ' . $this->user->name . '\'s request for room reservation at '. $this->reservation->location->name .' around '. Carbon::parse($this->reservation->start)->toDayDateTimeString() . ' to ' . Carbon::parse($this->reservation->end)->toDayDateTimeString(). '.')
             ->action('View Reservation', 'http://172.17.0.210:914/home#/reservations');
     }
 
