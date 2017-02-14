@@ -19,6 +19,7 @@ use App\Notifications\ReservationCreated;
 use App\Notifications\ReservationUpdated;
 use App\Notifications\ReservationCancelled;
 use App\Notifications\ReservationDisapproved;
+use App\Notifications\RescheduleReservation;
 use App\Notifications\PostCreated;
 
 use Auth;
@@ -29,6 +30,31 @@ use Notification;
 
 class ReservationController extends Controller
 {
+    /**
+     * Reschedule reservation by F&A.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function reschedule(Request $request)
+    {
+        if(!Gate::forUser($request->user())->allows('approvals'))
+        {
+            abort(403, 'Unauthorized action');
+        }
+
+        $reservation = Reservation::find($request->id);
+
+        $reservation->schedule_approver_id = $request->user()->id;
+
+        $reservation->disapproved_schedule = 1;
+
+        $reservation->save();
+
+        $recipient = User::find($reservation->user_id);
+
+        Notification::send($recipient, new RescheduleReservation($reservation, $request->user()));
+    }
+
     /**
      * Approve reservation according to users authorization.
      *
@@ -939,6 +965,7 @@ class ReservationController extends Controller
             $reservation->start = $start->toDateTimeString();
             $reservation->schedule_approver_id = null;
             $reservation->equipment_approver_id = null;
+            $reservation->disapproved_schedule = 0;
 
             if(Carbon::parse($request->date_start .' '. $request->time_start)->gt(Carbon::parse($request->date_end .' '. $request->time_end)))
             {

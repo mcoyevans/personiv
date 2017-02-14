@@ -47,6 +47,9 @@
         </md-dialog-content>
     </form>
     <div layout="row" layout-align="end center">   
+        <md-button ng-if="!busy" class="md-primary" aria-label="Submit" ng-click="disapprove()" ng-if="approver.group_id == 2">
+            Disapprove
+        </md-button>
         <md-button ng-if="!busy" class="md-primary" aria-label="Submit" ng-click="submit()">
             Approve
         </md-button>

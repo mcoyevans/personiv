@@ -28,7 +28,7 @@
         		</div>
         	</md-list-item>
         </md-list>
-        <div layout="row">
+        <div layout="row" ng-if="!reservation.disapproved_schedule">
             <div flex-sm="100" flex-gt-sm ng-if="reservation.equipment_types.length">            
                 <strong>Reserved equipment:</strong>
                 <ul ng-if="reservation.equipment_types.length">
@@ -40,6 +40,14 @@
                 <ul ng-if="reservation.schedule_approver || reservation.equipment_approver">
                     <li ng-if="reservation.equipment_types">Equipment: <span ng-if="!reservation.equipment_approver.name">N/A</span>{{reservation.equipment_approver.name}}</li>
                     <li>Schedule: <span ng-if="!reservation.schedule_approver.name">N/A</span>{{reservation.schedule_approver.name}}</li>
+                </ul>
+            </div>
+        </div>
+        <div layout="row" ng-if="reservation.disapproved_schedule">
+            <div flex-sm="100" flex-gt-sm>
+                <strong>Disapproved by:</strong>
+                <ul ng-if="reservation.schedule_approver">
+                    <li>Schedule: {{reservation.schedule_approver.name}}</li>
                 </ul>
             </div>
         </div>

@@ -61,8 +61,14 @@ app
 	    	}
 
 	    	Helper.customDialog(dialog)
-	    		.then(function(){
-	    			Helper.notify('Reservation approved.');
+	    		.then(function(reschedule){
+	    			if(reschedule)
+	    			{
+		    			Helper.notify('Reservation disapproved.');
+	    			}
+	    			else{
+		    			Helper.notify('Reservation approved.');
+	    			}
 	    			$scope.refresh();
 	    		}, function(){
 	    			return;
