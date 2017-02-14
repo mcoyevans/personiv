@@ -18,6 +18,7 @@ use App\Notifications\ReservationApprovedConfirmation;
 use App\Notifications\ReservationCreated;
 use App\Notifications\ReservationUpdated;
 use App\Notifications\ReservationCancelled;
+use App\Notifications\ReservationDeleted;
 use App\Notifications\ReservationDisapproved;
 use App\Notifications\RescheduleReservation;
 use App\Notifications\PostCreated;
@@ -1034,7 +1035,7 @@ class ReservationController extends Controller
                 Notification::send($users, new ReservationCancelled($reservation));
             }
             else{
-                Notification::send($reservation->user, new ReservationDisapproved($reservation, Auth::user()));
+                Notification::send($reservation->user, new ReservationDeleted($reservation, Auth::user()));
             }
 
             $reservation->delete();
