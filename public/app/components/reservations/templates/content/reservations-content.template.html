@@ -33,7 +33,7 @@
 					                Reschedule
 					            </md-button>
 				        	</md-menu-item>
-				        	<md-menu-item ng-if="current_user.id == reservation.user_id || current_user.super_admin">
+				        	<md-menu-item ng-if="current_user.id == reservation.user_id || current_user.super_admin || current_user.can_approve">
 					            <!-- Cancel -->
 					            <md-button aria-label="Cancel" ng-click="deleteReservation(reservation)" flex>
 					                Cancel
