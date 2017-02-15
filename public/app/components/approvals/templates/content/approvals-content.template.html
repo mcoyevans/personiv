@@ -1,20 +1,11 @@
 <div infinite-scroll='reservation.paginateLoad()' infinite-scroll-distance="1" infinite-scroll-disabled="reservation.busy" infinite-scroll-parent ng-if="reservation.show">
 	<md-list>
-		<md-list-item ng-if="!selectMultiple" class="md-3-line md-long-text" ng-repeat="reservation in reservation.items | filter: toolbar.searchText | orderBy:sortType:sortReverse" ng-click="viewReservation(reservation)">
+		<md-list-item class="md-3-line md-long-text" ng-repeat="reservation in reservation.items | filter: toolbar.searchText | orderBy:sortType:sortReverse" ng-click="viewReservation(reservation)">
 			<div class="md-list-item-text">
 				<h3>{{reservation.title}}</h3>
 				<h4>{{reservation.user.name}} - {{reservation.user.email}}</h4>
-				<p>{{reservation.location.name}} - {{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{reservation.start | date: 'hh:mma'}} to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span></p>
+				<p>{{reservation.location.name}} | {{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{reservation.start | date: 'hh:mma'}} to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span> {{reservation.end | date: 'hh:mma'}}</span> | {{reservation.participants}} participant<span ng-if="reservation.participants > 1">s</span></p>
 			</div>
-		</md-list-item>
-		<!-- Select Multiple -->
-		<md-list-item ng-if="selectMultiple" class="md-3-line md-long-text" ng-repeat="reservation in reservation.items | filter: toolbar.searchText | orderBy:sortType:sortReverse">
-			<div class="md-list-item-text">
-				<h3>{{reservation.title}}</h3>
-				<h4>{{reservation.user.name}} - {{reservation.user.email}}</h4>
-				<p>{{reservation.location.name}} - {{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{reservation.start | date: 'hh:mma'}} to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span></p>
-			</div>
-			<md-checkbox aria-label="Include {{reservation.file_name}}" class="md-primary" ng-model="reservation.include"></md-checkbox>
 		</md-list-item>
 	</md-list>
 </div>

@@ -21,6 +21,7 @@
                         <div ng-message="required">Title is required.</div>
                     </div>
                 </md-input-container>
+                <!-- Location -->
                 <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
                     <label>Location</label>
                     <md-select name="Location" ng-model="reservation.location_id" required ng-disabled="busy" ng-change="locationChange()" ng-if="locations.length && reservation">
@@ -28,6 +29,17 @@
                     </md-select>
                     <div ng-messages="reservationForm.Location.$error" ng-if="reservationForm.Location.$touched">
                         <div ng-message="required">Location is required.</div>
+                    </div>
+                </md-input-container>
+            </div>
+            <div layout="row" flex>
+                <!-- Participants -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Number of Participants</label>
+                    <input name="Participants" type="number" ng-model="reservation.participants" required min="1" ng-disabled="busy" ng-change="floorParticipants()">
+                    <div ng-messages="reservationForm.Participants.$error" ng-if="reservationForm.Participants.$touched">
+                        <div ng-message="required">Number of participants</div>
+                        <div ng-message="min">Number of participants cannot be less than one.</div>
                     </div>
                 </md-input-container>
             </div>

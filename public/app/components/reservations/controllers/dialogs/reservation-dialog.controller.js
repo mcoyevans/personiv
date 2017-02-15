@@ -55,6 +55,10 @@ app
 			$scope.reservation.until = $scope.fallback.until ? new Date($scope.fallback.until) : null;
 		}
 
+		$scope.floorParticipants = function(){
+			$scope.reservation.participants = Math.floor($scope.reservation.participants);
+		}
+
 		$scope.setUntil = function(){
 			$scope.reservation.until = new Date();
 		}

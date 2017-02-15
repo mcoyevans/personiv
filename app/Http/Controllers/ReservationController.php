@@ -537,6 +537,7 @@ class ReservationController extends Controller
 
         $this->validate($request, [
             'title' => 'required',
+            'participants' => 'required',
             'location_id' => 'required',
             'date_start' => 'required',
             'date_end' => 'required',
@@ -741,6 +742,7 @@ class ReservationController extends Controller
 
             $reservation->title = $request->title;
             $reservation->remarks = $request->remarks;
+            $reservation->participants = $request->participants;
             $reservation->location_id = $request->location_id;
             $reservation->user_id = $request->user()->id;
             $reservation->start = $start->toDateTimeString();
@@ -915,6 +917,7 @@ class ReservationController extends Controller
 
         $this->validate($request, [
             'title' => 'required',
+            'participants' => 'required',
             'location_id' => 'required',
             'date_start' => 'required',
             'date_end' => 'required',
@@ -961,6 +964,7 @@ class ReservationController extends Controller
 
             $reservation->title = $request->title;
             $reservation->remarks = $request->remarks;
+            $reservation->participants = $request->participants;
             $reservation->location_id = $request->location_id;
             $reservation->user_id = $request->user()->id;
             $reservation->start = $start->toDateTimeString();
