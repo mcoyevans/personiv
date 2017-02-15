@@ -463,9 +463,9 @@ class ReservationController extends Controller
         {
             $reservations->whereBetween($request->input('whereBetween.label'), [Carbon::parse($request->input('whereBetween.start')), Carbon::parse($request->input('whereBetween.end'))]);   
         }
-        else{
-            $reservations->whereBetween('start', [Carbon::parse('first day of this month'), Carbon::parse('first day of next month')]);   
-        }
+        // else{
+        //     $reservations->whereBetween('start', [Carbon::parse('first day of this month'), Carbon::parse('first day of next month')]);   
+        // }
 
         if($request->has('approvals'))
         {
