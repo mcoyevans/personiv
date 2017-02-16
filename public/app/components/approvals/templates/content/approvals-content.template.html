@@ -4,7 +4,7 @@
 			<div class="md-list-item-text">
 				<h3>{{reservation.title}}</h3>
 				<h4>{{reservation.user.name}} - {{reservation.user.email}}</h4>
-				<p>{{reservation.location.name}} | {{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{reservation.start | date: 'hh:mma'}} to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span> {{reservation.end | date: 'hh:mma'}}</span> <span ng-if="reservation.participants">| {{reservation.participants}} participant</span><span ng-if="reservation.participants > 1">s</span></p>
+				<p>{{reservation.location.name}} | {{reservation.start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{reservation.start | date: 'hh:mma'}} to <span ng-if="reservation.start.toDateString() != reservation.end.toDateString()">{{reservation.end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{reservation.end | date: 'hh:mma'}}</span>  <span ng-if="reservation.participants">| {{reservation.participants}} participant</span><span ng-if="reservation.participants > 1">s</span></p>
 			</div>
 		</md-list-item>
 	</md-list>

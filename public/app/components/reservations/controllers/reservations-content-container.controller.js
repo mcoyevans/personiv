@@ -142,11 +142,7 @@ app
 		            $scope.dateRange.start = new Date(date.start._d).toDateString();
 		            $scope.dateRange.end = new Date(date.end._d).toDateString();
 
-		            Helper.set($scope.dateRange);
-
-		            $scope.$broadcast('dateRange');
-
-		            $scope.init($scope.subheader.current);
+		            $scope.refresh();
 		        }
 		    }
 	    };
@@ -240,6 +236,8 @@ app
 								});
 
 								$scope.eventSources.push($scope.reservation.approved);
+
+								$scope.isLoading = false;
 							
 							}
 							
