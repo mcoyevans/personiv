@@ -787,6 +787,7 @@ class ReservationController extends Controller
 
                         $repeat->title = $request->title;
                         $repeat->remarks = $request->remarks;
+                        $repeat->participants = $request->participants;
                         $repeat->location_id = $request->location_id;
                         $repeat->user_id = $request->user()->id;
                         $repeat->start = $date_start->toDateTimeString();
@@ -818,6 +819,7 @@ class ReservationController extends Controller
 
                         $repeat->title = $request->title;
                         $repeat->remarks = $request->remarks;
+                        $repeat->participants = $request->participants;
                         $repeat->location_id = $request->location_id;
                         $repeat->user_id = $request->user()->id;
                         $repeat->start = $date_start->toDateTimeString();
@@ -849,6 +851,7 @@ class ReservationController extends Controller
 
                         $repeat->title = $request->title;
                         $repeat->remarks = $request->remarks;
+                        $repeat->participants = $request->participants;
                         $repeat->location_id = $request->location_id;
                         $repeat->user_id = $request->user()->id;
                         $repeat->start = $date_start->toDateTimeString();
@@ -957,10 +960,7 @@ class ReservationController extends Controller
         DB::transaction(function() use($request, $start, $end, $id){
             $reservation = Reservation::where('id', $id)->first();
 
-            if($reservation->equipment_approver_id || $reservation->schedule_approver_id)
-            {
-                $notify = true;
-            }
+            $notify =  $reservation->equipment_approver_id || $reservation->schedule_approver_id ? true : false;
 
             $reservation->title = $request->title;
             $reservation->remarks = $request->remarks;
