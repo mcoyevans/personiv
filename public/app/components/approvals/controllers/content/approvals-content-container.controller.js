@@ -191,7 +191,7 @@ app
 						$scope.reservation.busy = true;
 						$scope.isLoading = true;
 						// Calls the next page of pagination.
-						Helper.post('/reservation/enlist', $scope.reservation.page)
+						Helper.post('/reservation/enlist?page=' + $scope.reservation.page, query.request)
 							.success(function(data){
 								// increment the page to set up next page for next AJAX Call
 								$scope.reservation.page++;
