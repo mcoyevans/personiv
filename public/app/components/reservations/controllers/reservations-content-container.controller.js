@@ -142,7 +142,13 @@ app
 		            $scope.dateRange.start = new Date(date.start._d).toDateString();
 		            $scope.dateRange.end = new Date(date.end._d).toDateString();
 
-		            $scope.refresh();
+		            $scope.isLoading = true;
+
+					Helper.set($scope.dateRange);
+
+		            $scope.$broadcast('dateRange');
+
+		  			$scope.init($scope.subheader.current);
 		        }
 		    }
 	    };
