@@ -73,9 +73,13 @@ class ReservationController extends Controller
                 // in between approved reservation
                 $query->where('start', '<=', Carbon::parse($request->start))->where('end', '>=', Carbon::parse($request->end));
                 // overlap on start of approved reservation
-                $query->orWhereBetween('start', [Carbon::parse($request->start), Carbon::parse($request->end)]);
+                $query->orWhere(function($query) use($request){
+                    $query->where('start', '>', Carbon::parse($request->start))->where('end', '<', Carbon::parse($request->end));
+                });
                 // overlap on end of approved reservation
-                $query->orWhereBetween('end', [Carbon::parse($request->start), Carbon::parse($request->end)]);
+                $query->orWhere(function($query) use($request){
+                    $query->where('end', '>', Carbon::parse($request->start))->where('end', '<', Carbon::parse($request->end));
+                });
             })->first();
 
         if($duplicate)
