@@ -763,7 +763,7 @@ class ReservationController extends Controller
 
             $reservation->save();
 
-            $reservation->load('user');
+            $reservation->load('user', 'location');
 
             if($request->has('equipment_types'))
             {
@@ -1000,7 +1000,7 @@ class ReservationController extends Controller
 
             $reservation->save();
 
-            $reservation->load('user');
+            $reservation->load('user', 'location');
 
             if($notify)
             {

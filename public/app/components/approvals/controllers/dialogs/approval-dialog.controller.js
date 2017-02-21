@@ -75,6 +75,8 @@ app
 				return;
 			}
 
+			$scope.duplicate = false;
+
 			if(!$scope.duplicate)
 			{
 				$scope.busy = true;

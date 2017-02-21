@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
 use App\Reservation;
+use Carbon\Carbon;
 
 class ReservationUpdated extends Notification
 {
@@ -46,6 +47,7 @@ class ReservationUpdated extends Notification
                     ->subject('Updated Room Reservation')
                     ->greeting('Hello!')
                     ->line($this->reservation->user->name . ' needs approval for his/her updated room reservation.')
+                    ->line($this->reservation->location->name . ' from ' . Carbon::parse($this->reservation->start)->toDayDateTimeString() . ' to ' . Carbon::parse($this->reservation->end)->toDayDateTimeString())
                     ->action('View Reservation', 'http://172.17.0.210:914/home#/approvals');
     }
 
