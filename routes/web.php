@@ -129,6 +129,7 @@ Route::group(['prefix' => 'repost'], function(){
 Route::group(['prefix' => 'reservation'], function(){
 	Route::post('approve', 'ReservationController@approve');
 	Route::post('disapprove', 'ReservationController@disapprove');
+	Route::post('reschedule', 'ReservationController@reschedule');
 	Route::post('enlist', 'ReservationController@enlist');
 	Route::post('check-duplicate', 'ReservationController@checkDuplicate');
 });
