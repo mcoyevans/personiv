@@ -199,7 +199,8 @@ class ReservationController extends Controller
 
                     if($request->has('id'))
                     {
-                        $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        // $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        $reservation = Reservation::whereNotIn('id', [$request->id])->where('location_id', $request->location_id)
                             ->where(function($query) use ($date_start, $date_end){
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
@@ -216,7 +217,8 @@ class ReservationController extends Controller
                             })->first();
                     }
                     else{
-                        $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        // $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        $reservation = Reservation::where('location_id', $request->location_id)
                             ->where(function($query) use ($date_start, $date_end){
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
@@ -250,7 +252,8 @@ class ReservationController extends Controller
 
                     if($request->has('id'))
                     {
-                        $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        // $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        $reservation = Reservation::whereNotIn('id', [$request->id])->where('location_id', $request->location_id)
                             ->where(function($query) use ($date_start, $date_end){
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
@@ -267,7 +270,8 @@ class ReservationController extends Controller
                             })->first();
                     }
                     else{
-                        $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        // $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        $reservation = Reservation::where('location_id', $request->location_id)
                             ->where(function($query) use ($date_start, $date_end){
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
@@ -301,7 +305,8 @@ class ReservationController extends Controller
 
                     if($request->has('id'))
                     {
-                        $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        // $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        $reservation = Reservation::whereNotIn('id', [$request->id])->where('location_id', $request->location_id)
                             ->where(function($query) use ($date_start, $date_end){
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
@@ -318,7 +323,8 @@ class ReservationController extends Controller
                             })->first();
                     }
                     else{
-                        $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        // $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        $reservation = Reservation::where('location_id', $request->location_id)
                             ->where(function($query) use ($date_start, $date_end){
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
@@ -347,7 +353,8 @@ class ReservationController extends Controller
             return response()->json(false);
         }
 
-        $new = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+        // $new = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+        $new = Reservation::where('location_id', $request->location_id)
             ->where(function($query) use ($start, $end){
                 // in between approved reservation
                 $query->where('start', '<=', $start)->where('end', '>=', $end);
@@ -363,7 +370,8 @@ class ReservationController extends Controller
                 });
             })->first();
 
-        $existing = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+        // $existing = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+        $existing = Reservation::whereNotIn('id', [$request->id])->where('location_id', $request->location_id)
             ->where(function($query) use ($start, $end){
                 // in between approved reservation
                 $query->where('start', '<=', $start)->where('end', '>=', $end);
@@ -576,7 +584,8 @@ class ReservationController extends Controller
 
                     if($request->has('id'))
                     {
-                        $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        // $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        $reservation = Reservation::whereNotIn('id', [$request->id])->where('location_id', $request->location_id)
                             ->where(function($query) use ($date_start, $date_end){
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
@@ -593,7 +602,8 @@ class ReservationController extends Controller
                             })->first();
                     }
                     else{
-                        $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        // $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        $reservation = Reservation::where('location_id', $request->location_id)
                             ->where(function($query) use ($date_start, $date_end){
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
@@ -627,7 +637,8 @@ class ReservationController extends Controller
 
                     if($request->has('id'))
                     {
-                        $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        // $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        $reservation = Reservation::whereNotIn('id', [$request->id])->where('location_id', $request->location_id)
                             ->where(function($query) use ($date_start, $date_end){
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
@@ -644,7 +655,8 @@ class ReservationController extends Controller
                             })->first();
                     }
                     else{
-                        $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        // $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        $reservation = Reservation::where('location_id', $request->location_id)
                             ->where(function($query) use ($date_start, $date_end){
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
@@ -678,7 +690,8 @@ class ReservationController extends Controller
 
                     if($request->has('id'))
                     {
-                        $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        // $reservation = Reservation::whereNotIn('id', [$request->id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        $reservation = Reservation::whereNotIn('id', [$request->id])->where('location_id', $request->location_id)
                             ->where(function($query) use ($date_start, $date_end){
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
@@ -695,7 +708,8 @@ class ReservationController extends Controller
                             })->first();
                     }
                     else{
-                        $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        // $reservation = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+                        $reservation = Reservation::where('location_id', $request->location_id)
                             ->where(function($query) use ($date_start, $date_end){
                                 // in between approved reservation
                                 $query->where('start', '<=', $date_start)->where('end', '>=', $date_end);
@@ -722,7 +736,8 @@ class ReservationController extends Controller
             }
         }
 
-        $duplicate = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+        // $duplicate = Reservation::whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+        $duplicate = Reservation::where('location_id', $request->location_id)
             ->where(function($query) use ($start, $end){
                 // in between approved reservation
                 $query->where('start', '<=', $start)->where('end', '>=', $end);
@@ -942,7 +957,8 @@ class ReservationController extends Controller
             abort(422, 'Reservation cannot be earlier than current time.');
         }
 
-        $duplicate = Reservation::whereNotIn('id', [$id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+        // $duplicate = Reservation::whereNotIn('id', [$id])->whereNotNull('schedule_approver_id')->where('location_id', $request->location_id)
+        $duplicate = Reservation::whereNotIn('id', [$id])->where('location_id', $request->location_id)
             ->where(function($query) use ($start, $end){
                 // in between approved reservation
                 $query->where('start', '<=', $start)->where('end', '>=', $end);
