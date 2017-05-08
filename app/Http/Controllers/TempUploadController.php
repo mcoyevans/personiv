@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use DB;
 use Gate;
 use Storage;
+use Image;
 
 class TempUploadController extends Controller
 {
@@ -49,6 +50,23 @@ class TempUploadController extends Controller
     }
 
     /**
+     * Upload form file.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function uploadFile(Request $request)
+    {
+        if(Gate::forUser($request->user())->denies('manage-forms'))
+        {
+            abort(403, 'Unauthorized action');
+        }
+
+        $path = Storage::putFile('temp', $request->file('file'));
+
+        return response()->json($path);
+    }
+
+    /**
      * Upload post photo.
      *
      * @return \Illuminate\Http\Response
@@ -61,6 +79,11 @@ class TempUploadController extends Controller
         }
 
         $path = Storage::putFile('temp', $request->file('file'));
+
+        Image::make(Storage::get($path))->resize(null, 360, function($constraint){
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        })->save(storage_path() .'/app/'. $path);
 
         $temp_upload = new TempUpload;
 
@@ -78,7 +101,7 @@ class TempUploadController extends Controller
      */
     public function index()
     {
-        //
+        // 
     }
 
     /**

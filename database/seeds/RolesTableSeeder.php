@@ -20,7 +20,9 @@ class RolesTableSeeder extends Seeder
         	['name' => 'manage-users', 'description' => 'Manage own group users.', 'super_admin_action' => true],
         	['name' => 'manage-locations', 'description' => 'Manage locations for reservations.', 'super_admin_action' => true],
         	['name' => 'manage-equipment', 'description' => 'Manage equipment for reservation.', 'super_admin_action' => true],
-        	['name' => 'manage-links', 'description' => 'Manage local app links.', 'super_admin_action' => true],
+            ['name' => 'manage-links', 'description' => 'Manage local app links.', 'super_admin_action' => true],
+            ['name' => 'manage-birthdays', 'description' => 'Manage birthday celebrants.', 'super_admin_action' => true],
+        	['name' => 'manage-forms', 'description' => 'Manage forms.', 'super_admin_action' => true],
         ]);
     }
 }

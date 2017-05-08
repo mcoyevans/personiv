@@ -1,6 +1,6 @@
 guest
 	.controller('reservationsToolbarController', ['$scope', '$filter', function($scope, $filter){
-		$scope.toolbar.childState = 'Reservations';
+		$scope.toolbar.childState = 'Room Reservations';
 
 		$scope.$on('close', function(){
 			$scope.hideSearchBar();

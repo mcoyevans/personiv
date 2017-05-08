@@ -81,10 +81,36 @@ app
 
 			Helper.confirm(dialog)
 				.then(function(){
+					Helper.preload();
 					Helper.delete('/reservation/' + data.id)
 						.success(function(){
 							$scope.refresh();
+							Helper.stop();
 							Helper.notify('Reservation deleted.');
+						})
+						.error(function(){
+							Helper.error();
+						});
+				}, function(){
+					return;
+				})
+	    }
+
+	    $scope.disapproveReservation = function(data){
+	    	var dialog = {};
+			dialog.title = 'Disapprove';
+			dialog.message = 'Disapprove this reservation?'
+			dialog.ok = 'Disapprove';
+			dialog.cancel = 'Cancel';
+
+			Helper.confirm(dialog)
+				.then(function(){
+					Helper.preload();
+					Helper.post('/reservation/disapprove', data)
+						.success(function(){
+							$scope.refresh();
+							Helper.stop();
+							Helper.notify('Reservation disapproved.');
 						})
 						.error(function(){
 							Helper.error();
@@ -116,11 +142,13 @@ app
 		            $scope.dateRange.start = new Date(date.start._d).toDateString();
 		            $scope.dateRange.end = new Date(date.end._d).toDateString();
 
-		            Helper.set($scope.dateRange);
+		            $scope.isLoading = true;
+
+					Helper.set($scope.dateRange);
 
 		            $scope.$broadcast('dateRange');
 
-		            $scope.init($scope.subheader.current);
+		  			$scope.init($scope.subheader.current);
 		        }
 		    }
 	    };
@@ -183,6 +211,10 @@ app
 						{
 							data.can_reserve = true;
 						}
+						if(role.name == 'approvals')
+						{
+							data.can_approve = true;
+						}
 					});
 
 					$scope.current_user = data;
@@ -199,7 +231,8 @@ app
 								angular.forEach(data, function(item){
 									pushItem(item);
 
-									if((item.schedule_approver_id && item.equipment_types_count && item.equipment_approver_id) || (item.schedule_approver_id && !item.equipment_types_count))
+									// if((item.schedule_approver_id && item.equipment_types_count && item.equipment_approver_id && !item.disapproved_schedule) || (item.schedule_approver_id && !item.equipment_types_count && !item.disapproved_schedule))
+									if(item.schedule_approver_id && !item.disapproved_schedule)
 									{
 										item.title = item.title + ' - ' + item.location.name;
 										$scope.reservation.approved.push(item);
@@ -210,9 +243,12 @@ app
 								});
 
 								$scope.eventSources.push($scope.reservation.approved);
+
+								$scope.isLoading = false;
 							
-								$scope.fab.show = $scope.current_user.can_reserve ? true : false;
 							}
+							
+							$scope.fab.show = $scope.current_user.can_reserve ? true : false;
 
 							$scope.refresh = function(){
 								$scope.isLoading = true;

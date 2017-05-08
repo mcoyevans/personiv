@@ -75,6 +75,8 @@ app
 				return;
 			}
 
+			$scope.duplicate = false;
+
 			if(!$scope.duplicate)
 			{
 				$scope.busy = true;
@@ -107,6 +109,21 @@ app
 							$scope.duplicate = true;
 							$scope.busy = false;
 						}
+					})
+					.error(function(){
+						$scope.busy = false;
+						$scope.error = true;
+					})
+			}
+		}
+
+		$scope.disapprove = function(){
+			if($scope.approver.group_id == 2){
+				$scope.busy = true;
+
+				Helper.post('/reservation/reschedule', $scope.reservation)
+					.success(function(){
+						Helper.stop(true);
 					})
 					.error(function(){
 						$scope.busy = false;

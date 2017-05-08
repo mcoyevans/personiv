@@ -42,7 +42,7 @@
 		        <md-menu-content width="4">
 		        	<md-subheader>Menu</md-subheader>
 	        		<!-- Posts -->
-		            <md-menu-item>
+		            <!-- <md-menu-item>
 		        		<md-button flex ui-sref="wall.posts">
 			                <div layout="row" flex>
 			                	<md-icon class="mdi mdi-bulletin-board grey"></md-icon>
@@ -50,14 +50,14 @@
 			                    <span flex class="left-text secondary-text">Posts</span>
 			                </div>
 			            </md-button>
-		        	</md-menu-item>
+		        	</md-menu-item> -->
 	        		<!-- Reservation -->
 		            <md-menu-item>
 		        		<md-button flex ui-sref="wall.reservations">
 			                <div layout="row" flex>
 			                	<md-icon class="mdi mdi-format-list-numbers grey"></md-icon>
 			                    <span flex="5"></span>
-			                    <span flex class="left-text secondary-text">Room Reservation</span>
+			                    <span flex class="left-text secondary-text">Training Room Reservation</span>
 			                </div>
 			            </md-button>
 		        	</md-menu-item>
@@ -80,6 +80,15 @@
 		              		</div>
 		              	</md-button>
 		            </md-menu-item>
+		            <md-subheader ng-if="menu.forms.length">Forms</md-subheader>
+		            <md-menu-item ng-repeat="form in menu.forms | orderBy:'name'">
+		              	<md-button aria-label="{{form.name}}" flex href="/form/{{form.id}}" target="_blank">
+		              		<div layout="row">
+			                	<span>{{form.name}}</span>
+			                	<span flex></span>
+		              		</div>
+		              	</md-button>
+		            </md-menu-item>
 		        </md-menu-content>
 		    </md-menu>
 		</div>
@@ -92,7 +101,7 @@
 	            <md-icon class="mdi mdi-chevron-down grey"></md-icon>
 	        </md-button>
 	        <md-menu-content width="4">
-	        	<md-subheader>Apps</md-subheader>
+	        	<!-- <md-subheader>Apps</md-subheader> -->
 	            <md-menu-item ng-repeat="link in menu.static | orderBy:'name'">
 	              	<md-button aria-label="{{link.name}}" flex href="{{link.link}}" target="_blank">
 	              		<div layout="row">
@@ -103,10 +112,27 @@
 	            </md-menu-item>
 	        </md-menu-content>
 	    </md-menu>
+	    <!-- Forms -->
+		<md-menu ng-if="menu.forms.length">
+	        <md-button aria-label="Open filters" class="md-primary" ng-click="$mdOpenMenu($event)">
+	            <span>Forms</span> 
+	            <md-icon class="mdi mdi-chevron-down grey"></md-icon>
+	        </md-button>
+	        <md-menu-content width="4">
+	            <md-menu-item ng-repeat="form in menu.forms | orderBy:'name'">
+	              	<md-button aria-label="{{form.name}}" flex href="/form/{{form.id}}" target="_blank">
+	              		<div layout="row">
+		                	<span>{{form.name}}</span>
+		                	<span flex></span>
+	              		</div>
+	              	</md-button>
+	            </md-menu-item>
+	        </md-menu-content>
+	    </md-menu>
 	    <!-- Posts -->
-		<md-button class="md-primary" ui-sref="wall.posts">Posts</md-button>
+		<!-- <md-button class="md-primary" ui-sref="wall.posts">Posts</md-button> -->
 	    <!-- Reservations -->
-		<md-button class="md-primary" ui-sref="wall.reservations">Room Reservation</md-button>
+		<md-button class="md-primary" ui-sref="wall.reservations">Training Room Reservation</md-button>
 		<!-- Login -->
 		<md-button class="md-primary" href="/login">Login</md-button>
 	</div>

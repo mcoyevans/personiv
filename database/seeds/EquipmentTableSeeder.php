@@ -13,18 +13,10 @@ class EquipmentTableSeeder extends Seeder
     {
         DB::table('equipment')->insert([
         	[
-        		'brand' => 'Mic',
-        		'model' => 'Mic',
+        		'brand' => 'Genius',
+        		'model' => 'Media Pointer 100',
         		'asset_tag' => 'PITD00001',
         		'equipment_type_id' => 1,
-        		'created_at' => Carbon\Carbon::now(),
-        		'updated_at' => Carbon\Carbon::now(),
-        	],
-        	[
-        		'brand' => 'Speaker',
-        		'model' => 'Speaker',
-        		'asset_tag' => 'PITD00002',
-        		'equipment_type_id' => 2,
         		'created_at' => Carbon\Carbon::now(),
         		'updated_at' => Carbon\Carbon::now(),
         	],

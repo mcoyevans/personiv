@@ -194,7 +194,7 @@ class SlideshowController extends Controller
                     'slides.'.$i.'.order' => 'required',
                 ]);
 
-                if(!isset($request->input('slides')[$i]['id']))
+                if(!isset($request->input('slides')[$i]['slideshow_id']))
                 {
                     $slide = new Slide([
                         'description' => isset($request->input('slides')[$i]['description']) ? $request->input('slides')[$i]['description'] : null,
@@ -214,7 +214,6 @@ class SlideshowController extends Controller
 
                     $slide->save();
                 }
-
             }
 
             if(count($slides))

@@ -24,6 +24,7 @@ Route::get('/home', 'HomeController@home');
 Route::resource('comment', 'CommentController');
 Route::resource('equipment', 'EquipmentController');
 Route::resource('equipment-type', 'EquipmentTypeController');
+Route::resource('form', 'FormController');
 Route::resource('group', 'GroupController');
 Route::resource('hashtag', 'HashtagController');
 Route::resource('link', 'LinkController');
@@ -38,6 +39,8 @@ Route::resource('slideshow', 'SlideshowController');
 Route::resource('slide', 'SlideController');
 Route::resource('user', 'UserController');
 Route::resource('user-role', 'UserRoleController');
+Route::resource('birthday', 'BirthdayController');
+Route::resource('upload', 'UploadController');
 
 Route::post('/pusher/auth', 'PusherController@auth');
 
@@ -112,6 +115,7 @@ Route::group(['prefix' => 'comment'], function(){
 /* Temp Upload */
 Route::group(['prefix' => 'temp-upload'], function(){
 	Route::post('upload-photo', 'TempUploadController@uploadPhoto');
+	Route::post('upload-file', 'TempUploadController@uploadFile');
 	Route::post('cancel-upload', 'TempUploadController@cancelUpload');
 	Route::post('delete-slide', 'TempUploadController@deleteSlide');
 });
@@ -124,7 +128,8 @@ Route::group(['prefix' => 'repost'], function(){
 /* Reservation */
 Route::group(['prefix' => 'reservation'], function(){
 	Route::post('approve', 'ReservationController@approve');
-	Route::post('decline', 'ReservationController@decline');
+	Route::post('disapprove', 'ReservationController@disapprove');
+	Route::post('reschedule', 'ReservationController@reschedule');
 	Route::post('enlist', 'ReservationController@enlist');
 	Route::post('check-duplicate', 'ReservationController@checkDuplicate');
 });
@@ -136,6 +141,21 @@ Route::group(['prefix' => 'reservation-equipment'], function(){
 	Route::post('approve', 'ReservationEquipmentController@approve');
 });
 
+/* Slideshow */
 Route::group(['prefix' => 'slideshow'], function(){
 	Route::post('enlist', 'SlideshowController@enlist');	
+});
+
+/* Birthday */
+Route::group(['prefix' => 'birthday'], function(){
+	Route::post('check-duplicate', 'BirthdayController@checkDuplicate');	
+	Route::post('check-duplicate-multiple', 'BirthdayController@checkDuplicateMultiple');	
+	Route::post('store-multiple', 'BirthdayController@storeMultiple');	
+	Route::post('enlist', 'BirthdayController@enlist');	
+});
+
+/* Form */
+Route::group(['prefix' => 'form'], function(){
+	Route::post('check-duplicate', 'FormController@checkDuplicate');	
+	Route::post('enlist', 'FormController@enlist');	
 });

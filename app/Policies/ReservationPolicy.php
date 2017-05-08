@@ -10,6 +10,12 @@ class ReservationPolicy
 {
     use HandlesAuthorization;
 
+    public function before($user, $ability)
+    {
+        if ($user->super_admin) {
+            return true;
+        }
+    }
     /**
      * Determine whether the user can view the reservation.
      *
@@ -54,6 +60,15 @@ class ReservationPolicy
      */
     public function delete(User $user, Reservation $reservation)
     {
-        return $user->id == $reservation->user_id;
+        $user = User::with('roles')->where('id', $user->id)->first();
+
+        foreach ($user->roles as $role) {
+            if($role->name == 'approvals')
+            {
+                $can_approve = true;
+            }
+        }
+
+        return $user->id == $reservation->user_id || $can_approve;
     }
 }

@@ -40,7 +40,7 @@ app
 					angular.forEach(data.roles, function(role){
 						if(role.name == 'slideshow')
 						{
-							data.can_post = true;
+							data.can_slide = true;
 							$scope.fab.show = true;
 						}
 					});

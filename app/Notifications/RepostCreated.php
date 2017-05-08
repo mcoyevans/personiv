@@ -45,7 +45,7 @@ class RepostCreated extends Notification
     {
         return (new MailMessage)
                     ->line('The introduction to the notification.')
-                    ->action('Notification Action', 'https://laravel.com')
+                    ->action('Notification Action', 'http://172.17.0.210:914/home#/')
                     ->line('Thank you for using our application!');
     }
 
@@ -61,7 +61,7 @@ class RepostCreated extends Notification
             'attachment' => $this->post,
             'sender' => $this->post->user,
             'message' => 'reposted '. $this->repost->user->name .' post.',
-            'url' => 'main.posts',
+            'url' => 'main',
         ];
     }
 }

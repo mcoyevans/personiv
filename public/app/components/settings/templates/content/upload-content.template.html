@@ -1,0 +1,118 @@
+<div layout="column" flex layout-align="center center" class="drop-zone" nv-file-drop uploader="excelUploader" ng-if="!excelUploader.queue.length">
+	<div layout="column" layout-align="center center" layout-padding>
+		<img src="/img/excel.png" alt="Drop Zone">
+		<input type="file" nv-file-select uploader="excelUploader">
+		<h2 class="md-subhead">Drop spreadsheet here.</h2>
+		<h2 class="md-subhead" ng-if="fileError">Spreadsheet must be .xls or .xlsx</h2>
+	</div>
+	<div class="container">
+		<h2 class="md-headline">Before uploading a file:</h2>
+		<ul>
+			<li>File must be .xls or .xlsx</li>
+			<li>Use the following format below.</li>
+			<li>Check for duplicate employee number.</li>
+			<li>Do not leave any empty columns or rows in between.</li>
+		</ul>
+		<h2 class="md-headline">Sample Format:</h2>
+		<table class="table">
+			<tr>
+				<th>Employee Number</th>
+				<th>Last Name</th>
+				<th>First Name</th>
+				<th>Middle Name</th>
+				<th>Suffix</th>
+				<th>LOB</th>
+				<th>Birthdate</th>
+			</tr>
+			<tr>
+				<td>123456789</td>
+				<td>Doe</td>
+				<td>John</td>
+				<td>Smith</td>
+				<td>Jr.</td>
+				<td>Department XYZ</td>
+				<td>01/01/1993</td>
+			</tr>
+		</table>
+	</div>
+</div>
+
+<div layout="column" flex layout-align="center center" class="drop-zone" ng-if="excelUploader.queue.length && !show">
+	<div layout="column">
+		<md-progress-circular md-diameter="96"></md-progress-circular>
+	</div>
+</div>
+
+ <div ng-if="show" layout-margin flex layout="row" layout-align="center center">
+ 	<form name="form.employeeForm" flex-gt-md="60">
+ 		<md-card ng-repeat="employee in employees | filter:toolbar.searchText">
+ 			<md-toolbar ng-class="employee.duplicate ? 'md-primary' : 'white-toolbar'">
+	            <div class="md-toolbar-tools">
+	                <h2 ng-class="employee.duplicate ? 'white-text' : 'secondary-text'">{{employee.employee_number}}</h2>
+	                <span flex></span>
+	                <md-button class="md-icon-button" ng-click="remove(employee)">
+	                    <md-icon class="mdi mdi-close mdi-24px" ng-class="employee.duplicate ? '' : 'grey'" aria-label="Close dialog"></md-icon>
+	                </md-button>
+	            </div>
+	        </md-toolbar>
+ 			<md-card-content layout-padding>
+		        <div layout="row" layout-wrap flex>
+		        	<!-- Employee ID -->
+	                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm ng-blur="checkDuplicate(employee)">
+	                    <label>Employee ID</label>
+	                    <input type="text" name="EmployeeID{{$index}}" required ng-model="employee.employee_number" ng-disabled="busy" ng-change="checkDuplicate(employee)">
+	                    <div class="pattern" ng-if="employee.duplicate">Employee already exists.</div>
+	                    <div ng-messages="employeeForm['EmployeeID'+ $index].$error" ng-if="employeeForm['EmployeeID'+ $index].$touched">
+	                        <div ng-message="required">Employee ID is required.</div>
+	                    </div>
+	                </md-input-container>
+	                <!-- Last Name -->
+		            <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+		                <label>Last name</label>
+		                <input type="text" name="LastName{{$index}}" required ng-model="employee.last_name">
+		                <div ng-messages="form.taskForm['LastName' + $index].$error" ng-if="form.taskForm['LastName' + $index].$touched">
+		                    <div ng-message="required">Last name is required.</div>
+		                </div>
+		            </md-input-container>
+		            <!-- First Name -->
+		            <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+		                <label>First name</label>
+		                <input type="text" name="FirstName{{$index}}" required ng-model="employee.first_name">
+		                <div ng-messages="form.taskForm['FirstName' + $index].$error" ng-if="form.taskForm['FirstName' + $index].$touched">
+		                    <div ng-message="required">First name is required.</div>
+		                </div>
+		            </md-input-container>
+		            <!-- Middle Name -->
+		            <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+		                <label>Middle name</label>
+		                <input type="text" name="MiddleName{{$index}}" ng-model="employee.middle_name">
+		            </md-input-container>
+		            <!-- Suffix -->
+		            <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+		                <label>Suffix</label>
+		                <input type="text" name="Suffix{{$index}}" ng-model="employee.suffix">
+		            </md-input-container>
+		        </div>
+		        <div layout="row" layout-wrap flex>
+	                <!-- Birthdate -->
+	                <div flex-xs="100" flex-sm="100" flex-gt-sm>
+	                    <md-datepicker name="Birthdate{{$index}}" ng-model="employee.birthdate" md-placeholder="Birthdate" required md-max-date="today"></md-datepicker>
+	                    <div class="validation-messages" ng-messages="employeeForm['Birthdate' + $index].$error" ng-if="employeeForm['Birthdate' + $index].$touched">
+	                        <div ng-message="valid">The entered value is not a date!</div>
+	                        <div ng-message="required">This date is required!</div>
+	                        <div ng-message="maxdate">Birthdate cannot be earlier than today.</div>
+	                    </div>
+	                </div>
+	                <!-- LOB -->
+	                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+	                    <label>LOB</label>
+	                    <input type="text" name="LOB{{$index}}" required ng-model="employee.lob" ng-disabled="busy">
+	                    <div ng-messages="employeeForm['LOB' + $index].$error" ng-if="employeeForm['LOB' + $index].$touched">
+	                        <div ng-message="required">LOB is required.</div>
+	                    </div>
+	                </md-input-container>
+	            </div>
+ 			</md-card-content>
+ 		</md-card>
+ 	</form>
+ </div>

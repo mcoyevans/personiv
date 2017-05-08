@@ -6,6 +6,8 @@ app
 			Helper.cancel();
 		}
 
+		$scope.repetitions = ['Daily', 'Weekly', 'Monthly'];
+
 		$scope.duplicate = false;
 
 		$scope.fallback = {};
@@ -16,15 +18,21 @@ app
 
 		$scope.current = new Date();
 
-		if($scope.current.getMinutes() < 30)
-		{
-			$scope.current.setMinutes(30);
+		var formatTime = function(time){
+			if(time.getMinutes() < 30)
+			{
+				time.setMinutes(30);
+			}
+			else if(time.getMinutes() > 30)
+			{
+				time.setHours(time.getHours() + 1);
+				time.setMinutes(0);
+			}
+			
+			time.setSeconds(0);
 		}
-		else if($scope.current.getMinutes() > 30)
-		{
-			$scope.current.setHours($scope.current.getHours() + 1);
-			$scope.current.setMinutes(0);
-		}
+
+		formatTime($scope.current);
 
 		$scope.reservation.date_start = new Date();
 		$scope.reservation.time_start = $scope.current;
@@ -36,6 +44,7 @@ app
 			$scope.fallback.date_end = new Date($scope.reservation.date_end);
 			$scope.fallback.time_start = new Date($scope.reservation.time_start);
 			$scope.fallback.time_end = new Date($scope.reservation.time_end);
+			$scope.fallback.until = $scope.reservation.until ? new Date($scope.reservation.until) : null;
 		}
 
 		var fallbackDateToObject = function(){
@@ -43,6 +52,23 @@ app
 			$scope.reservation.date_end = new Date($scope.fallback.date_end);
 			$scope.reservation.time_start = new Date($scope.fallback.time_start);
 			$scope.reservation.time_end = new Date($scope.fallback.time_end);
+			$scope.reservation.until = $scope.fallback.until ? new Date($scope.fallback.until) : null;
+		}
+
+		$scope.floorParticipants = function(){
+			$scope.reservation.participants = Math.floor($scope.reservation.participants);
+		}
+
+		$scope.setUntil = function(){
+			$scope.reservation.until = new Date();
+		}
+
+		$scope.setRepeat = function(){
+			if(!$scope.repeat)
+			{
+				$scope.reservation.repeat = null;
+				$scope.reservation.until = null;
+			}
 		}
 
 		$scope.checkDuplicate = function(){
@@ -56,6 +82,16 @@ app
 				request.time_start = new Date($scope.reservation.time_start).toLocaleTimeString();
 				request.time_end = new Date($scope.reservation.time_end).toLocaleTimeString();
 
+				if($scope.reservation.until)
+				{
+					request.repeat = $scope.reservation.repeat;
+					request.until = new Date($scope.reservation.until).toDateString();
+				}
+
+				if($scope.reservation.id)
+				{
+					request.id = $scope.reservation.id;
+				}
 
 				Helper.post('/reservation/check-duplicate', request)
 					.success(function(data){
@@ -77,6 +113,11 @@ app
 
 			$scope.min_end_time = new Date($scope.reservation.time_start);
 
+			if($scope.min_end_time >= $scope.reservation.time_end)
+			{
+				$scope.reservation.time_end = new Date($scope.min_end_time);
+			}
+
 			if($scope.reservation.time_start > $scope.reservation.time_end)
 			{
 				$scope.reservation.time_end = new Date($scope.reservation.time_start);
@@ -96,6 +137,7 @@ app
 			$scope.reservation.time_end.setFullYear($scope.reservation.date_end.getFullYear());
 
 			$scope.reservation.time_end = new Date($scope.reservation.time_end);
+			$scope.reservation.until = new Date($scope.reservation.time_end);
 
 			if($scope.reservation.time_start > $scope.reservation.time_end)
 			{
@@ -139,8 +181,12 @@ app
 				$scope.reservation.time_end = new Date();
 				$scope.min_start_time = new Date();
 				$scope.min_start_date = new Date();
-
 				$scope.min_end_time = new Date();
+
+				formatTime($scope.reservation.time_start);
+				formatTime($scope.reservation.time_end);
+				formatTime($scope.reservation.min_start_time);
+				formatTime($scope.reservation.min_end_time);
 			}
 
 			$scope.checkDuplicate();
@@ -256,8 +302,8 @@ app
 					$scope.reservation.date_start = new Date(data.start);
 					$scope.reservation.date_end = new Date(data.end);
 
-					$scope.reservation.time_start = $scope.current;
-					$scope.reservation.time_end = $scope.current;
+					$scope.reservation.time_start = new Date(data.start);
+					$scope.reservation.time_end = new Date(data.end);
 
 					$scope.min_start_time = new Date();
 					$scope.min_start_date = new Date();
@@ -288,10 +334,14 @@ app
 
 				formatDateToObject();
 
-				$scope.reservation.date_start = $scope.reservation.date_start.toDateString();
-				$scope.reservation.date_end = $scope.reservation.date_end.toDateString();
-				$scope.reservation.time_start = $scope.reservation.time_start.toLocaleTimeString();
-				$scope.reservation.time_end = $scope.reservation.time_end.toLocaleTimeString();
+				$scope.reservation.time_start = new Date($scope.reservation.time_start).setSeconds(0);
+				$scope.reservation.time_end = new Date($scope.reservation.time_end).setSeconds(0);
+
+				$scope.reservation.date_start = new Date($scope.reservation.date_start).toDateString();
+				$scope.reservation.date_end = new Date($scope.reservation.date_end).toDateString();
+				$scope.reservation.time_start = new Date($scope.reservation.time_start).toLocaleTimeString();
+				$scope.reservation.time_end = new Date($scope.reservation.time_end).toLocaleTimeString();
+				$scope.reservation.until = $scope.reservation.until ? new Date($scope.reservation.until).toDateString() : null;
 
 				if($scope.config.action == 'create')
 				{

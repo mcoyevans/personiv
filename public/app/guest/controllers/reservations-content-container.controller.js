@@ -168,7 +168,8 @@ guest
 						angular.forEach(data, function(item){
 							pushItem(item);
 
-							if((item.schedule_approver_id && item.equipment_types_count && item.equipment_approver_id) || (item.schedule_approver_id && !item.equipment_types_count))
+							// if((item.schedule_approver_id && item.equipment_types_count && item.equipment_approver_id) || (item.schedule_approver_id && !item.equipment_types_count))
+							if(item.schedule_approver_id && !item.disapproved_schedule)
 							{
 								item.title = item.title + ' - ' + item.location.name;
 								$scope.reservation.approved.push(item);

@@ -10,6 +10,12 @@ class CommentPolicy
 {
     use HandlesAuthorization;
 
+    public function before($user, $ability)
+    {
+        if ($user->super_admin) {
+            return true;
+        }
+    }
     /**
      * Determine whether the user can view the comment.
      *

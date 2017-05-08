@@ -10,20 +10,43 @@ app
 					},
 					'content-container@main': {
 						templateUrl: '/app/shared/views/content-container.view.html',
-						controller: 'homeContentContainerController',
+						controller: 'postsContentContainerController',
 					},
 					'toolbar@main': {
 						templateUrl: '/app/shared/templates/toolbar.template.html',
-						controller: 'homeToolbarController',
+						controller: 'postsToolbarController',
 					},
 					'left-sidenav@main': {
 						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
 					},
 					'content@main':{
-						templateUrl: '/app/components/app/templates/home.template.html',
+						templateUrl: '/app/components/posts/templates/content/posts.template.html',
 					}
 				}
 			})
+			// .state('main', {
+			// 	url: '/',
+			// 	views: {
+			// 		'': {
+			// 			templateUrl: '/app/shared/views/main.view.html',
+			// 			controller: 'mainViewController',
+			// 		},
+			// 		'content-container@main': {
+			// 			templateUrl: '/app/shared/views/content-container.view.html',
+			// 			controller: 'homeContentContainerController',
+			// 		},
+			// 		'toolbar@main': {
+			// 			templateUrl: '/app/shared/templates/toolbar.template.html',
+			// 			controller: 'homeToolbarController',
+			// 		},
+			// 		'left-sidenav@main': {
+			// 			templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+			// 		},
+			// 		'content@main':{
+			// 			templateUrl: '/app/components/app/templates/home.template.html',
+			// 		}
+			// 	}
+			// })
 			.state('main.slideshow', {
 				url: 'slideshow/{slideshowID}',
 				resolve:{
@@ -55,26 +78,26 @@ app
 					}
 				}
 			})
-			.state('main.posts', {
-				url: 'posts/{postID}',
-				params: {'postID':null},
-				views: {
-					'content-container': {
-						templateUrl: '/app/shared/views/content-container.view.html',
-						controller: 'postsContentContainerController',
-					},
-					'toolbar@main.posts': {
-						templateUrl: '/app/shared/templates/toolbar.template.html',
-						controller: 'postsToolbarController',
-					},
-					'left-sidenav@main.posts': {
-						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
-					},
-					'content@main.posts':{
-						templateUrl: '/app/components/posts/templates/content/posts.template.html',
-					}
-				}
-			})
+			// .state('main.posts', {
+			// 	url: 'posts/{postID}',
+			// 	params: {'postID':null},
+			// 	views: {
+			// 		'content-container': {
+			// 			templateUrl: '/app/shared/views/content-container.view.html',
+			// 			controller: 'postsContentContainerController',
+			// 		},
+			// 		'toolbar@main.posts': {
+			// 			templateUrl: '/app/shared/templates/toolbar.template.html',
+			// 			controller: 'postsToolbarController',
+			// 		},
+			// 		'left-sidenav@main.posts': {
+			// 			templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+			// 		},
+			// 		'content@main.posts':{
+			// 			templateUrl: '/app/components/posts/templates/content/posts.template.html',
+			// 		}
+			// 	}
+			// })
 			.state('main.approvals', {
 				url: 'approvals/{reservationID}',
 				params: {'reservationID':null},
@@ -119,6 +142,66 @@ app
 					},
 					'content@main.reservations':{
 						templateUrl: '/app/components/reservations/templates/content/reservations-content.template.html',
+					}
+				}
+			})
+			.state('main.birthdays', {
+				url: 'settings/birthdays',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/birthday/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'birthdaysContentContainerController',
+					},
+					'toolbar@main.birthdays': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'birthdaysToolbarController',
+					},
+					'left-sidenav@main.birthdays': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.birthdays':{
+						templateUrl: '/app/components/settings/templates/content/settings-content.template.html',
+					}
+				}
+			})
+			.state('main.upload', {
+				url: 'settings/birthdays/upload',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/birthday/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'uploadContentContainerController',
+					},
+					'toolbar@main.upload': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'uploadToolbarController',
+					},
+					'left-sidenav@main.upload': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.upload':{
+						templateUrl: '/app/components/settings/templates/content/upload-content.template.html',
 					}
 				}
 			})
@@ -216,8 +299,38 @@ app
 					}
 				}
 			})
+			.state('main.forms', {
+				url: 'settings/forms',
+				resolve:{
+					authorization: ['Helper', '$state', function(Helper, $state){
+						Helper.get('/form/create')
+							.success(function(data){
+								return;
+							})
+							.error(function(){
+								return $state.go('page-not-found');
+							});
+					}],
+				},
+				views: {
+					'content-container': {
+						templateUrl: '/app/shared/views/content-container.view.html',
+						controller: 'formsContentContainerController',
+					},
+					'toolbar@main.forms': {
+						templateUrl: '/app/shared/templates/toolbar.template.html',
+						controller: 'formsToolbarController',
+					},
+					'left-sidenav@main.forms': {
+						templateUrl: '/app/shared/templates/sidenavs/main-left-sidenav.template.html',
+					},
+					'content@main.forms':{
+						templateUrl: '/app/components/settings/templates/content/settings-content.template.html',
+					}
+				}
+			})
 			.state('main.locations', {
-				url: 'settings/locations',
+				url: 'settings/rooms',
 				resolve:{
 					authorization: ['Helper', '$state', function(Helper, $state){
 						Helper.get('/location/create')

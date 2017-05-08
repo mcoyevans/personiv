@@ -13,15 +13,20 @@ app
 				'icon': 'mdi-home',
 				'label': 'Home',
 			},
-			{
-				'state': 'main.posts',
-				'icon': 'mdi-bulletin-board',
-				'label': 'Posts',
-			},
+			// {
+			// 	'state': 'main.posts',
+			// 	'icon': 'mdi-bulletin-board',
+			// 	'label': 'Posts',
+			// },
 			{
 				'state': 'main.reservations',
 				'icon': 'mdi-format-list-numbers',
-				'label': 'Reservations',
+				'label': 'Training Room Reservations',
+			},
+			{
+				'state': 'main.notifications',
+				'icon': 'mdi-bell',
+				'label': 'Notifications',
 			},
 		];
 
@@ -29,6 +34,10 @@ app
 			{
 				'name':'Apps',
 				'icon':'mdi-application',
+			},
+			{
+				'name':'Forms',
+				'icon':'mdi-file-document',
 			},
 		];
 
@@ -151,7 +160,7 @@ app
 						settings = true;
 
 						var item = {
-							'label': 'Locations',
+							'label': 'Rooms',
 							action: function(){
 								$state.go('main.locations');
 							},
@@ -185,17 +194,42 @@ app
 
 						settings_menu.push(item); 
 					}
+					else if(role.name == 'manage-birthdays')
+					{
+						settings = true;
 
+						var item = {
+							'label': 'Birthdays',
+							action: function(){
+								$state.go('main.birthdays');
+							},
+						}
+
+						settings_menu.push(item); 
+					}
+					else if(role.name == 'manage-forms')
+					{
+						settings = true;
+
+						var item = {
+							'label': 'Forms',
+							action: function(){
+								$state.go('main.forms');
+							},
+						}
+
+						settings_menu.push(item); 
+					}
 				});
 
 				if(settings)
 				{
-					$scope.menu.section[1] = {
+					$scope.menu.section[2] = {
 						'name':'Settings',
 						'icon':'mdi-settings',
 					}
 
-					$scope.menu.pages[1] = settings_menu;
+					$scope.menu.pages[2] = settings_menu;
 				}
 
 				$scope.user = data;
@@ -225,11 +259,17 @@ app
 				};
 
 				$scope.photoUploader.onCompleteItem  = function(data, response){
-					$scope.currentTime = Date.now();
-					$scope.photoUploader.queue = [];
+					if($scope.user.avatar_path)
+					{
+						$scope.currentTime = Date.now();
+						$scope.photoUploader.queue = [];
+					}
+					else{
+						$state.go($state.current, {}, {reload:true});
+					}
 				}
 
-				var pusher = new Pusher('17a18a226b9ef5997bd1', {
+				var pusher = new Pusher('0521fe41d7482726355c', {
 			      	encrypted: true,
 			      	auth: {
 					    headers: {
@@ -261,6 +301,11 @@ app
 
 				 		// notify the user with a toast message
 				 		Helper.notify(data.sender.name + ' ' + data.message);
+
+				 		if($state.current.name == data.data.url)
+						{
+							$state.go($state.current, {}, {reload:true});
+						}
 				    }),
 				];
 			})
@@ -278,29 +323,28 @@ app
 		}
 
 		$scope.read = function(notification){			
+			$state.go(notification.data.url);
+
 			if(notification.type == 'App\\Notifications\\PostCreated' || notification.type == 'App\\Notifications\\RepostCreated')
 			{	
-				$state.go(notification.data.url, {'postID':notification.data.attachment.id});
-				// Helper.set(notification.data.attachment.id);
-				// $scope.$broadcast('read-post');
+				// $state.go(notification.data.url, {'postID':notification.data.attachment.id});
+				Helper.set(notification.data.attachment.id);
+				$scope.$broadcast('read-post');
 			}
 			else if(notification.type == 'App\\Notifications\\CommentCreated')
 			{
-				$state.go(notification.data.url, {'postID':notification.data.attachment.post_id});
-				// Helper.set(notification.data.attachment.post_id);
-				// $scope.$broadcast('read-post-and-comments');
+				// $state.go(notification.data.url, {'postID':notification.data.attachment.post_id});
+				Helper.set(notification.data.attachment.post_id);
+				$scope.$broadcast('read-post-and-comments');
 			}
 
 			else if(notification.type == 'App\\Notifications\\ReservationCreated')
 			{
-				$state.go(notification.data.url, {'reservationID':notification.data.attachment.id});
-				// Helper.set(notification.data.attachment.id);
-				// $scope.$broadcast('read-approval');
+				// $state.go(notification.data.url, {'reservationID':notification.data.attachment.id});
+				Helper.set(notification.data.attachment.id);
+				$scope.$broadcast('read-approval');
 			}
-			else if(notification.type == 'App\\Notifications\\SlideshowCreated' || notification.type == 'App\\Notifications\\UpdatedCreated')
-			{
-				$state.go(notification.data.url);
-			}
+			
 
 			$scope.markAsRead(notification);
 		}
@@ -326,7 +370,28 @@ app
 				})
 		}
 
+		$scope.fetchForms = function(){		
+			Helper.get('/form')
+				.success(function(data){
+					var forms = [];
+
+					angular.forEach(data, function(form){
+						var item = {};
+
+						item.label = form.name;	
+						item.action = function(){
+							window.open('/form/' + form.id);
+						}
+
+						forms.push(item);
+					});
+					
+					$scope.menu.pages[1] = forms;
+				})
+		}
+
 		$scope.fetchLinks();
+		$scope.fetchForms();
 
 		$scope.$on('closeSidenav', function(){
 			$mdSidenav('left').close();
@@ -334,5 +399,9 @@ app
 
 		$scope.$on('fetchLinks', function(){
 			$scope.fetchLinks();
+		});
+
+		$scope.$on('fetchForms', function(){
+			$scope.fetchForms();
 		});
 	}]);

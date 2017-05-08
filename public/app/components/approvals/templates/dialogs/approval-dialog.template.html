@@ -19,9 +19,10 @@
     						{{reservation.user.name}} - {{reservation.user.email}}
             			</h3>
                         <h4>
-                            {{reservation.location.name}} - 
+                            {{reservation.location.name}} | 
                             {{start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{start | date: 'hh:mma'}}</span> <span ng-if="reservation.allDay">- All Day</span>
-                            <span ng-if="!reservation.allDay"> to <span ng-if="start.toDateString() != end.toDateString()">{{end | date: 'EEEE, MMM. dd, yyyy'}} at</span> {{end | date: 'hh:mma'}}</span>
+                            <span ng-if="!reservation.allDay"> to <span ng-if="start.toDateString() != end.toDateString()">{{end | date: 'EEEE, MMM. dd, yyyy'}} at</span></span>
+                            {{end | date: 'hh:mma'}}</span> | {{reservation.participants}} participant<span ng-if="reservation.participants > 1">s</span>
             			</h4>
             			<p>
             				<strong ng-if="reservation.remarks">Remarks: </strong>
@@ -36,7 +37,7 @@
                 <md-input-container class="md-block" flex-xs="100" flex-gt-xs="50" ng-repeat="equipment_type in reservation.equipment_types">
                     <label>{{equipment_type.name}}</label>
                     <md-select name="Equipment{{$index}}" ng-model="equipment_type.equipment_id" ng-change="checkDuplicate(equipment_type)" required>
-                        <md-option ng-repeat="item in equipment_type.equipment" value="{{item.id}}">{{item.asset_tag}}</md-option>
+                        <md-option ng-repeat="item in equipment_type.equipment | orderBy:'asset_tag'" value="{{item.id}}">{{item.asset_tag}}</md-option>
                     </md-select>
                     <div class="pattern" ng-if="equipment_type.duplicate">{{equipment_type.name}} has conflict with other reservations.</div>
                     <div ng-messages="approvalForm['Equipment' + $index].$error" ng-if="approvalForm['Equipment' + $index].$touched">
@@ -47,6 +48,9 @@
         </md-dialog-content>
     </form>
     <div layout="row" layout-align="end center">   
+        <md-button ng-if="!busy" class="md-primary" aria-label="Submit" ng-click="disapprove()" ng-if="approver.group_id == 2">
+            Disapprove
+        </md-button>
         <md-button ng-if="!busy" class="md-primary" aria-label="Submit" ng-click="submit()">
             Approve
         </md-button>

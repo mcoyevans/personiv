@@ -2,6 +2,8 @@ app
 	.controller('postsContentContainerController', ['$scope', '$stateParams', '$state', 'Helper', function($scope, $stateParams, $state, Helper){
 		$scope.$emit('closeSidenav');
 
+		$scope.today = new Date();
+
 		$scope.viewReposts = function(post){
 			var dialog = {
 				'template':'/app/components/posts/templates/dialogs/reposts-dialog.template.html',
@@ -202,6 +204,38 @@ app
 			$scope.refresh();
 		});
 
+		$scope.$on('read-post', function(){
+			$scope.request.where = [
+				{
+					'label':'id',
+					'condition':'=',
+					'value': Helper.fetch()
+				}
+			];
+
+			$scope.isLoading = true;
+  			$scope.post.show = false;
+  			$scope.currentTime = Date.now();
+
+			$scope.init($scope.request);
+		});
+
+		$scope.$on('read-post-and-comments', function(){
+			$scope.request.where = [
+				{
+					'label':'id',
+					'condition':'=',
+					'value': Helper.fetch()
+				}
+			];
+
+			$scope.isLoading = true;
+  			$scope.post.show = false;
+  			$scope.currentTime = Date.now();
+
+			$scope.init($scope.request, true);
+		});
+
 		$scope.updatePost = function(data){
 			if(!data.repost_id)
 			{			
@@ -352,6 +386,24 @@ app
 			$scope.toolbar.searchText = chip;
 			$scope.$broadcast('open');
 		}
+
+		var birthday_query = {
+			'whereMonth': 
+			{
+				'label': 'birthdate',
+				'value' : new Date().getMonth() + 1,
+			},
+			'whereDay': 
+			{
+				'label': 'birthdate',
+				'value' : new Date().getDate(),
+			},
+		}
+
+		Helper.post('/birthday/enlist', birthday_query)
+			.success(function(data){
+				$scope.birthdays = data;
+			})
 
 		$scope.init = function(query, withComments){
 			$scope.post = {};

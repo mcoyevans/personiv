@@ -1,7 +1,7 @@
 app
 	.controller('locationsToolbarController', ['$scope', '$filter', function($scope, $filter){
 		$scope.toolbar.parentState = 'Settings';
-		$scope.toolbar.childState = 'Locations';
+		$scope.toolbar.childState = 'Rooms';
 
 		$scope.$on('close', function(){
 			$scope.hideSearchBar();

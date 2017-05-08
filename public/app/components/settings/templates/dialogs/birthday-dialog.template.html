@@ -1,0 +1,78 @@
+<md-dialog aria-label="Birthday Form"  flex flex-gt-sm="50" ng-cloak>
+    <form name="modelForm">
+        <md-toolbar >
+            <div class="md-toolbar-tools">
+                <h2 class="white-text">Birthday</h2>
+                <span flex></span>
+                <md-button class="md-icon-button" ng-click="cancel()">
+                    <md-icon class="mdi mdi-close mdi-24px" aria-label="Close dialog"></md-icon>
+                </md-button>
+            </div>
+        </md-toolbar>
+        <md-dialog-content flex layout-padding layout-wrap>
+            <md-subheader class="red-text" ng-if="error">Oops! Something went wrong! An error occured. Please try again.</md-subheader>
+            <div layout="row" layout-wrap flex>
+                <!-- Employee ID -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Employee ID</label>
+                    <input type="number" name="EmployeeNumber" required ng-model="model.employee_number" ng-disabled="busy" ng-blur="checkDuplicate()">
+                    <div class="pattern" ng-if="duplicate && modelForm.EmployeeNumber.$valid">Employee ID already in use.</div>
+                    <div ng-messages="modelForm.EmployeeNumber.$error" ng-if="modelForm.EmployeeNumber.$touched">
+                        <div ng-message="required">Employee ID is required.</div>
+                    </div>
+                </md-input-container>
+            </div>
+            <div layout="row" layout-wrap flex>
+                <!-- Last Name -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Last Name</label>
+                    <input type="text" name="LastName" required ng-model="model.last_name" ng-disabled="busy">
+                    <div ng-messages="modelForm.LastName.$error" ng-if="modelForm.LastName.$touched">
+                        <div ng-message="required">Last Name is required.</div>
+                    </div>
+                </md-input-container>
+                <!-- First Name -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>First Name</label>
+                    <input type="text" name="FirstName" required ng-model="model.first_name" ng-disabled="busy">
+                    <div ng-messages="modelForm.FirstName.$error" ng-if="modelForm.FirstName.$touched">
+                        <div ng-message="required">First Name is required.</div>
+                    </div>
+                </md-input-container>
+                <!-- Middle Name -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Middle Name</label>
+                    <input type="text" name="MiddleName" required ng-model="model.middle_name" ng-disabled="busy">
+                    <div ng-messages="modelForm.MiddleName.$error" ng-if="modelForm.MiddleName.$touched">
+                        <div ng-message="required">Middle Name is required.</div>
+                    </div>
+                </md-input-container>
+            </div>
+            <div layout="row" layout-wrap flex>
+                <!-- Birthdate -->
+                <div flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <md-datepicker name="Birthdate" ng-model="model.birthdate" md-placeholder="Birthdate" required md-max-date="today"></md-datepicker>
+                    <div class="validation-messages" ng-messages="modelForm.Birthdate.$error" ng-if="modelForm.Birthdate.$touched">
+                        <div ng-message="valid">The entered value is not a date!</div>
+                        <div ng-message="required">This date is required!</div>
+                        <div ng-message="maxdate">Birthdate cannot be earlier than today.</div>
+                    </div>
+                </div>
+                <!-- LOB -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>LOB</label>
+                    <input type="text" name="LOB" required ng-model="model.lob" ng-disabled="busy">
+                    <div ng-messages="modelForm.LOB.$error" ng-if="modelForm.LOB.$touched">
+                        <div ng-message="required">LOB is required.</div>
+                    </div>
+                </md-input-container>
+            </div>
+        </md-dialog-content>
+    </form>
+    <div layout="row" layout-align="end center">   
+        <md-button ng-if="!busy" class="md-primary" aria-label="Submit" ng-click="submit()">
+            Save
+        </md-button>
+        <md-progress-circular ng-if="busy" md-mode="indeterminate" class="md-primary" md-diameter="60"></md-progress-circular>
+    </div>
+</md-dialog>

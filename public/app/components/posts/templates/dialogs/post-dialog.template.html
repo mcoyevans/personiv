@@ -1,5 +1,5 @@
 <md-dialog aria-label="Post Form"  flex flex-gt-sm="50" ng-cloak>
-    <form name="postForm">
+    <form name="postForm" enctype="multipart/form-data">
         <md-toolbar >
             <div class="md-toolbar-tools">
                 <h2 class="white-text">Post</h2>
@@ -42,6 +42,14 @@
                     <div ng-messages="postForm.Body.$error" ng-if="postForm.Body.$touched">
                         <div ng-message="required">You might want to add some details to your post.</div>
                     </div>
+                </md-input-container>
+            </div>
+            <div layout="row" layout-wrap flex>
+                <!-- Link -->
+                <md-input-container class="md-block" flex-xs="100" flex-sm="100" flex-gt-sm>
+                    <label>Link</label>
+                    <input type="url" name="Link" ng-model="post.url" ng-disabled="busy">
+                    <div class="pattern" ng-if="postForm.Link.$error.url">Please give a valid URL.</div>
                 </md-input-container>
             </div>
             <div layout="column" flex>
