@@ -100,33 +100,6 @@ class ReservationController extends Controller
 
             if(($reservation->schedule_approver_id && $reservation->equipment_approver_id && $reservation->equipment_types_count) || ($reservation->schedule_approver_id && !$reservation->equipment_types_count))
             {
-                // $post = new Post;
-
-                // $post->title = 'Room reservation for ' . $reservation->location->name;
-                // $post->body = $reservation->user->name .' requested a room reservation for ' .$reservation->location->name. ' from ' .Carbon::parse($reservation->start)->toDayDateTimeString(). ' to '. Carbon::parse($reservation->end)->toDayDateTimeString().'.';
-                // $post->allow_comments = true;
-                // $post->user_id = $reservation->user_id;
-
-                // $post->save();
-
-                // $post->load('user');
-
-                // $tags = ['#Room Reservation', '#'.$reservation->location->name];
-
-                // $hashtags = array();
-
-                // foreach ($tags as $item) {
-                //     $hashtag = new Hashtag(['tag' => $item]);
-
-                //     array_push($hashtags, $hashtag);
-                // }
-
-                // $post->hashtags()->saveMany($hashtags);
-
-                // $users = User::whereNotIn('id', [$request->user()->id])->get();
-
-                // Notification::send($users, new PostCreated($post));
-
                 $recipient = User::find($reservation->user_id);
 
                 Notification::send($recipient, new ReservationApproved($reservation, $request->user()));
@@ -481,7 +454,7 @@ class ReservationController extends Controller
 
         if($request->has('approvals'))
         {
-            $reservations->where('start', '>=', Carbon::now());
+            // $reservations->where('start', '>=', Carbon::now());
 
             // IT
             if($request->user()->group_id == 1)
@@ -503,7 +476,6 @@ class ReservationController extends Controller
             $reservations->where('title', 'like', '%'.$request->search.'%');
         }
 
-        
         if($request->has('paginate'))
         {
             return $reservations->paginate($request->paginate);
