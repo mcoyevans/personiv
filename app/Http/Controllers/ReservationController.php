@@ -468,7 +468,7 @@ class ReservationController extends Controller
                 $reservations->whereNull('schedule_approver_id');
             }
 
-            $reservations->orderBy('start');
+            $reservations->orderBy('start', 'desc');
         }
 
         if($request->has('search'))
