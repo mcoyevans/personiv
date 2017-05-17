@@ -1,6 +1,6 @@
 <div infinite-scroll='reservation.paginateLoad()' infinite-scroll-distance="1" infinite-scroll-disabled="reservation.busy" infinite-scroll-parent ng-if="reservation.show">
 	<md-list>
-		<md-list-item class="md-3-line md-long-text" ng-repeat="reservation in reservation.items | filter: toolbar.searchText | orderBy:'start'" ng-click="viewReservation(reservation)">
+		<md-list-item class="md-3-line md-long-text" ng-repeat="reservation in reservation.items | filter: toolbar.searchText | orderBy:sortType:sortReverse" ng-click="viewReservation(reservation)">
 			<div class="md-list-item-text">
 				<h3>{{reservation.title}}</h3>
 				<h4>{{reservation.user.name}} - {{reservation.user.email}}</h4>
