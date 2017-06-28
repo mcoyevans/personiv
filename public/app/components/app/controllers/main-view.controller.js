@@ -269,7 +269,7 @@ app
 					}
 				}
 
-				var pusher = new Pusher('0521fe41d7482726355c', {
+				var pusher = new Pusher('19259e5533c962321c46', {
 			      	encrypted: true,
 			      	auth: {
 					    headers: {
