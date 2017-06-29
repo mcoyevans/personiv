@@ -10,9 +10,11 @@ use Illuminate\Notifications\Messages\MailMessage;
 use App\Reservation;
 use Carbon\Carbon;
 
-class ReservationUpdated extends Notification
+class ReservationUpdated extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    protected $reservation;
 
     /**
      * Create a new notification instance.

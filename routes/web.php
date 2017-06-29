@@ -43,6 +43,7 @@ Route::resource('birthday', 'BirthdayController');
 Route::resource('upload', 'UploadController');
 
 Route::post('/pusher/auth', 'PusherController@auth');
+Route::post('/pusher/config', 'PusherController@config');
 
 /* User Routes */
 Route::group(['prefix' => 'user'], function(){

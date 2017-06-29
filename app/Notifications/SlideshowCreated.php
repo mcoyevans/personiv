@@ -10,9 +10,12 @@ use Illuminate\Notifications\Messages\MailMessage;
 use App\Slideshow;
 use App\User;
 
-class SlideshowCreated extends Notification
+class SlideshowCreated extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    protected $slideshow;
+    protected $user;
 
     /**
      * Create a new notification instance.

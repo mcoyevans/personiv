@@ -9,9 +9,11 @@ use Illuminate\Notifications\Messages\MailMessage;
 
 use App\Post;
 
-class PostCreated extends Notification
+class PostCreated extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    protected $post;
 
     /**
      * Create a new notification instance.

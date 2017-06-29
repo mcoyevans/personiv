@@ -11,9 +11,12 @@ use App\Reservation;
 use App\User;
 use Carbon\Carbon;
 
-class ReservationDeleted extends Notification
+class ReservationDeleted extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    protected $reservation;
+    protected $user;
 
     /**
      * Create a new notification instance.

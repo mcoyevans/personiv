@@ -9,9 +9,12 @@ use Illuminate\Notifications\Messages\MailMessage;
 
 use App\Post;
 
-class RepostCreated extends Notification
+class RepostCreated extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    protected $post;
+    protected $repost;
 
     /**
      * Create a new notification instance.

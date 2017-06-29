@@ -11,9 +11,13 @@ use App\Reservation;
 use App\User;
 use Carbon\Carbon;
 
-class ReservationApprovedConfirmation extends Notification
+class ReservationApprovedConfirmation extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    protected $reservation;
+    protected $user;
+    protected $sender;
 
     /**
      * Create a new notification instance.

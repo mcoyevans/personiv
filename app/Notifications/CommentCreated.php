@@ -9,9 +9,11 @@ use Illuminate\Notifications\Messages\MailMessage;
 
 use App\Comment;
 
-class CommentCreated extends Notification
+class CommentCreated extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    protected $comment;
 
     /**
      * Create a new notification instance.
