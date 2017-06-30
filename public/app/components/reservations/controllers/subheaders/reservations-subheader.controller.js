@@ -59,7 +59,7 @@ app
 			}
 
 			$scope.subheader.all.request.whereBetween = whereBetween;
-			
+
 			angular.forEach($scope.subheader.navs, function(item){
 				item.request.whereBetween = whereBetween;
 			});
@@ -108,6 +108,11 @@ app
 									'value': location.id,
 								},
 							],
+							'whereBetween': {
+								'label': 'start',
+								'start': $scope.dateRange.start,
+								'end': $scope.dateRange.end,
+							}
 						}
 						item.fab = {
 							'template':'/app/components/reservations/templates/dialogs/reservation-dialog.template.html',

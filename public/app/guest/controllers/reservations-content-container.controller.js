@@ -159,6 +159,7 @@ guest
 			Helper.post('/reservation/enlist', query.request)
 				.success(function(data){
 					$scope.eventSources.splice(0,1);
+					$scope.isLoading = false;
 
 					$scope.reservation.approved = [];
 					$scope.reservation.pending = [];
@@ -184,10 +185,6 @@ guest
 
 					$scope.refresh = function(){
 						$scope.isLoading = true;
-
-						Helper.set($scope.dateRange);
-
-			            $scope.$broadcast('dateRange');
 
 			  			$scope.init($scope.subheader.current);
 					};

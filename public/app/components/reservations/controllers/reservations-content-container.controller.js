@@ -222,6 +222,7 @@ app
 					Helper.post('/reservation/enlist', query.request)
 						.success(function(data){
 							$scope.eventSources.splice(0,1);
+							$scope.isLoading = false;
 
 							$scope.reservation.approved = [];
 							$scope.reservation.pending = [];
@@ -244,7 +245,6 @@ app
 
 								$scope.eventSources.push($scope.reservation.approved);
 
-								$scope.isLoading = false;
 							
 							}
 							
@@ -252,10 +252,6 @@ app
 
 							$scope.refresh = function(){
 								$scope.isLoading = true;
-
-								Helper.set($scope.dateRange);
-
-					            $scope.$broadcast('dateRange');
 
 					  			$scope.init($scope.subheader.current);
 							};

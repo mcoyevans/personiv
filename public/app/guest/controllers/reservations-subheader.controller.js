@@ -102,6 +102,11 @@ guest
 									'value': location.id,
 								},
 							],
+							'whereBetween': {
+								'label': 'start',
+								'start': $scope.dateRange.start,
+								'end': $scope.dateRange.end,
+							}
 						}
 						item.action = function(current){
 							setInit(current);
