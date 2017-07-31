@@ -138,16 +138,16 @@ app
 		}
 
 		$scope.init = function(query){
-			if($stateParams.reservationID)
-			{
-				query.request.where.push(
-					{
-						'label':'id',
-						'condition':'=',
-						'value': $stateParams.reservationID,	
-					}
-				);
-			}
+			// if($stateParams.reservationID)
+			// {
+			// 	query.request.where.push(
+			// 		{
+			// 			'label':'id',
+			// 			'condition':'=',
+			// 			'value': $stateParams.reservationID,	
+			// 		}
+			// 	);
+			// }
 
 			$scope.subheader.mark.all = false;
 			$scope.subheader.mark.icon = 'mdi-checkbox-blank-outline';

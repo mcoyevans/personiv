@@ -48,7 +48,7 @@ class RepostCreated extends Notification implements ShouldQueue
     {
         return (new MailMessage)
                     ->line('The introduction to the notification.')
-                    ->action('Notification Action', 'http://172.17.0.210:914/home#/')
+                    ->action('Notification Action', env('APP_URL') . "/home#/")
                     ->line('Thank you for using our application!');
     }
 

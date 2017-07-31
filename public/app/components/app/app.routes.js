@@ -99,8 +99,8 @@ app
 			// 	}
 			// })
 			.state('main.approvals', {
-				url: 'approvals/{reservationID}',
-				params: {'reservationID':null},
+				url: 'approvals',
+				// params: {'reservationID':null},
 				views: {
 					'content-container': {
 						templateUrl: '/app/shared/views/content-container.view.html',

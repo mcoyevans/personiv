@@ -48,7 +48,7 @@ class PostCreated extends Notification implements ShouldQueue
             ->subject('New Post!')
             ->greeting('Hey there!')        
             ->line($this->post->user->name. ' created a new post at Personiv portal.')
-            ->action('View Post', 'http://172.17.0.210:914/home#/')
+            ->action('View Post', env('APP_URL') . "/home#/")
             ->line('Thank you for using our application!');
     }
 

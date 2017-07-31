@@ -52,7 +52,7 @@ class ReservationApproved extends Notification implements ShouldQueue
                     ->subject('Approved Room Reservation')
                     ->greeting('Hurray!')
                     ->line('Your room reservation for ' . $this->reservation->location->name . ' around ' . Carbon::parse($this->reservation->start)->toDayDateTimeString() . ' to ' . Carbon::parse($this->reservation->end)->toDayDateTimeString()  .' has been approved.')
-                    ->action('View Reservation', 'http://172.17.0.210:914/home#/reservations');
+                    ->action('View Reservation', env('APP_URL') . "/home#/reservations");
     }
 
     /**

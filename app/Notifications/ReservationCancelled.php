@@ -49,7 +49,7 @@ class ReservationCancelled extends Notification implements ShouldQueue
                     ->subject('Cancelled Room Reservation')
                     ->greeting('Heads up!')
                     ->line($this->reservation->user->name . ' cancelled a room reservation at ' . $this->reservation->location->name . ' around ' . Carbon::parse($this->reservation->start)->toDayDateTimeString() . ' to ' . Carbon::parse($this->reservation->end)->toDayDateTimeString())
-                    ->action('View Reservation', 'http://172.17.0.210:914/home#/reservations');
+                    ->action('View Reservation', env('APP_URL') . "/home#/reservations");
     }
 
     /**

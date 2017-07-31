@@ -50,7 +50,7 @@ class ReservationUpdated extends Notification implements ShouldQueue
                     ->greeting('Hello!')
                     ->line($this->reservation->user->name . ' needs approval for his/her updated room reservation.')
                     ->line($this->reservation->location->name . ' from ' . Carbon::parse($this->reservation->start)->toDayDateTimeString() . ' to ' . Carbon::parse($this->reservation->end)->toDayDateTimeString())
-                    ->action('View Reservation', 'http://172.17.0.210:914/home#/approvals');
+                    ->action('View Reservation', env('APP_URL') . "/home#/approvals");
     }
 
     /**
