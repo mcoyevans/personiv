@@ -12,14 +12,16 @@ class LocationsTableSeeder extends Seeder
     public function run()
     {
         DB::table('locations')->insert([
-        	['name' => '6th Street', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
-        	['name' => 'Lake Austin', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
-        	['name' => 'Longhorn', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
-        	['name' => 'Manchaca', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
-        	['name' => 'Pecan', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
-        	['name' => 'Stevie Ray', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
-        	['name' => 'Taj Mahal', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
-        	['name' => 'The Oasis', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()]
+        	['name' => 'Capital Hill', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
+        	['name' => 'Broken Spoke', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
+        	['name' => 'Burnet', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
+        	['name' => 'Barton Springs', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
+        	['name' => 'Brazos', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
+        	['name' => 'Long Horns', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
+        	['name' => 'Deep Eddy', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
+        	['name' => 'Hope Gallery', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()],
+        	['name' => 'Taal', 'created_at' => Carbon\Carbon::now(), 'updated_at' => Carbon\Carbon::now()]
        ]);
     }
 }
+

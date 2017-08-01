@@ -18,7 +18,7 @@ class GroupsTableSeeder extends Seeder
                 'updated_at' => Carbon\Carbon::now()
             ],
             [
-                'name' => 'Finance and Admin',
+                'name' => 'Facilities Admin',
                 'created_at' => Carbon\Carbon::now(),
                 'updated_at' => Carbon\Carbon::now()
             ],
