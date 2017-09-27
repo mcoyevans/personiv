@@ -22,8 +22,8 @@ class CreateReservationsTable extends Migration
             $table->integer('user_id')->unsigned();
             $table->integer('schedule_approver_id')->unsigned()->nullable();
             $table->integer('equipment_approver_id')->unsigned()->nullable();
-            $table->timestamp('start');
-            $table->timestamp('end');
+            $table->dateTime('start');
+            $table->dateTime('end');
             $table->boolean('allDay');
             $table->timestamps();
             $table->softDeletes();
