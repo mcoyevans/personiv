@@ -20,9 +20,11 @@
             			</h3>
                         <h4>
                             {{reservation.location.name}} | 
-                            {{start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{start | date: 'hh:mma'}}</span> <span ng-if="reservation.allDay">- All Day</span>
-                            <span ng-if="!reservation.allDay"> to <span ng-if="start.toDateString() != end.toDateString()">{{end | date: 'EEEE, MMM. dd, yyyy'}} at</span></span>
-                            {{end | date: 'hh:mma'}}</span> | {{reservation.participants}} participant<span ng-if="reservation.participants > 1">s</span>
+                            {{start | date: 'EEEE, MMM. dd, yyyy'}} <span ng-if="!reservation.allDay">at {{start | date: 'hh:mma'}}</span> 
+                            <span ng-if="reservation.allDay">- All Day</span>
+                            <span> to </span>
+                            <span ng-if="start.toDateString() != end.toDateString()">{{end | date: 'EEEE, MMM. dd, yyyy'}} </span>
+                            <span ng-if="!reservation.allDay">at {{end | date: 'hh:mma'}}</span> | {{reservation.participants}} participant<span ng-if="reservation.participants > 1">s</span>
             			</h4>
             			<p>
             				<strong ng-if="reservation.remarks">Remarks: </strong>
